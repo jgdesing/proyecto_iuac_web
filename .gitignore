@@ -1,0 +1,27 @@
+# Entornos virtuales
+.venv/
+venv/
+ENV/
+env/
+
+# Caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Variables de entorno locales
+.env
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Subidas temporales en desarrollo local (mantiene .gitkeep)
+backend/uploads/fotos/*
+!backend/uploads/fotos/.gitkeep
+
+# Logs
+*.log
+temp_*.sql
