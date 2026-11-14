@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrativo | IUAC Aspirantes Web</title>
+    <link rel="icon" type="image/png" href="img/favicon.png">
+    <link rel="stylesheet" href="css/landing.css?v=2.2">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 2.5rem auto;
+            padding: 0 1rem;
+        }
+        .admin-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 2rem;
+            border-top: 5px solid #0284c7;
+        }
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #0369a1;
+        }
+        .stat-label {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+        .btn-export {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.4rem;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            text-decoration: none;
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .btn-csv { background: #16a34a; }
+        .btn-csv:hover { background: #15803d; }
+        .btn-sql { background: #0284c7; }
+        .btn-sql:hover { background: #0369a1; }
+        .btn-json { background: #475569; }
+        .btn-json:hover { background: #334155; }
+        .export-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .login-box {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 450px;
+            margin: 2rem auto;
+            text-align: center;
+        }
+        .recent-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+        }
+        .recent-table th, .recent-table td {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+        }
+        .recent-table th {
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body style="background:#f1f5f9; min-height:100vh;">
+
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <img src="img/logo_iuac.png" alt="Logo IUAC" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <h1>IUAC</h1>
+                    <span>Instituto Universitario de Aeronáutica Civil</span>
+                </div>
+            </a>
+            <a href="/" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.8rem;">← Volver al Portal</a>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        
+        <!-- PANTALLA DE ACCESO -->
+        <div class="login-box" id="admin-login-view">
+            <h3 style="margin-bottom:0.5rem; color:#0f172a;">🔐 Acceso Administrativo</h3>
+            <p style="font-size:0.88rem; color:#64748b; margin-bottom:1.25rem;">
+                Ingrese la clave secreta institucional para consultar y descargar los aspirantes registrados.
+            </p>
+            <input type="password" id="admin-key-input" class="form-control" placeholder="Clave de Administrador" style="margin-bottom:1rem; text-align:center;">
+            <button type="button" class="btn btn-primary" style="width:100%;" onclick="autenticarAdmin()">
+                Ingresar al Panel →
+            </button>
+            <div id="login-err" style="color:#ef4444; font-size:0.82rem; font-weight:700; margin-top:0.75rem; display:none;"></div>
+        </div>
+
+        <!-- PANEL DE CONTROL Y DESCARGA -->
+        <div class="admin-card" id="admin-dashboard-view" style="display:none;">
+            <div class="admin-header">
+                <div>
+                    <h2 style="font-size:1.4rem; color:#0f172a; margin:0;">Centro de Descarga y Control de Aspirantes</h2>
+                    <p style="font-size:0.85rem; color:#64748b; margin-top:0.2rem;">Portal Oficial IUAC — Convocatoria 2026-2027</p>
+                </div>
+                <button type="button" class="btn btn-secondary" style="font-size:0.8rem;" onclick="cerrarSesionAdmin()">Cerrar Sesión</button>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-number" id="total-aspirantes">0</div>
+                    <div class="stat-label">Aspirantes Registrados</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" style="color:#16a34a;" id="carreras-activas">7</div>
+                    <div class="stat-label">Especialidades Activas</div>
+                </div>
+            </div>
+
+            <h3 style="font-size:1.05rem; color:#0f172a; margin-bottom:0.5rem;">📥 Descargar Base de Datos Registrada:</h3>
+            <p style="font-size:0.86rem; color:#64748b;">
+                Descargue la información de todos los aspirantes capturados en el hosting para vaciarla a su sistema principal o abrirla en Excel:
+            </p>
+
+            <div class="export-actions">
+                <a href="#" id="btn-export-csv" class="btn-export btn-csv">
+                    📊 Descargar para Excel (CSV)
+                </a>
+                <a href="#" id="btn-export-sql" class="btn-export btn-sql">
+                    💾 Descargar Vaciado SQL (SisCE IUAC)
+                </a>
+                <a href="#" id="btn-export-json" target="_blank" class="btn-export btn-json">
+                    📋 Ver JSON Completo
+                </a>
+            </div>
+
+            <div style="margin-top:2.5rem;">
+                <h3 style="font-size:1rem; color:#0f172a; margin-bottom:0.5rem;">🕒 Últimos Registros Capturados:</h3>
+                <div style="overflow-x:auto;">
+                    <table class="recent-table">
+                        <thead>
+                            <tr>
+                                <th>Cédula</th>
+                                <th>Aspirante</th>
+                                <th>Carrera</th>
+                                <th>Fecha / Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-recientes">
+                            <tr><td colspan="4" style="text-align:center;">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentAdminKey = localStorage.getItem('iuac_admin_key') || '';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (currentAdminKey) {
+                cargarDashboard();
+            }
+        });
+
+        async function autenticarAdmin() {
+            const key = document.getElementById('admin-key-input').value.trim();
+            if (!key) return;
+            currentAdminKey = key;
+            await cargarDashboard();
+        }
+
+        async function cargarDashboard() {
+            const errDiv = document.getElementById('login-err');
+            errDiv.style.display = 'none';
+
+            try {
+                const res = await fetch(`/api/admin/resumen?key=${encodeURIComponent(currentAdminKey)}`);
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    localStorage.setItem('iuac_admin_key', currentAdminKey);
+                    document.getElementById('admin-login-view').style.display = 'none';
+                    document.getElementById('admin-dashboard-view').style.display = 'block';
+
+                    document.getElementById('total-aspirantes').textContent = data.total;
+
+                    // Enlaces de descarga directa
+                    document.getElementById('btn-export-csv').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=csv`;
+                    document.getElementById('btn-export-sql').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=sql`;
+                    document.getElementById('btn-export-json').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=json`;
+
+                    // Tabla de recientes
+                    const tbody = document.getElementById('tabla-recientes');
+                    if (data.ultimos && data.ultimos.length > 0) {
+                        tbody.innerHTML = data.ultimos.reverse().map(u => `
+                            <tr>
+                                <td><strong>V-${u.cedula}</strong></td>
+                                <td>${u.nombre}</td>
+                                <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">${u.carrera}</span></td>
+                                <td>${u.fecha}</td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">No hay registros aún.</td></tr>';
+                    }
+                } else {
+                    errDiv.textContent = data.error || 'Clave incorrecta.';
+                    errDiv.style.display = 'block';
+                    localStorage.removeItem('iuac_admin_key');
+                }
+            } catch (e) {
+                errDiv.textContent = 'Error al comunicarse con el servidor.';
+                errDiv.style.display = 'block';
+            }
+        }
+
+        function cerrarSesionAdmin() {
+            localStorage.removeItem('iuac_admin_key');
+            currentAdminKey = '';
+            document.getElementById('admin-login-view').style.display = 'block';
+            document.getElementById('admin-dashboard-view').style.display = 'none';
+            document.getElementById('admin-key-input').value = '';
+        }
+    </script>
+</body>
+</html>

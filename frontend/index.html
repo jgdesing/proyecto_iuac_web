@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Portal Oficial de Preinscripción y Captura de Aspirantes del Instituto Universitario de Aeronáutica Civil (IUAC) - Admisión 2026.">
+    <meta name="theme-color" content="#0a192f">
+    <title>Preinscripción de Aspirantes | IUAC - Instituto Universitario de Aeronáutica Civil</title>
+
+    <!-- Favicon Oficial -->
+    <link rel="icon" type="image/png" href="img/favicon.png">
+
+    <!-- Estilos de Alto Rendimiento -->
+    <link rel="stylesheet" href="css/landing.css?v=2.2">
+</head>
+<body>
+
+    <!-- ── POPUP INFORMATIVO AL CARGAR LA PÁGINA (IMAGEN ANEXA 6) ── -->
+    <div class="info-popup-overlay" id="modal-info-popup">
+        <div class="info-popup-card">
+            <div class="info-popup-header">
+                <div class="info-popup-title">
+                    <span>📌</span> Destacado Institucional
+                </div>
+                <button type="button" class="info-popup-close-btn" id="btn-cerrar-popup" title="Cerrar ventana">
+                    ✕ Cerrar
+                </button>
+            </div>
+            
+            <div class="info-popup-banner">
+                <span class="info-popup-badge-proceso">Proceso de Admisión & Acreditación</span>
+                <h3>Instituto Universitario de Aeronáutica Civil</h3>
+                <p style="font-size:0.92rem; color:#bae6fd; margin:0;">Recepción de Postulaciones y Convocatoria 2026 - 2027</p>
+            </div>
+
+            <div class="info-popup-body">
+                <p style="margin-bottom:0.85rem; font-weight:700; color:#0f172a;">
+                    ¿Deseas formarte como profesional aeronáutico o certificar tu trayectoria en la aviación civil?
+                </p>
+                <p style="margin-bottom:1rem; color:#475569;">
+                    El <strong>IUAC</strong> abre su proceso de preinscripción en línea para bachilleres y aspirantes a las 7 carreras aeronáuticas oficiales avaladas por el INAC y la OACI.
+                </p>
+                
+                <div class="info-popup-item">
+                    <span>📅</span>
+                    <div>
+                        <strong>Fecha de Inicio de Actividades Académicas:</strong><br>
+                        13 de Septiembre de 2027 (Nuevos Ingresos).
+                    </div>
+                </div>
+
+                <div class="info-popup-item">
+                    <span>⚠️</span>
+                    <div>
+                        <strong>Reglamentación de Edad Límite:</strong><br>
+                        El bachiller debe tener máximo 23 años cumplidos (NO cumplir 24 años para el 13/09/2027).
+                    </div>
+                </div>
+
+                <div class="info-popup-item">
+                    <span>📍</span>
+                    <div>
+                        <strong>Sede Principal:</strong><br>
+                        Instituto Universitario de Aeronáutica Civil "Mayor (Av) Miguel Rodríguez", Maracay, Edo. Aragua.
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-popup-footer">
+                <button type="button" class="btn btn-primary" id="btn-comenzar-registro">
+                    Comenzar Preinscripción →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── BARRA SUPERIOR INSTITUCIONAL ── -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-brand">
+                <img src="img/logo_iuac.png" alt="Logo IUAC" class="nav-logo-img">
+                <div class="nav-brand-text">
+                    <h1>IUAC</h1>
+                    <span>Instituto Universitario de Aeronáutica Civil</span>
+                </div>
+            </a>
+            <div class="nav-badge-secure">
+                <span>🔒</span> Conexión Segura SSL
+            </div>
+        </div>
+    </header>
+
+    <!-- ── HERO BANNER INSTITUCIONAL CON IMAGEN DE FONDO ── -->
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-institution-badge">
+                <span>✈</span> Admisión Académica 2026
+            </div>
+            <h2>Inicia tu Carrera en el Mundo Aeronáutico</h2>
+            <p>Completa tu formulario de preinscripción en línea de forma rápida y segura para optar a un cupo en las especialidades aeronáuticas certificadas del IUAC.</p>
+            
+            <div class="hero-interactive-row">
+                <!-- Botón Interactivo con Full Efecto para Carreras Oficiales (Punto 10) -->
+                <button type="button" class="btn-carreras-hero" id="btn-ver-carreras" title="Haga clic para ver la oferta académica completa">
+                    <span class="btn-carreras-badge">7</span>
+                    <span>Carreras Oficiales Ofertadas</span>
+                    <span style="font-size:1.1rem;">▾</span>
+                </button>
+                <div class="badge-acreditacion">
+                    <span>🛡️</span> Acreditación Oficial INAC / OACI
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── MODAL CON FULL EFECTO DE CARRERAS OFICIALES ── -->
+    <div class="modal-carreras-overlay" id="modal-carreras">
+        <div class="modal-carreras-card">
+            <div class="modal-carreras-header">
+                <h3>✈ Oferta Académica Oficial del IUAC</h3>
+                <button type="button" class="info-popup-close-btn" id="btn-cerrar-carreras" style="font-size:1.4rem;">
+                    ✕
+                </button>
+            </div>
+            <div class="carreras-cards-grid">
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">CTA</span>
+                    <h4 class="carrera-card-name">Control de Tránsito Aéreo</h4>
+                    <p class="carrera-card-desc">Control de aproximación, torre y ruta aérea garantizando la separación y seguridad operacional de las aeronaves.</p>
+                </div>
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">ICA</span>
+                    <h4 class="carrera-card-name">Información y Comunicaciones Aeronáuticas</h4>
+                    <p class="carrera-card-desc">Gestión de redes de telecomunicaciones, planes de vuelo y servicios de información aeronáutica (AIS/AIM).</p>
+                </div>
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">IMA</span>
+                    <h4 class="carrera-card-name">Mantenimiento Aeronáutico</h4>
+                    <p class="carrera-card-desc">Técnicas avanzadas de inspección, diagnóstico y mantenimiento de estructuras, motores y sistemas de aeronaves.</p>
+                </div>
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">SAR</span>
+                    <h4 class="carrera-card-name">Búsqueda y Salvamento</h4>
+                    <p class="carrera-card-desc">Operaciones tácticas de rescate aéreo, gestión de emergencias aeroportuarias y misiones de salvamento.</p>
+                </div>
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">ETA</span>
+                    <h4 class="carrera-card-name">Electrónica Aeronáutica</h4>
+                    <p class="carrera-card-desc">Calibración, mantenimiento y operatividad de sistemas de radar, aviónica, radioayudas y navegación por satélite.</p>
+                </div>
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">GTM</span>
+                    <h4 class="carrera-card-name">Gestión de Tripulación de Mando</h4>
+                    <p class="carrera-card-desc">Formación técnica integral para futuros comandantes y pilotos en aviación comercial y de transporte.</p>
+                </div>
+                <div class="carrera-card-item">
+                    <span class="carrera-card-code">GTCP</span>
+                    <h4 class="carrera-card-name">Gestión de Tripulación de Cabina de Pasajeros</h4>
+                    <p class="carrera-card-desc">Seguridad en cabina de aeronaves comerciales, primeros auxilios aeronáuticos, evacuación y atención al pasajero.</p>
+                </div>
+            </div>
+            <div style="background:#f8fafc; padding:1rem 1.75rem; border-top:1px solid #e2e8f0; text-align:right;">
+                <button type="button" class="btn btn-primary" id="btn-cerrar-carreras-footer">
+                    Entendido, Ir al Formulario
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── CONTENEDOR DEL FORMULARIO PRINCIPAL ── -->
+    <main class="main-wrapper">
+        <div class="form-card" id="form-card-container">
+            
+            <!-- Stepper de Progreso -->
+            <div class="stepper-header">
+                <div class="step-node active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-title">
+                        <span>Paso 1</span>
+                        <span>Datos Personales</span>
+                    </div>
+                </div>
+                <div class="step-node" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-title">
+                        <span>Paso 2</span>
+                        <span>Ubicación y Contacto</span>
+                    </div>
+                </div>
+                <div class="step-node" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-title">
+                        <span>Paso 3</span>
+                        <span>Academia y Carrera</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Registro -->
+            <form id="form-preinscripcion" autocomplete="off" novalidate>
+                
+                <!-- CAMPO HONEYPOT INVISIBLE ANTI-BOT -->
+                <div class="hp-container">
+                    <label for="website_url_hp">No llenar este campo:</label>
+                    <input type="text" id="website_url_hp" name="website_url_hp" tabindex="-1" autocomplete="off">
+                </div>
+
+                <div class="form-body">
+                    
+                    <!-- ── BANNER DE BLOQUEO POR EDAD REGLAMENTARIA (IMAGEN ANEXA 1) ── -->
+                    <div class="age-lock-banner" id="age-lock-banner">
+                        <div class="age-lock-header">
+                            <span>🚫</span>
+                            <span>Requisito de Edad No Cumplido (Reglamento de Admisión IUAC)</span>
+                        </div>
+                        <div class="age-lock-content" id="age-lock-text">
+                            <!-- Se llena dinámicamente con la explicación exacta -->
+                        </div>
+                    </div>
+
+                    <!-- ── PASO 1: DATOS PERSONALES ── -->
+                    <div class="step-pane active" id="step-pane-1">
+                        <h3 class="section-title">👤 Datos Personales e Identificación</h3>
+                        <p class="section-subtitle">Ingrese sus datos tal como aparecen en su documento de identidad oficial.</p>
+
+                        <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL (PUNTO 5) -->
+                        <div class="photo-capture-card">
+                            <div class="photo-preview-box" id="photo-preview-box">
+                                <span class="photo-placeholder-icon" id="photo-placeholder-icon">👤</span>
+                                <img id="photo-preview-img" class="photo-preview-img" alt="Foto Aspirante">
+                            </div>
+                            <div class="photo-actions">
+                                <input type="file" id="asp-foto_alum" accept="image/jpeg,image/png,image/webp" capture="user" style="display:none;">
+                                <button type="button" class="btn-photo-action" id="btn-subir-foto">
+                                    📷 Tomar Foto / Subir Imagen
+                                </button>
+                                <button type="button" class="btn-photo-remove" id="btn-quitar-foto" style="display:none;">
+                                    ✕ Quitar Foto
+                                </button>
+                                <div class="field-error-msg" id="err-foto"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <!-- Tipo de Documento y Cédula -->
+                            <div class="col-4">
+                                <div class="form-group">
+                                    <label>Tipo <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-tipo_cedula">
+                                        <option value="V" selected>V - Venezolano</option>
+                                        <option value="E">E - Extranjero</option>
+                                        <option value="P">P - Pasaporte</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <div class="form-group">
+                                    <label>Número de Cédula <span class="req">*</span></label>
+                                    <input type="text" class="form-control" id="asp-ced_alum" placeholder="Ej: 28456123" maxlength="8" inputmode="numeric" required>
+                                    <div class="field-error-msg" id="err-cedula"></div>
+                                    <div id="asp-cedula-status"></div>
+                                </div>
+                            </div>
+
+                            <!-- Nombres y Apellidos (Solo letras y espacios, Imagen 3) -->
+                            <div class="col-6 lockable-field">
+                                <div class="form-group">
+                                    <label>Nombres Completos <span class="req">*</span></label>
+                                    <input type="text" class="form-control" id="asp-nom_alum" placeholder="Ej: Carlos Eduardo" required>
+                                    <div class="field-error-msg" id="err-nombres"></div>
+                                </div>
+                            </div>
+                            <div class="col-6 lockable-field">
+                                <div class="form-group">
+                                    <label>Apellidos Completos <span class="req">*</span></label>
+                                    <input type="text" class="form-control" id="asp-ape_alum" placeholder="Ej: Mendoza Pérez" required>
+                                    <div class="field-error-msg" id="err-apellidos"></div>
+                                </div>
+                            </div>
+
+                            <!-- Fecha Nacimiento y Edad (Etiqueta "Edad", Punto 6) -->
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Fecha de Nacimiento <span class="req">*</span></label>
+                                    <input type="date" class="form-control" id="asp-fec_nac_alum" required>
+                                    <div class="field-error-msg" id="err-fec_nac"></div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Edad</label>
+                                    <input type="number" class="form-control" id="asp-edad_alum" placeholder="Auto" readonly style="background:#f1f5f9;">
+                                </div>
+                            </div>
+
+                            <!-- Sexo y Estado Civil -->
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>Género <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-sex_alum" required>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Femenino</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-sexo"></div>
+                                </div>
+                            </div>
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>Estado Civil <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-est_civil_alum" required>
+                                        <option value="Soltero/a" selected>Soltero/a</option>
+                                        <option value="Casado/a">Casado/a</option>
+                                        <option value="Concubinato">Concubinato</option>
+                                        <option value="Divorciado/a">Divorciado/a</option>
+                                        <option value="Viudo/a">Viudo/a</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-est_civil"></div>
+                                </div>
+                            </div>
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>Lugar de Nacimiento <span class="req">*</span></label>
+                                    <input type="text" class="form-control" id="asp-lugar_nac_alum" placeholder="Ciudad o Población" required>
+                                    <div class="field-error-msg" id="err-lugar_nac"></div>
+                                </div>
+                            </div>
+
+                            <!-- Nacionalidad -->
+                            <div class="col-12 lockable-field">
+                                <div class="form-group">
+                                    <label>Nacionalidad</label>
+                                    <input type="text" class="form-control" id="asp-nacionalidad_alum" value="VENEZOLANA" readonly style="background:#f1f5f9;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── PASO 2: UBICACIÓN Y CONTACTO ── -->
+                    <div class="step-pane" id="step-pane-2">
+                        <h3 class="section-title">📍 Residencia y Canales de Contacto</h3>
+                        <p class="section-subtitle">Es indispensable contar con sus datos de contacto válidos para notificarle las convocatorias y evaluaciones.</p>
+
+                        <div class="form-grid">
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>País</label>
+                                    <input type="text" class="form-control" id="asp-pais_alum" value="Venezuela" readonly style="background:#f1f5f9;">
+                                </div>
+                            </div>
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>Estado de Residencia <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-est_alum" required>
+                                        <option value="">Seleccione un Estado...</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-estado"></div>
+                                </div>
+                            </div>
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>Ciudad / Municipio <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-ciu_alum" required disabled>
+                                        <option value="">Seleccione un Estado primero...</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-ciudad"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 lockable-field">
+                                <div class="form-group">
+                                    <label>Dirección de Habitación Detallada <span class="req">*</span></label>
+                                    <textarea class="form-control" id="asp-direc_alum" placeholder="Sector, Avenida/Calle, Casa o Edificio, Piso, Punto de Referencia..." required></textarea>
+                                    <div class="field-error-msg" id="err-direccion"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-6 lockable-field">
+                                <div class="form-group">
+                                    <label>Teléfono Celular / Móvil <span class="req">*</span></label>
+                                    <input type="tel" class="form-control" id="asp-telemov_alum" placeholder="Ej: 0412-1234567" maxlength="12" inputmode="tel" required>
+                                    <div class="field-error-msg" id="err-telemov"></div>
+                                </div>
+                            </div>
+                            <div class="col-6 lockable-field">
+                                <div class="form-group">
+                                    <label>Teléfono Habitación / Secundario</label>
+                                    <input type="tel" class="form-control" id="asp-telehabi_alum" placeholder="Ej: 0243-2345678 o 0414-0000000" maxlength="12" inputmode="tel">
+                                    <div class="field-error-msg" id="err-telehab"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 lockable-field">
+                                <div class="form-group">
+                                    <label>Correo Electrónico Personal <span class="req">*</span></label>
+                                    <input type="email" class="form-control" id="asp-correo_alum" placeholder="ejemplo@correo.com" required>
+                                    <div class="field-error-msg" id="err-correo"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── PASO 3: ANTECEDENTES ACADÉMICOS Y CARRERA IUAC ── -->
+                    <div class="step-pane" id="step-pane-3">
+                        <h3 class="section-title">🎓 Antecedentes y Selección de Carrera</h3>
+                        <p class="section-subtitle">Seleccione la especialidad aeronáutica oficial a la que aspira ingresar en el IUAC.</p>
+
+                        <div class="form-grid">
+                            <!-- Carrera IUAC -->
+                            <div class="col-12 lockable-field">
+                                <div class="form-group" style="background:#f0f9ff; border:2px solid #bae6fd; padding:1.25rem; border-radius:12px;">
+                                    <label style="font-size:1.05rem; color:#0369a1;">
+                                        ✈ Carrera / Especialidad de Postulación <span class="req">*</span>
+                                    </label>
+                                    <select class="form-control" id="asp-carrera" required style="font-size:1rem; font-weight:700; height:48px;">
+                                        <option value="">-- Seleccione una Carrera de la Oferta Académica --</option>
+                                        <option value="CTA">CTA - Control de Tránsito Aéreo</option>
+                                        <option value="ICA">ICA - Información y Comunicaciones Aeronáuticas</option>
+                                        <option value="IMA">IMA - Mantenimiento Aeronáutico</option>
+                                        <option value="SAR">SAR - Búsqueda y Salvamento</option>
+                                        <option value="ETA">ETA - Electrónica Aeronáutica</option>
+                                        <option value="GTM">GTM - Gestión de Tripulación de Mando (Piloto)</option>
+                                        <option value="GTCP">GTCP - Gestión de Tripulación de Cabina de Pasajeros</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-carrera"></div>
+                                </div>
+                            </div>
+
+                            <!-- Datos del Colegio -->
+                            <div class="col-6 lockable-field">
+                                <div class="form-group">
+                                    <label>Nivel Académico <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-niv_acad_alum" required>
+                                        <option value="Bachiller" selected>Bachiller</option>
+                                        <option value="Estudiante de 5° Año">Estudiante de 5° Año</option>
+                                        <option value="Técnico Medio">Técnico Medio</option>
+                                        <option value="Universitario">Universitario / TSU</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-niv_acad"></div>
+                                </div>
+                            </div>
+                            <div class="col-6 lockable-field">
+                                <div class="form-group">
+                                    <label>Año de Graduación <span class="req">*</span></label>
+                                    <input type="number" class="form-control" id="asp-ano_grad_alum" value="2025" min="1990" max="2026" required>
+                                    <div class="field-error-msg" id="err-ano_grad"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-8 lockable-field">
+                                <div class="form-group">
+                                    <label>Institución / Plantel de Egreso <span class="req">*</span></label>
+                                    <input type="text" class="form-control" id="asp-inst_grad_alum" placeholder="Ej: Liceo Bolivariano Agustín Codazzi" required>
+                                    <div class="field-error-msg" id="err-inst_grad"></div>
+                                </div>
+                            </div>
+                            <div class="col-4 lockable-field">
+                                <div class="form-group">
+                                    <label>Tipo de Institución <span class="req">*</span></label>
+                                    <select class="form-control" id="asp-tipo_colegio" required>
+                                        <option value="Público" selected>Público</option>
+                                        <option value="Privado">Privado</option>
+                                        <option value="Subvencionado">Subvencionado</option>
+                                    </select>
+                                    <div class="field-error-msg" id="err-tipo_colegio"></div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 lockable-field">
+                                <div class="form-group">
+                                    <label>Observaciones Adicionales (Opcional)</label>
+                                    <textarea class="form-control" id="asp-observaciones" placeholder="Indique alguna condición o dato de interés para su inscripción..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ── BOTONES DE NAVEGACIÓN Y ENVÍO ── -->
+                <div class="form-footer">
+                    <button type="button" class="btn btn-secondary btn-nav" id="btn-step-prev" style="display:none;">
+                        ← Anterior
+                    </button>
+                    <div></div>
+                    <button type="button" class="btn btn-primary btn-nav" id="btn-step-next">
+                        Siguiente →
+                    </button>
+                    <button type="submit" class="btn btn-submit btn-nav" id="btn-step-submit" style="display:none;">
+                        <span class="spinner" id="submit-spinner"></span>
+                        <span id="submit-text">Confirmar y Enviar Preinscripción</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- ── MODAL DE ÉXITO / COMPROBANTE DE PREINSCRIPCIÓN ── -->
+    <div class="modal-overlay" id="modal-exito">
+        <div class="modal-card">
+            <div class="modal-icon-success">✓</div>
+            <h3 style="font-size:1.45rem; font-weight:800; color:#0f172a; margin-bottom:0.25rem;">¡Preinscripción Exitosa!</h3>
+            <p style="color:#64748b; font-size:0.88rem; margin-bottom:0.75rem;">Sus datos han sido capturados y registrados de forma segura en la plataforma del IUAC.</p>
+
+            <div class="voucher-box">
+                <div class="voucher-folio" id="voucher-folio">IUAC-2026-00000000</div>
+                
+                <!-- Datos centrados tipo etiqueta arriba y valor abajo (Punto 4.2) -->
+                <div class="voucher-item-centered">
+                    <span class="voucher-label-centered">Cédula de Identidad</span>
+                    <span class="voucher-value-centered" id="voucher-cedula">V-28.456.123</span>
+                </div>
+
+                <div class="voucher-item-centered">
+                    <span class="voucher-label-centered">Aspirante</span>
+                    <span class="voucher-value-centered" id="voucher-nombre">Carlos Mendoza</span>
+                </div>
+
+                <div class="voucher-item-centered">
+                    <span class="voucher-label-centered">Carrera de Postulación</span>
+                    <span class="voucher-value-centered" id="voucher-carrera" style="color:#0369a1;">Control de Tránsito Aéreo (CTA)</span>
+                </div>
+
+                <div class="voucher-item-centered">
+                    <span class="voucher-label-centered">Fecha de Registro</span>
+                    <span class="voucher-value-centered" id="voucher-fecha">13/11/2026</span>
+                </div>
+            </div>
+
+            <!-- Próximos pasos con la indicación exacta requerida (Punto 4.4) -->
+            <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:0.75rem 0.9rem; text-align:center; font-size:0.85rem; color:#166534; margin-bottom:1.25rem;">
+                📌 Recibirá notificaciones y detalles del cronograma a través de su correo electrónico y teléfono móvil registrado.
+            </div>
+
+            <!-- Botones de Acción (Punto 4.5) -->
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" id="btn-imprimir-planilla" onclick="imprimirPlanillaOficial()">
+                    🖨 Imprimir Planilla de Inscripción
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="location.reload()">
+                    Finalizar y Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PLANILLA OFICIAL DE PREINSCRIPCIÓN IUAC (FORMATO OFICIAL DE IMPRESIÓN Y CAPTACIÓN) ── -->
+    <div id="planilla-impresion" class="planilla-impresion">
+        <div class="planilla-header">
+            <div class="planilla-logos">
+                <img src="img/logo_iuac.png" alt="Logo IUAC" class="planilla-logo-img">
+                <div class="planilla-titulos">
+                    <h4>REPÚBLICA BOLIVARIANA DE VENEZUELA</h4>
+                    <h5>MINISTERIO DEL PODER POPULAR PARA EL TRANSPORTE</h5>
+                    <h5>INSTITUTO NACIONAL DE AERONÁUTICA CIVIL (INAC)</h5>
+                    <h3>INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL</h3>
+                    <h2>"MAYOR (AV) MIGUEL RODRÍGUEZ"</h2>
+                    <div class="planilla-subtitulo-dep">DEPARTAMENTO DE CAPTACIÓN, SELECCIÓN Y ADMISIÓN</div>
+                    <div class="planilla-tipo-doc">PLANILLA OFICIAL DE PREINSCRIPCIÓN DE ASPIRANTES — CONVOCATORIA 2026-2027</div>
+                </div>
+                <div class="planilla-foto-box">
+                    <img id="planilla-foto-img" class="planilla-foto-img" style="display:none;" alt="Foto">
+                    <div id="planilla-foto-placeholder" class="planilla-foto-placeholder">
+                        <span>FOTO TIPO CARNET</span>
+                    </div>
+                </div>
+            </div>
+            <div class="planilla-control-bar">
+                <div><strong>N° FOLIO:</strong> <span id="p-folio">IUAC-2026-00000000</span></div>
+                <div><strong>FECHA EMISIÓN:</strong> <span id="p-fecha">--/--/----</span></div>
+                <div><strong>CONDICIÓN:</strong> PREINSCRITO EN LÍNEA</div>
+            </div>
+        </div>
+
+        <!-- 1. DATOS PERSONALES -->
+        <div class="p-seccion">
+            <div class="p-seccion-titulo">1. DATOS DE IDENTIFICACIÓN Y PERSONALES DEL ASPIRANTE</div>
+            <table class="p-table">
+                <tr>
+                    <td style="width:25%;"><strong>CÉDULA DE IDENTIDAD:</strong><br><span id="p-cedula">--</span></td>
+                    <td style="width:25%;"><strong>NACIONALIDAD:</strong><br><span id="p-nacionalidad">--</span></td>
+                    <td style="width:25%;"><strong>GÉNERO:</strong><br><span id="p-sexo">--</span></td>
+                    <td style="width:25%;"><strong>ESTADO CIVIL:</strong><br><span id="p-est-civil">--</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"><strong>NOMBRES COMPLETOS:</strong><br><span id="p-nombres">--</span></td>
+                    <td colspan="2"><strong>APELLIDOS COMPLETOS:</strong><br><span id="p-apellidos">--</span></td>
+                </tr>
+                <tr>
+                    <td style="width:25%;"><strong>FECHA DE NACIMIENTO:</strong><br><span id="p-fec-nac">--</span></td>
+                    <td style="width:25%;"><strong>EDAD:</strong><br><span id="p-edad">--</span> años</td>
+                    <td colspan="2"><strong>LUGAR DE NACIMIENTO:</strong><br><span id="p-lugar-nac">--</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 2. UBICACIÓN Y CONTACTO -->
+        <div class="p-seccion">
+            <div class="p-seccion-titulo">2. DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO</div>
+            <table class="p-table">
+                <tr>
+                    <td style="width:33%;"><strong>ESTADO:</strong><br><span id="p-estado">--</span></td>
+                    <td style="width:33%;"><strong>CIUDAD / MUNICIPIO:</strong><br><span id="p-ciudad">--</span></td>
+                    <td style="width:34%;"><strong>PAÍS:</strong><br><span id="p-pais">Venezuela</span></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>DIRECCIÓN DE HABITACIÓN:</strong><br><span id="p-direccion">--</span></td>
+                </tr>
+                <tr>
+                    <td style="width:33%;"><strong>TELÉFONO MÓVIL:</strong><br><span id="p-telemov">--</span></td>
+                    <td style="width:33%;"><strong>TELÉFONO HABITACIÓN:</strong><br><span id="p-telehab">--</span></td>
+                    <td style="width:34%;"><strong>CORREO ELECTRÓNICO:</strong><br><span id="p-correo">--</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 3. ANTECEDENTES ACADÉMICOS Y CARRERA -->
+        <div class="p-seccion">
+            <div class="p-seccion-titulo">3. ANTECEDENTES ACADÉMICOS Y ESPECIALIDAD DE POSTULACIÓN</div>
+            <table class="p-table">
+                <tr style="background:#f1f5f9;">
+                    <td colspan="3" style="font-size:9pt; padding:6px;">
+                        <strong>ESPECIALIDAD AERONÁUTICA DE POSTULACIÓN:</strong><br>
+                        <span id="p-carrera" style="font-weight:900; color:#0369a1; font-size:10pt;">--</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width:33%;"><strong>NIVEL ACADÉMICO:</strong><br><span id="p-nivel">--</span></td>
+                    <td style="width:33%;"><strong>AÑO DE GRADUACIÓN:</strong><br><span id="p-ano-grad">--</span></td>
+                    <td style="width:34%;"><strong>TIPO DE INSTITUCIÓN:</strong><br><span id="p-tipo-inst">--</span></td>
+                </tr>
+                <tr>
+                    <td colspan="3"><strong>PLANTEL O INSTITUCIÓN DE EGRESO:</strong><br><span id="p-plantel">--</span></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 4. RECAUDOS A CONSIGNAR -->
+        <div class="p-seccion">
+            <div class="p-seccion-titulo">4. RECAUDOS EXIGIDOS PARA LA CONSIGNACIÓN EN EL DEPARTAMENTO DE CAPTACIÓN</div>
+            <div class="p-recaudos-grid">
+                <div class="p-recaudo-item">[ ] 02 Fotocopias legibles de la C.I. ampliada a color.</div>
+                <div class="p-recaudo-item">[ ] Fondo negro y copia del Título de Bachiller o Constancia de 5° Año.</div>
+                <div class="p-recaudo-item">[ ] Calificaciones Certificadas de 1° a 4° o 5° año (original y copia).</div>
+                <div class="p-recaudo-item">[ ] 02 Fotos tipo carnet en fondo blanco (recientes y formales).</div>
+                <div class="p-recaudo-item">[ ] Copia legible de la Partida de Nacimiento.</div>
+                <div class="p-recaudo-item">[ ] Comprobante de Registro del Sistema Nacional de Ingreso (SNI).</div>
+            </div>
+        </div>
+
+        <!-- 5. DECLARACIÓN JURADA Y FIRMAS -->
+        <div class="p-seccion" style="margin-top:8px;">
+            <p class="p-juramento">
+                <em>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el Instituto Universitario de Aeronáutica Civil (IUAC)."</em>
+            </p>
+            <div class="p-firmas-container">
+                <div class="p-firma-box">
+                    <div class="p-firma-linea"></div>
+                    <strong>FIRMA DEL ASPIRANTE</strong>
+                    <div style="font-size:7.5pt; margin-top:2px;">C.I.: <span id="p-firma-ci">--</span></div>
+                    <div class="p-huella-box">Huella Pulgar Derecho</div>
+                </div>
+                <div class="p-firma-box">
+                    <div class="p-firma-linea"></div>
+                    <strong>REVISADO Y RECIBIDO POR:</strong>
+                    <div style="font-size:7.5pt; margin-top:2px;">Depto. de Captación, Selección y Admisión IUAC</div>
+                    <div class="p-sello-box">SELLO INSTITUCIONAL / FECHA</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FOOTER INSTITUCIONAL (CINTILLO INFERIOR, PUNTO 8) ── -->
+    <footer class="footer">
+        <p>© 2026 Instituto Universitario de Aeronáutica Civil (IUAC) - República Bolivariana de Venezuela.</p>
+        <p style="margin-top:0.35rem; font-size:0.78rem; color:#64748b;">Garantía de Privacidad y Protección de Datos Personales de Aspirantes. Certificación Oficial INAC.</p>
+    </footer>
+
+    <!-- Scripts de Carga Ultra Rápida -->
+    <script src="js/geo_data.js?v=2.2"></script>
+    <script src="js/app.js?v=2.2"></script>
+</body>
+</html>
