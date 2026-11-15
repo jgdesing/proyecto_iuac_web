@@ -7,13 +7,22 @@ CARRERAS_VALIDAS = {
     'ICA': 'Información y Comunicaciones Aeronáuticas',
     'IMA': 'Mantenimiento Aeronáutico',
     'SAR': 'Búsqueda y Salvamento',
-    'ETA': 'Electrónica Aeronáutica',
-    'GTM': 'Gestión de Tripulación de Mando',
-    'GTCP': 'Gestión de Tripulación de Cabina de Pasajeros'
+    'ETA': 'Electrónica Aeronáutica'
 }
 
 REGEX_EMAIL = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')
 REGEX_SOLO_LETRAS_Y_ESPACIOS = re.compile(r'^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\.]+$')
+
+def limpiar_texto_estricto(val):
+    """
+    Limpieza universal y estricta para cualquier campo que contenga letras o palabras:
+    1. Elimina cualquier espacio al inicio y al final (.strip()).
+    2. Colapsa múltiples espacios internos (espacios dobles, triples, tabulaciones o saltos)
+       en exactamente un único espacio simple.
+    """
+    if val is None:
+        return ''
+    return re.sub(r'\s+', ' ', str(val)).strip()
 
 def calcular_edad_en_fecha(fecha_nac, fecha_referencia):
     """Calcula los años cumplidos de una persona en una fecha específica."""
@@ -123,7 +132,7 @@ def validate_aspirante_payload(data):
     
     # 1. Cédula (integer)
     ced_raw = data.get('ced_alum')
-    tipo_ced = str(data.get('tipo_cedula', 'V')).upper().strip()
+    tipo_ced = limpiar_texto_estricto(data.get('tipo_cedula', 'V')).upper()
     if tipo_ced not in ('V', 'E', 'P'):
         tipo_ced = 'V'
     ok_ced, ced_int, err_ced = validar_cedula_venezolana(ced_raw)
@@ -132,9 +141,9 @@ def validate_aspirante_payload(data):
     cleaned['ced_alum'] = ced_int
     cleaned['tipo_cedula'] = tipo_ced
 
-    # 2. Nombres y Apellidos (solo caracteres alfabéticos y espacios)
-    nom = str(data.get('nom_alum', '')).strip()
-    ape = str(data.get('ape_alum', '')).strip()
+    # 2. Nombres y Apellidos (solo caracteres alfabéticos y espacios, sin espacios residuales)
+    nom = limpiar_texto_estricto(data.get('nom_alum', ''))
+    ape = limpiar_texto_estricto(data.get('ape_alum', ''))
     if len(nom) < 2 or len(nom) > 100:
         return False, None, "Debe ingresar sus nombres completos (mínimo 2 letras)."
     if len(ape) < 2 or len(ape) > 100:
@@ -147,7 +156,7 @@ def validate_aspirante_payload(data):
     cleaned['ape_alum'] = ape.title()
 
     # 3. Fecha de Nacimiento y Criterio de Edad IUAC (Inicio de Actividades 13/09/2027)
-    fec_nac_str = str(data.get('fec_nac_alum', '')).strip()
+    fec_nac_str = limpiar_texto_estricto(data.get('fec_nac_alum', ''))
     if not fec_nac_str:
         return False, None, "La fecha de nacimiento es obligatoria."
     
@@ -164,11 +173,11 @@ def validate_aspirante_payload(data):
     cleaned['edad_alum'] = int(edad_actual)
 
     # 4. Género y Estado Civil
-    sex = str(data.get('sex_alum', 'M')).upper().strip()
+    sex = limpiar_texto_estricto(data.get('sex_alum', 'M')).upper()
     if sex not in ('M', 'F'):
         sex = 'M'
     cleaned['sex_alum'] = sex
-    cleaned['est_civil_alum'] = str(data.get('est_civil_alum', 'Soltero/a')).strip()[:50]
+    cleaned['est_civil_alum'] = limpiar_texto_estricto(data.get('est_civil_alum', 'Soltero/a'))[:50]
 
     # 5. Teléfonos
     tel_mov_raw = data.get('telemov_alum')
@@ -187,18 +196,18 @@ def validate_aspirante_payload(data):
         cleaned['telehabi_alum'] = tel_mov
 
     # 6. Correo Electrónico
-    correo = str(data.get('correo_alum', '')).strip().lower()
+    correo = limpiar_texto_estricto(data.get('correo_alum', '')).lower().replace(' ', '')
     if not correo or not REGEX_EMAIL.match(correo):
         return False, None, "El correo electrónico no posee un formato válido (ej: aspirante@correo.com)."
     cleaned['correo_alum'] = correo[:150]
 
     # 7. Residencia y Ubicación
-    cleaned['pais_alum'] = str(data.get('pais_alum', 'Venezuela')).strip()[:100]
-    cleaned['est_alum'] = str(data.get('est_alum', '')).strip()[:100]
-    cleaned['ciu_alum'] = str(data.get('ciu_alum', '')).strip()[:100]
-    cleaned['direc_alum'] = str(data.get('direc_alum', '')).strip()[:500]
-    cleaned['lugar_nac_alum'] = str(data.get('lugar_nac_alum', '')).strip()[:150]
-    cleaned['nacionalidad_alum'] = str(data.get('nacionalidad_alum', 'VENEZOLANA')).strip()[:100]
+    cleaned['pais_alum'] = limpiar_texto_estricto(data.get('pais_alum', 'Venezuela'))[:100]
+    cleaned['est_alum'] = limpiar_texto_estricto(data.get('est_alum', ''))[:100]
+    cleaned['ciu_alum'] = limpiar_texto_estricto(data.get('ciu_alum', ''))[:100]
+    cleaned['direc_alum'] = limpiar_texto_estricto(data.get('direc_alum', ''))[:500]
+    cleaned['lugar_nac_alum'] = limpiar_texto_estricto(data.get('lugar_nac_alum', ''))[:150]
+    cleaned['nacionalidad_alum'] = limpiar_texto_estricto(data.get('nacionalidad_alum', 'VENEZOLANA'))[:100]
     cleaned['etnia'] = 'Ninguna'  # Eliminado del formulario visual
 
     if not cleaned['est_alum']:
@@ -209,9 +218,9 @@ def validate_aspirante_payload(data):
         return False, None, "Debe detallar su dirección de habitación completa (mínimo 8 caracteres)."
 
     # 8. Datos Académicos
-    cleaned['niv_acad_alum'] = str(data.get('niv_acad_alum', 'Bachiller')).strip()[:150]
-    cleaned['inst_grad_alum'] = str(data.get('inst_grad_alum', '')).strip()[:200]
-    cleaned['ubica_inst_muni_alum'] = str(data.get('ubica_inst_muni_alum', '')).strip()[:150]
+    cleaned['niv_acad_alum'] = limpiar_texto_estricto(data.get('niv_acad_alum', 'Bachiller'))[:150]
+    cleaned['inst_grad_alum'] = limpiar_texto_estricto(data.get('inst_grad_alum', ''))[:200]
+    cleaned['ubica_inst_muni_alum'] = limpiar_texto_estricto(data.get('ubica_inst_muni_alum', ''))[:150]
     
     ano_grad = data.get('ano_grad_alum')
     if ano_grad and str(ano_grad).isdigit():
@@ -222,10 +231,10 @@ def validate_aspirante_payload(data):
     else:
         cleaned['ano_grad_alum'] = date.today().year
 
-    cleaned['tipo_colegio'] = str(data.get('tipo_colegio', 'Público')).strip()[:50]
+    cleaned['tipo_colegio'] = limpiar_texto_estricto(data.get('tipo_colegio', 'Público'))[:50]
 
     # 9. Carrera de Postulación IUAC
-    carrera = str(data.get('carrera', '')).strip().upper()
+    carrera = limpiar_texto_estricto(data.get('carrera', '')).upper()
     if carrera not in CARRERAS_VALIDAS:
         return False, None, f"La carrera seleccionada '{carrera}' no es válida. Seleccione una carrera de la oferta académica oficial."
     cleaned['carrera'] = carrera
@@ -237,6 +246,6 @@ def validate_aspirante_payload(data):
     cleaned['turno_class'] = 'DIURNO'
     cleaned['canal_inscripcion'] = 'WEB'
     cleaned['status_alum'] = 'REGISTRADO_WEB'
-    cleaned['observaciones'] = str(data.get('observaciones', 'Inscripción vía formulario público web')).strip()[:500]
+    cleaned['observaciones'] = limpiar_texto_estricto(data.get('observaciones', 'Inscripción vía formulario público web'))[:500]
 
     return True, cleaned, None

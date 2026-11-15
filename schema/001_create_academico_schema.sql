@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS academico.estudiante_especialidades (
     prioridad INTEGER NOT NULL DEFAULT 1,
     especialidad VARCHAR(50) NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_web_cedula_prioridad UNIQUE (ced_alum, prioridad)
+    CONSTRAINT uq_web_cedula UNIQUE (ced_alum)
 );
 
 -- Índices de Optimización

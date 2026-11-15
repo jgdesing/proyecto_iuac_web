@@ -59,7 +59,7 @@ def check_correo_exists(correo):
         release_db(conn, cur)
 
 def get_active_carreras():
-    """Retorna las carreras oficiales activas del IUAC."""
+    """Retorna exclusivamente las carreras oficiales activas del IUAC (activo = TRUE)."""
     conn, cur = get_db_cursor()
     if not conn:
         return [
@@ -67,12 +67,10 @@ def get_active_carreras():
             {"codigo": "ICA", "nombre": "Información y Comunicaciones Aeronáuticas"},
             {"codigo": "IMA", "nombre": "Mantenimiento Aeronáutico"},
             {"codigo": "SAR", "nombre": "Búsqueda y Salvamento"},
-            {"codigo": "ETA", "nombre": "Electrónica Aeronáutica"},
-            {"codigo": "GTM", "nombre": "Gestión de Tripulación de Mando"},
-            {"codigo": "GTCP", "nombre": "Gestión de Tripulación de Cabina de Pasajeros"}
+            {"codigo": "ETA", "nombre": "Electrónica Aeronáutica"}
         ]
     try:
-        cur.execute("SELECT codigo, nombre, descripcion FROM academico.carreras WHERE activo = TRUE ORDER BY codigo ASC;")
+        cur.execute("SELECT codigo, nombre, descripcion FROM academico.carreras WHERE activo = TRUE ORDER BY carrera_id ASC, codigo ASC;")
         rows = cur.fetchall()
         if rows:
             return [{"codigo": r[0], "nombre": r[1], "descripcion": r[2]} for r in rows]
@@ -158,6 +156,12 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             True,
             'WEB_PUBLIC_FORM',
             'WEB_PUBLIC_FORM'
+        ]
+
+        # Sanitización universal de última milla: limpiar espacios residuales o múltiples de cualquier cadena
+        valores = [
+            re.sub(r'\s+', ' ', v).strip() if (isinstance(v, str) and c != 'foto_alum') else v
+            for c, v in zip(columnas, valores)
         ]
 
         placeholders = ', '.join(['%s'] * len(columnas))

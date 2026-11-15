@@ -8,15 +8,13 @@
 // redirige las peticiones AJAX al servidor Flask local en http://127.0.0.1:5050
 const API_BASE = (window.location.protocol === 'file:') ? 'http://127.0.0.1:5050' : '';
 
-// Diccionario oficial de carreras IUAC (Nombre completo y siglas)
+// Diccionario oficial de carreras IUAC activas (solo activo = TRUE)
 const MAPA_CARRERAS = {
     'CTA': 'Control de Tránsito Aéreo (CTA)',
     'ICA': 'Información y Comunicaciones Aeronáuticas (ICA)',
     'IMA': 'Mantenimiento Aeronáutico (IMA)',
     'SAR': 'Búsqueda y Salvamento (SAR)',
-    'ETA': 'Electrónica Aeronáutica (ETA)',
-    'GTM': 'Gestión de Tripulación de Mando - Piloto (GTM)',
-    'GTCP': 'Gestión de Tripulación de Cabina de Pasajeros (GTCP)'
+    'ETA': 'Electrónica Aeronáutica (ETA)'
 };
 
 let capturedPhotoBase64 = null;
@@ -486,12 +484,18 @@ function initRealtimeValidations() {
                 checkCedulaTimeout = setTimeout(() => verificarCedulaRemota(val), 350);
             }
         });
+        const limpiarCedula = (e) => { e.target.value = e.target.value.trim(); };
+        cedulaInput.addEventListener('blur', limpiarCedula);
+        cedulaInput.addEventListener('change', limpiarCedula);
     }
 
-    // 2. Nombres (Solo caracteres alfabéticos y espacios, Punto 5)
+    // 2. Nombres (Solo caracteres alfabéticos y espacios; sin espacios iniciales, dobles o finales)
     if (nombresInput) {
         nombresInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+            // Evitar espacios al inicio, caracteres raros y dobles espacios consecutivos
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+                                          .replace(/^\s+/, '')
+                                          .replace(/\s{2,}/g, ' ');
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(nombresInput, 'err-nombres', 'El campo Nombres es obligatorio.');
@@ -503,12 +507,21 @@ function initRealtimeValidations() {
                 setFieldValid(nombresInput, 'err-nombres');
             }
         });
+
+        // Al salir del campo o cambiar foco: eliminar automáticamente el espacio final agregado por teclados móviles
+        const limpiarEspaciosNombres = (e) => {
+            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
+        };
+        nombresInput.addEventListener('blur', limpiarEspaciosNombres);
+        nombresInput.addEventListener('change', limpiarEspaciosNombres);
     }
 
-    // 3. Apellidos (Solo caracteres alfabéticos y espacios, Punto 5)
+    // 3. Apellidos (Solo caracteres alfabéticos y espacios; sin espacios iniciales, dobles o finales)
     if (apellidosInput) {
         apellidosInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+                                          .replace(/^\s+/, '')
+                                          .replace(/\s{2,}/g, ' ');
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(apellidosInput, 'err-apellidos', 'El campo Apellidos es obligatorio.');
@@ -520,6 +533,12 @@ function initRealtimeValidations() {
                 setFieldValid(apellidosInput, 'err-apellidos');
             }
         });
+
+        const limpiarEspaciosApellidos = (e) => {
+            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
+        };
+        apellidosInput.addEventListener('blur', limpiarEspaciosApellidos);
+        apellidosInput.addEventListener('change', limpiarEspaciosApellidos);
     }
 
     // 4. Fecha de Nacimiento y Bloqueo Reglamentario de Edad (Puntos 1 y 2)
@@ -550,10 +569,12 @@ function initRealtimeValidations() {
         });
     }
 
-    // 5. Lugar de Nacimiento
+    // 5. Lugar de Nacimiento (sin espacios iniciales ni finales)
     if (lugarNacInput) {
         lugarNacInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '');
+            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+                                          .replace(/^\s+/, '')
+                                          .replace(/\s{2,}/g, ' ');
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(lugarNacInput, 'err-lugar_nac', 'El lugar de nacimiento es obligatorio.');
@@ -561,6 +582,11 @@ function initRealtimeValidations() {
                 setFieldValid(lugarNacInput, 'err-lugar_nac');
             }
         });
+        const limpiarLugarNac = (e) => {
+            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
+        };
+        lugarNacInput.addEventListener('blur', limpiarLugarNac);
+        lugarNacInput.addEventListener('change', limpiarLugarNac);
     }
 
     // 6. Teléfono Celular con máscara (0412-1234567)
@@ -587,6 +613,9 @@ function initRealtimeValidations() {
                 }
             }
         });
+        const limpiarTelemov = (e) => { e.target.value = e.target.value.trim(); };
+        telemovInput.addEventListener('blur', limpiarTelemov);
+        telemovInput.addEventListener('change', limpiarTelemov);
     }
 
     // 7. Teléfono Habitación (opcional pero validado si se escribe)
@@ -605,12 +634,16 @@ function initRealtimeValidations() {
                 setFieldValid(telehabInput, 'err-telehab');
             }
         });
+        const limpiarTelehab = (e) => { e.target.value = e.target.value.trim(); };
+        telehabInput.addEventListener('blur', limpiarTelehab);
+        telehabInput.addEventListener('change', limpiarTelehab);
     }
 
-    // 8. Correo Electrónico
+    // 8. Correo Electrónico (elimina automáticamente cualquier espacio)
     if (correoInput) {
         correoInput.addEventListener('input', (e) => {
-            const val = e.target.value.trim().toLowerCase();
+            e.target.value = e.target.value.replace(/\s+/g, '').toLowerCase();
+            const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(correoInput, 'err-correo', 'El correo electrónico es obligatorio.');
             } else if (!REGEX_EMAIL.test(val)) {
@@ -619,11 +652,17 @@ function initRealtimeValidations() {
                 setFieldValid(correoInput, 'err-correo');
             }
         });
+        const limpiarCorreo = (e) => {
+            e.target.value = e.target.value.trim().toLowerCase().replace(/\s+/g, '');
+        };
+        correoInput.addEventListener('blur', limpiarCorreo);
+        correoInput.addEventListener('change', limpiarCorreo);
     }
 
     // 9. Dirección
     if (direcInput) {
         direcInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/^\s+/, '').replace(/[ \t]{2,}/g, ' ');
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(direcInput, 'err-direccion', 'La dirección de habitación es obligatoria.');
@@ -633,6 +672,11 @@ function initRealtimeValidations() {
                 setFieldValid(direcInput, 'err-direccion');
             }
         });
+        const limpiarDirec = (e) => {
+            e.target.value = e.target.value.trim().replace(/[ \t]{2,}/g, ' ');
+        };
+        direcInput.addEventListener('blur', limpiarDirec);
+        direcInput.addEventListener('change', limpiarDirec);
     }
 
     // 10. Carrera
@@ -649,6 +693,7 @@ function initRealtimeValidations() {
     // 11. Año de Graduación
     if (anoGradInput) {
         anoGradInput.addEventListener('input', () => {
+            anoGradInput.value = anoGradInput.value.replace(/\D/g, '').slice(0, 4);
             const val = parseInt(anoGradInput.value, 10);
             const currentYear = new Date().getFullYear();
             if (!val || val < 1990 || val > (currentYear + 1)) {
@@ -657,11 +702,15 @@ function initRealtimeValidations() {
                 setFieldValid(anoGradInput, 'err-ano_grad');
             }
         });
+        const limpiarAnoGrad = (e) => { e.target.value = e.target.value.trim(); };
+        anoGradInput.addEventListener('blur', limpiarAnoGrad);
+        anoGradInput.addEventListener('change', limpiarAnoGrad);
     }
 
     // 12. Plantel de Egreso
     if (instGradInput) {
-        instGradInput.addEventListener('input', () => {
+        instGradInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/^\s+/, '').replace(/\s{2,}/g, ' ');
             const val = instGradInput.value.trim();
             if (!val) {
                 setFieldInvalid(instGradInput, 'err-inst_grad', 'Indique la institución de egreso.');
@@ -669,6 +718,11 @@ function initRealtimeValidations() {
                 setFieldValid(instGradInput, 'err-inst_grad');
             }
         });
+        const limpiarInstGrad = (e) => {
+            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
+        };
+        instGradInput.addEventListener('blur', limpiarInstGrad);
+        instGradInput.addEventListener('change', limpiarInstGrad);
     }
 }
 
@@ -708,17 +762,23 @@ function validateCurrentStep(step) {
         const fecNac = document.getElementById('asp-fec_nac_alum');
         const lugarNac = document.getElementById('asp-lugar_nac_alum');
 
-        if (!cedula.value.trim() || cedula.value.trim().length < 6) {
+        // Limpieza automática de espacios residuales al presionar Siguiente
+        if (cedula) cedula.value = cedula.value.trim();
+        if (nombres) nombres.value = nombres.value.trim().replace(/\s{2,}/g, ' ');
+        if (apellidos) apellidos.value = apellidos.value.trim().replace(/\s{2,}/g, ' ');
+        if (lugarNac) lugarNac.value = lugarNac.value.trim().replace(/\s{2,}/g, ' ');
+
+        if (!cedula.value || cedula.value.length < 6) {
             setFieldInvalid(cedula, 'err-cedula', 'Cédula obligatoria (mínimo 6 dígitos).');
             if (!primerErrorElement) primerErrorElement = cedula;
         }
 
-        if (!nombres.value.trim() || !REGEX_LETRAS_Y_ESPACIOS.test(nombres.value.trim())) {
+        if (!nombres.value || !REGEX_LETRAS_Y_ESPACIOS.test(nombres.value)) {
             setFieldInvalid(nombres, 'err-nombres', 'Nombres obligatorios (solo letras y espacios).');
             if (!primerErrorElement) primerErrorElement = nombres;
         }
 
-        if (!apellidos.value.trim() || !REGEX_LETRAS_Y_ESPACIOS.test(apellidos.value.trim())) {
+        if (!apellidos.value || !REGEX_LETRAS_Y_ESPACIOS.test(apellidos.value)) {
             setFieldInvalid(apellidos, 'err-apellidos', 'Apellidos obligatorios (solo letras y espacios).');
             if (!primerErrorElement) primerErrorElement = apellidos;
         }
@@ -735,7 +795,7 @@ function validateCurrentStep(step) {
             }
         }
 
-        if (!lugarNac.value.trim()) {
+        if (!lugarNac.value) {
             setFieldInvalid(lugarNac, 'err-lugar_nac', 'Lugar de nacimiento obligatorio.');
             if (!primerErrorElement) primerErrorElement = lugarNac;
         }
@@ -745,7 +805,14 @@ function validateCurrentStep(step) {
         const ciudad = document.getElementById('asp-ciu_alum');
         const direccion = document.getElementById('asp-direc_alum');
         const telemov = document.getElementById('asp-telemov_alum');
+        const telehab = document.getElementById('asp-telehabi_alum');
         const correo = document.getElementById('asp-correo_alum');
+
+        // Limpieza automática de espacios residuales en el Paso 2
+        if (direccion) direccion.value = direccion.value.trim().replace(/[ \t]{2,}/g, ' ');
+        if (telemov) telemov.value = telemov.value.trim();
+        if (telehab) telehab.value = telehab.value.trim();
+        if (correo) correo.value = correo.value.trim().toLowerCase().replace(/\s+/g, '');
 
         if (!estado.value) {
             setFieldInvalid(estado, 'err-estado', 'Seleccione un Estado.');
@@ -755,7 +822,7 @@ function validateCurrentStep(step) {
             setFieldInvalid(ciudad, 'err-ciudad', 'Seleccione una Ciudad.');
             if (!primerErrorElement) primerErrorElement = ciudad;
         }
-        if (!direccion.value.trim() || direccion.value.trim().length < 8) {
+        if (!direccion.value || direccion.value.length < 8) {
             setFieldInvalid(direccion, 'err-direccion', 'Detalle su dirección completa (mínimo 8 caracteres).');
             if (!primerErrorElement) primerErrorElement = direccion;
         }
@@ -764,7 +831,7 @@ function validateCurrentStep(step) {
             setFieldInvalid(telemov, 'err-telemov', 'Teléfono celular venezolano obligatorio (11 dígitos).');
             if (!primerErrorElement) primerErrorElement = telemov;
         }
-        if (!correo.value.trim() || !REGEX_EMAIL.test(correo.value.trim())) {
+        if (!correo.value || !REGEX_EMAIL.test(correo.value)) {
             setFieldInvalid(correo, 'err-correo', 'Correo electrónico no válido.');
             if (!primerErrorElement) primerErrorElement = correo;
         }
@@ -812,7 +879,11 @@ function initFormSubmit() {
             if (!errorPaso3) errorPaso3 = anoGrad;
         }
 
-        if (!instGrad?.value?.trim()) {
+        if (instGrad) instGrad.value = instGrad.value.trim().replace(/\s{2,}/g, ' ');
+        const obsEl = document.getElementById('asp-observaciones');
+        if (obsEl) obsEl.value = obsEl.value.trim().replace(/[ \t]{2,}/g, ' ');
+
+        if (!instGrad?.value) {
             setFieldInvalid(instGrad, 'err-inst_grad', 'Indique la institución de egreso.');
             if (!errorPaso3) errorPaso3 = instGrad;
         }
@@ -822,34 +893,34 @@ function initFormSubmit() {
             return;
         }
 
-        // Construir Payload
+        // Construir Payload sanitizado sin espacios residuales
         const payload = {
             website_url_hp: document.getElementById('website_url_hp')?.value || '',
 
             tipo_cedula: document.getElementById('asp-tipo_cedula')?.value || 'V',
             ced_alum: document.getElementById('asp-ced_alum')?.value?.trim(),
-            nom_alum: document.getElementById('asp-nom_alum')?.value?.trim(),
-            ape_alum: document.getElementById('asp-ape_alum')?.value?.trim(),
+            nom_alum: document.getElementById('asp-nom_alum')?.value?.trim().replace(/\s{2,}/g, ' '),
+            ape_alum: document.getElementById('asp-ape_alum')?.value?.trim().replace(/\s{2,}/g, ' '),
             fec_nac_alum: document.getElementById('asp-fec_nac_alum')?.value,
             sex_alum: document.getElementById('asp-sex_alum')?.value || 'M',
             est_civil_alum: document.getElementById('asp-est_civil_alum')?.value || 'Soltero/a',
-            lugar_nac_alum: document.getElementById('asp-lugar_nac_alum')?.value?.trim() || '',
+            lugar_nac_alum: document.getElementById('asp-lugar_nac_alum')?.value?.trim().replace(/\s{2,}/g, ' ') || '',
             nacionalidad_alum: document.getElementById('asp-nacionalidad_alum')?.value || 'VENEZOLANA',
 
             pais_alum: document.getElementById('asp-pais_alum')?.value || 'Venezuela',
             est_alum: document.getElementById('asp-est_alum')?.value,
             ciu_alum: document.getElementById('asp-ciu_alum')?.value,
-            direc_alum: document.getElementById('asp-direc_alum')?.value?.trim(),
+            direc_alum: document.getElementById('asp-direc_alum')?.value?.trim().replace(/[ \t]{2,}/g, ' '),
             telemov_alum: document.getElementById('asp-telemov_alum')?.value?.trim(),
             telehabi_alum: document.getElementById('asp-telehabi_alum')?.value?.trim(),
-            correo_alum: document.getElementById('asp-correo_alum')?.value?.trim(),
+            correo_alum: document.getElementById('asp-correo_alum')?.value?.trim().toLowerCase().replace(/\s+/g, ''),
 
             carrera: carrera.value,
             niv_acad_alum: document.getElementById('asp-niv_acad_alum')?.value || 'Bachiller',
-            inst_grad_alum: instGrad.value.trim(),
+            inst_grad_alum: instGrad.value,
             ano_grad_alum: valAno,
             tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || 'Público',
-            observaciones: document.getElementById('asp-observaciones')?.value?.trim() || 'Preinscripción Web',
+            observaciones: obsEl?.value || 'Preinscripción Web',
             foto_base64: capturedPhotoBase64 || null
         };
 

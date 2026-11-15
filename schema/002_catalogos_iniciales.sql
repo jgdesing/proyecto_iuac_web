@@ -10,8 +10,8 @@ VALUES
     ('IMA', 'Mantenimiento Aeronáutico', 'Técnicas avanzadas de inspección, mantenimiento y reparación estructural y de sistemas de aeronaves.', TRUE),
     ('SAR', 'Búsqueda y Salvamento', 'Operaciones tácticas, rescate aéreo y gestión de emergencias aeroportuarias y de aviación.', TRUE),
     ('ETA', 'Electrónica Aeronáutica', 'Mantenimiento y calibración de sistemas de navegación, radar, aviónica y radioayudas.', TRUE),
-    ('GTM', 'Gestión de Tripulación de Mando', 'Formación integral para futuros comandantes y pilotos en aviación comercial y de transporte.', TRUE),
-    ('GTCP', 'Gestión de Tripulación de Cabina de Pasajeros', 'Seguridad en cabina, atención al pasajero, primeros auxilios aeronáuticos y protocolos de vuelo.', TRUE)
+    ('GTM', 'Gestión de Tripulación de Mando', 'Formación integral para futuros comandantes y pilotos en aviación comercial y de transporte.', FALSE),
+    ('GTCP', 'Gestión de Tripulación de Cabina de Pasajeros', 'Seguridad en cabina, atención al pasajero, primeros auxilios aeronáuticos y protocolos de vuelo.', FALSE)
 ON CONFLICT (codigo) DO UPDATE SET 
     nombre = EXCLUDED.nombre,
     descripcion = EXCLUDED.descripcion,

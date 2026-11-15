@@ -48,7 +48,7 @@ def check_honeypot(data):
 
 # ── 4. SANITIZACIÓN GENERAL Y PREVENCIÓN DE INYECCIÓN ─────────────────────────
 PATRON_SQL_PELIGROSO = re.compile(
-    r"(\b(UNION\s+ALL|UNION\s+SELECT|DROP\s+TABLE|DROP\s+DATABASE|ALTER\s+TABLE|EXEC\(|EXECUTE\()\b|<script|<iframe|javascript:|onerror=|onload=)",
+    r"(\b(UNION\s+ALL|UNION\s+SELECT|DROP\s+TABLE|DROP\s+DATABASE|DROP\s+SCHEMA|TRUNCATE\s+TABLE|ALTER\s+TABLE|EXEC\(|EXECUTE\(|DELETE\s+FROM|INSERT\s+INTO|UPDATE\s+.*SET)\b|<script\b|<iframe\b|javascript:|onerror\s*=|onload\s*=)",
     re.IGNORECASE
 )
 
@@ -65,9 +65,9 @@ def sanitize_text(val, max_len=250):
 def contains_malicious_payload(data):
     """
     Escanea recursivamente los campos de texto para detectar payloads de inyección.
-    Excluye campos de imágenes en base64.
+    Excluye campos de imágenes en base64 para evitar falsos positivos por entropía.
     """
-    campos_excluidos = {'foto_b64', 'comprobante_b64', 'foto_alum', 'comprobante_derechos'}
+    campos_excluidos = {'foto_base64', 'foto_b64', 'comprobante_b64', 'foto_alum', 'comprobante_derechos'}
     for k, v in data.items():
         if k in campos_excluidos:
             continue
