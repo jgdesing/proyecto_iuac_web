@@ -1,6 +1,7 @@
 import logging
 import os
 import base64
+import re
 from database import get_db_cursor, release_db
 
 logger = logging.getLogger("IUAC_DB_OPS")
