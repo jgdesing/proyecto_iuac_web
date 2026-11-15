@@ -171,20 +171,38 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             VALUES ({placeholders});
         """
         cur.execute(query_estudiante, valores)
+        # Confirmar (COMMIT) inmediatamente el registro principal en academico.estudiantes
+        # para que ningún fallo posterior en tablas secundarias pueda revertir la transacción
+        conn.commit()
 
-        # 4. Insertar prioridad en academico.estudiante_especialidades si la tabla existe
+        # Verificar persistencia real en la base de datos antes de continuar
+        cur.execute("SELECT ced_alum FROM academico.estudiantes WHERE ced_alum = %s;", (ced_int,))
+        if not cur.fetchone():
+            release_db(conn, cur, commit=False)
+            return False, "Error de persistencia: el registro no pudo ser confirmado en la base de datos."
+        conn.commit()
+
+        # 4. Insertar prioridad en academico.estudiante_especialidades en transacción independiente
+        # Se usa DELETE + INSERT en lugar de ON CONFLICT para ser 100% compatible con cualquier
+        # restricción UNIQUE existente en Neon (sea ced_alum o ced_alum + prioridad).
         try:
-            query_esp = """
+            cur.execute("DELETE FROM academico.estudiante_especialidades WHERE ced_alum = %s;", (ced_int,))
+            cur.execute(
+                """
                 INSERT INTO academico.estudiante_especialidades (ced_alum, prioridad, especialidad)
-                VALUES (%s, 1, %s)
-                ON CONFLICT (ced_alum) DO UPDATE SET especialidad = EXCLUDED.especialidad;
-            """
-            cur.execute(query_esp, (ced_int, data['carrera']))
+                VALUES (%s, 1, %s);
+                """,
+                (ced_int, data['carrera'])
+            )
+            conn.commit()
         except Exception as e_esp:
+            try:
+                conn.rollback()
+            except Exception:
+                pass
             logger.warning(f"Aviso tabla especialidades: {e_esp}")
 
-        conn.commit()
-        release_db(conn, cur, commit=False)
+        release_db(conn, cur, commit=True)
         return True, None
 
     except Exception as e:
