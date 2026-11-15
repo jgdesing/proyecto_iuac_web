@@ -1,5 +1,6 @@
 import os
 import io
+import csv
 from flask import Flask, request, jsonify, send_from_directory, Response
 from flask_cors import CORS
 from config import Config
@@ -33,11 +34,9 @@ limiter = create_limiter(app)
 def after_request_security(response):
     return apply_security_headers(response)
 
-# Inicializar conexión a PostgreSQL
-try:
-    init_db_pool()
-except Exception as e:
-    app.logger.error(f"PostgreSQL pool init deferred: {e}")
+# Nota: El pool de PostgreSQL se inicializa de forma aislada (lazy por PID)
+# dentro de cada worker de Gunicorn al procesar la primera petición, evitando
+# colisiones de descriptores SSL entre procesos (SSL bad record mac).
 
 # ── 1. RUTAS ESTÁTICAS DE LA LANDING PAGE Y PANEL ADMIN ───────────────────────
 @app.route('/', methods=['GET'])

@@ -71,11 +71,9 @@ def exportar_a_sql(registros, output_file="vaciado_aspirantes_iuac.sql"):
 
     columnas_base = [
         'ced_alum', 'tipo_cedula', 'nom_alum', 'ape_alum', 'fec_nac_alum', 'edad_alum',
-        'sex_alum', 'est_civil_alum', 'estatura_alum', 'peso_alum', 'tipo_sangre',
-        'posee_discapacidad', 'descripcion_discapacidad', 'enfermedades_cronicas', 'alergias',
+        'sex_alum', 'est_civil_alum',
         'pais_alum', 'est_alum', 'ciu_alum', 'direc_alum', 'lugar_nac_alum', 'nacionalidad_alum', 'etnia',
         'telemov_alum', 'telehabi_alum', 'correo_alum',
-        'contacto_emergencia_nombre', 'contacto_emergencia_telefono', 'contacto_emergencia_parentesco',
         'niv_acad_alum', 'inst_grad_alum', 'ubica_inst_muni_alum', 'ano_grad_alum', 'tipo_colegio',
         'carrera', 'modalidad_ing', 'condicion_resi', 'turno_class',
         'foto_alum', 'canal_inscripcion', 'status_alum', 'observaciones'
@@ -120,8 +118,8 @@ def exportar_a_sql(registros, output_file="vaciado_aspirantes_iuac.sql"):
             # Insert en especialidades
             carrera = reg.get('carrera', 'CTA')
             f.write(f"INSERT INTO academico.estudiante_especialidades (ced_alum, prioridad, especialidad)\n")
-            f.write(f"VALUES ('{reg.get('ced_alum')}', 1, '{carrera}')\n")
-            f.write(f"ON CONFLICT (ced_alum, prioridad) DO UPDATE SET especialidad = EXCLUDED.especialidad;\n\n")
+            f.write(f"VALUES ({reg.get('ced_alum')}, 1, '{carrera}')\n")
+            f.write(f"ON CONFLICT (ced_alum) DO UPDATE SET especialidad = EXCLUDED.especialidad;\n\n")
 
         f.write("COMMIT;\n")
         f.write("-- Fin de vaciado exitoso.\n")
