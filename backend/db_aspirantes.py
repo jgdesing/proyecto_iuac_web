@@ -59,6 +59,67 @@ def check_correo_exists(correo):
     finally:
         release_db(conn, cur)
 
+def obtener_aspirante_por_cedula(cedula):
+    """
+    Recupera los datos completos de un aspirante ya inscrito por su número de cédula
+    para generar y descargar su Planilla Oficial de Preinscripción en PDF.
+    Consulta parametrizada estricta (%s) contra inyección SQL.
+    """
+    conn, cur = get_db_cursor()
+    if not conn:
+        return None, "No hay conexión disponible con el servidor de base de datos."
+    try:
+        ced_int = int(cedula)
+        query = """
+            SELECT
+                ced_alum, tipo_cedula, nom_alum, ape_alum, fec_nac_alum, edad_alum,
+                sex_alum, est_civil_alum, pais_alum, est_alum, ciu_alum, direc_alum,
+                lugar_nac_alum, nacionalidad_alum, foto_alum,
+                telemov_alum, telehabi_alum, correo_alum,
+                niv_acad_alum, inst_grad_alum, ano_grad_alum, tipo_colegio,
+                carrera, created_at
+            FROM academico.estudiantes
+            WHERE ced_alum = %s
+            LIMIT 1;
+        """
+        cur.execute(query, (ced_int,))
+        row = cur.fetchone()
+        if not row:
+            return None, f"No se encontró ningún aspirante inscrito con la cédula {ced_int}."
+
+        columnas = [desc[0] for desc in cur.description]
+        data = dict(zip(columnas, row))
+
+        # Formatear fechas a string ISO/legible
+        if data.get('fec_nac_alum') and hasattr(data['fec_nac_alum'], 'isoformat'):
+            data['fec_nac_alum'] = data['fec_nac_alum'].isoformat()
+        if data.get('created_at') and hasattr(data['created_at'], 'strftime'):
+            data['fecha_registro'] = data['created_at'].strftime('%d/%m/%Y, %I:%M %p')
+            data['created_at'] = data['created_at'].isoformat()
+        else:
+            data['fecha_registro'] = ''
+
+        # Cargar foto en base64 si existe en disco para incrustarla en el PDF
+        foto_base64 = None
+        foto_nombre = data.get('foto_alum')
+        if foto_nombre:
+            upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads', 'fotos'))
+            filepath = os.path.join(upload_dir, os.path.basename(str(foto_nombre)))
+            if os.path.exists(filepath):
+                try:
+                    with open(filepath, 'rb') as f:
+                        encoded = base64.b64encode(f.read()).decode('utf-8')
+                        foto_base64 = f"data:image/jpeg;base64,{encoded}"
+                except Exception:
+                    pass
+        data['foto_base64'] = foto_base64
+        return data, None
+    except Exception as e:
+        logger.error(f"Error consultando aspirante por cédula {cedula}: {e}")
+        return None, "Error al consultar los datos del aspirante en la base de datos."
+    finally:
+        release_db(conn, cur)
+
 def get_active_carreras():
     """Retorna exclusivamente las carreras oficiales activas del IUAC (activo = TRUE)."""
     conn, cur = get_db_cursor()

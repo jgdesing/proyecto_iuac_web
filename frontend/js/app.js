@@ -19,11 +19,14 @@ const MAPA_CARRERAS = {
 
 let capturedPhotoBase64 = null;
 let ultimoRegistroAspirante = {};
+window.MAPA_CARRERAS = MAPA_CARRERAS;
+window.ultimoRegistroAspirante = ultimoRegistroAspirante;
 
 document.addEventListener('DOMContentLoaded', () => {
     checkFileProtocolBanner();
     initInfoPopup();
     initCarrerasModal();
+    initRecuperarPlanillaModal();
     initStepper();
     initPhotoCapture();
     initGeoSelectors();
@@ -209,6 +212,7 @@ function initCarrerasModal() {
 let currentStep = 1;
 const totalSteps = 3;
 let formularioBloqueadoPorEdad = false;
+let formularioBloqueadoPorCedula = false;
 
 function initStepper() {
     const btnNext = document.getElementById('btn-step-next');
@@ -216,6 +220,10 @@ function initStepper() {
 
     if (btnNext) {
         btnNext.addEventListener('click', () => {
+            if (formularioBloqueadoPorCedula) {
+                mostrarAvisoScroll('cedula-lock-banner');
+                return;
+            }
             if (formularioBloqueadoPorEdad) {
                 mostrarAvisoScroll('age-lock-banner');
                 return;
@@ -397,6 +405,8 @@ function desbloquearFormularioPorEdad() {
     if (banner) banner.classList.remove('visible');
     if (formCard) formCard.classList.remove('locked-by-age');
 
+    if (formularioBloqueadoPorCedula) return;
+
     // Habilitar campos interactivos
     document.querySelectorAll('.lockable-field input, .lockable-field select, .lockable-field textarea, .btn-nav').forEach(el => {
         el.disabled = false;
@@ -406,6 +416,179 @@ function desbloquearFormularioPorEdad() {
     const estadoSelect = document.getElementById('asp-est_alum');
     if (ciudadSelect && (!estadoSelect || !estadoSelect.value)) {
         ciudadSelect.disabled = true;
+    }
+}
+
+// ── 5.1 BLOQUEO AUTOMÁTICO CUANDO LA CÉDULA YA ESTÁ REGISTRADA (PUNTO 5) ─────
+function bloquearFormularioPorCedulaRegistrada(cedula) {
+    formularioBloqueadoPorCedula = true;
+    const banner = document.getElementById('cedula-lock-banner');
+    const formCard = document.getElementById('form-card-container');
+    const fecNac = document.getElementById('asp-fec_nac_alum');
+    const btnFoto = document.getElementById('btn-subir-foto');
+
+    if (banner) {
+        banner.classList.add('visible');
+    }
+    if (formCard) {
+        formCard.classList.add('locked-by-cedula');
+    }
+
+    // Deshabilitar todos los demás campos y botones de navegación excepto el campo Cédula y el botón de búsqueda
+    document.querySelectorAll('.lockable-field input, .lockable-field select, .lockable-field textarea, .btn-nav').forEach(el => {
+        el.disabled = true;
+    });
+    if (fecNac) fecNac.disabled = true;
+    if (btnFoto) btnFoto.disabled = true;
+}
+
+function desbloquearFormularioPorCedulaRegistrada() {
+    if (!formularioBloqueadoPorCedula) return;
+    formularioBloqueadoPorCedula = false;
+
+    const banner = document.getElementById('cedula-lock-banner');
+    const formCard = document.getElementById('form-card-container');
+    const fecNac = document.getElementById('asp-fec_nac_alum');
+    const btnFoto = document.getElementById('btn-subir-foto');
+
+    if (banner) banner.classList.remove('visible');
+    if (formCard) formCard.classList.remove('locked-by-cedula');
+    if (fecNac) fecNac.disabled = false;
+    if (btnFoto) btnFoto.disabled = false;
+
+    if (formularioBloqueadoPorEdad) return;
+
+    document.querySelectorAll('.lockable-field input, .lockable-field select, .lockable-field textarea, .btn-nav').forEach(el => {
+        el.disabled = false;
+    });
+
+    const ciudadSelect = document.getElementById('asp-ciu_alum');
+    const estadoSelect = document.getElementById('asp-est_alum');
+    if (ciudadSelect && (!estadoSelect || !estadoSelect.value)) {
+        ciudadSelect.disabled = true;
+    }
+}
+
+// ── 5.2 MODAL Y BÚSQUEDA DIRECTA PARA DESCARGAR PLANILLA PDF (PUNTOS 2 Y 3) ──
+function abrirModalRecuperarPlanilla(cedulaPrefill = '') {
+    const modal = document.getElementById('modal-recuperar-planilla');
+    const inputCed = document.getElementById('input-buscar-cedula');
+    const errBox = document.getElementById('err-buscar-cedula');
+    if (!modal) return;
+
+    const cedActual = cedulaPrefill || document.getElementById('asp-ced_alum')?.value?.trim() || '';
+    if (inputCed) {
+        inputCed.value = cedActual.replace(/\D/g, '').slice(0, 8);
+    }
+    if (errBox) {
+        errBox.textContent = '';
+        errBox.classList.remove('visible');
+    }
+    modal.classList.add('active');
+    setTimeout(() => {
+        if (inputCed) inputCed.focus();
+    }, 150);
+}
+window.abrirModalRecuperarPlanilla = abrirModalRecuperarPlanilla;
+
+function initRecuperarPlanillaModal() {
+    const modal = document.getElementById('modal-recuperar-planilla');
+    const btnHero = document.getElementById('btn-abrir-busqueda-hero');
+    const btnBanner = document.getElementById('btn-recuperar-desde-banner');
+    const btnCerrar = document.getElementById('btn-cerrar-recuperar');
+    const btnEjecutar = document.getElementById('btn-ejecutar-busqueda-planilla');
+    const inputCed = document.getElementById('input-buscar-cedula');
+    const errBox = document.getElementById('err-buscar-cedula');
+
+    if (btnHero) {
+        btnHero.addEventListener('click', () => abrirModalRecuperarPlanilla());
+    }
+    if (btnBanner) {
+        btnBanner.addEventListener('click', () => {
+            const ced = document.getElementById('asp-ced_alum')?.value?.trim() || '';
+            abrirModalRecuperarPlanilla(ced);
+        });
+    }
+    if (!modal) return;
+
+    const cerrar = () => modal.classList.remove('active');
+    if (btnCerrar) btnCerrar.addEventListener('click', cerrar);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) cerrar();
+    });
+
+    if (inputCed) {
+        inputCed.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
+            if (errBox) {
+                errBox.textContent = '';
+                errBox.classList.remove('visible');
+            }
+        });
+    }
+
+    if (btnEjecutar) {
+        btnEjecutar.addEventListener('click', async () => {
+            const ced = (inputCed?.value || '').replace(/\D/g, '').trim();
+            if (!ced || ced.length < 6 || ced.length > 8) {
+                if (errBox) {
+                    errBox.textContent = 'Por favor ingrese un número de cédula válido (entre 6 y 8 dígitos).';
+                    errBox.classList.add('visible');
+                }
+                return;
+            }
+
+            btnEjecutar.disabled = true;
+            const textoOriginal = btnEjecutar.innerHTML;
+            btnEjecutar.innerHTML = '⏳ Verificando titular y consultando...';
+
+            try {
+                // 1. Si se usa desde el móvil y tiene huella activa, solicitar verificación biométrica del titular
+                if (typeof window.verificarHuellaTitularMovil === 'function') {
+                    const bioRes = await window.verificarHuellaTitularMovil(ced);
+                    if (!bioRes.ok) {
+                        if (errBox) {
+                            errBox.textContent = bioRes.error;
+                            errBox.classList.add('visible');
+                        }
+                        return;
+                    }
+                }
+
+                // 2. Consultar datos del aspirante en el servidor
+                const res = await fetch(`${API_BASE}/api/aspirantes/planilla/${ced}`);
+                const data = await res.json();
+
+                if (!res.ok || !data.ok || !data.aspirante) {
+                    if (errBox) {
+                        errBox.textContent = data.error || 'No se encontró ningún aspirante registrado con esta cédula.';
+                        errBox.classList.add('visible');
+                    }
+                    return;
+                }
+
+                // 3. Cargar datos recuperados y disparar descarga directa del PDF de 1 página con QR
+                ultimoRegistroAspirante = { ...data.aspirante, folio: data.folio };
+                window.ultimoRegistroAspirante = ultimoRegistroAspirante;
+                capturedPhotoBase64 = data.aspirante.foto_base64 || null;
+                window.capturedPhotoBase64 = capturedPhotoBase64;
+
+                cerrar();
+                mostrarModalExito(data);
+
+                if (typeof window.descargarPlanillaPDFOficial === 'function') {
+                    await window.descargarPlanillaPDFOficial(ultimoRegistroAspirante);
+                }
+            } catch (err) {
+                if (errBox) {
+                    errBox.textContent = 'No se pudo conectar con el servidor en este momento. Intente nuevamente.';
+                    errBox.classList.add('visible');
+                }
+            } finally {
+                btnEjecutar.disabled = false;
+                btnEjecutar.innerHTML = textoOriginal;
+            }
+        });
     }
 }
 
@@ -474,10 +657,12 @@ function initRealtimeValidations() {
                 setFieldInvalid(cedulaInput, 'err-cedula', 'El número de cédula es obligatorio.');
                 statusLabel.innerHTML = '';
                 cedulaDisponible = false;
+                desbloquearFormularioPorCedulaRegistrada();
             } else if (val.length < 6) {
                 setFieldInvalid(cedulaInput, 'err-cedula', 'La cédula debe tener entre 6 y 8 dígitos.');
                 statusLabel.innerHTML = '';
                 cedulaDisponible = false;
+                desbloquearFormularioPorCedulaRegistrada();
             } else {
                 setFieldValid(cedulaInput, 'err-cedula');
                 statusLabel.innerHTML = '<span style="color:#0284c7; font-size:0.75rem;">⏳ Comprobando disponibilidad...</span>';
@@ -737,16 +922,25 @@ async function verificarCedulaRemota(cedula) {
         if (res.ok && data.ok) {
             if (data.exists) {
                 cedulaDisponible = false;
-                setFieldInvalid(input, 'err-cedula', 'Esta cédula ya se encuentra registrada en el sistema.');
-                statusLabel.innerHTML = '<span style="color:#ef4444; font-size:0.75rem; font-weight:700;">❌ Cédula ya registrada</span>';
+                setFieldInvalid(input, 'err-cedula', '⚠️ Usted ya se encuentra inscrito en el sistema. Los demás campos han sido desactivados.');
+                bloquearFormularioPorCedulaRegistrada(cedula);
+                statusLabel.innerHTML = `
+                    <div style="margin-top:8px;">
+                        <button type="button" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.84rem; width:100%;" onclick="abrirModalRecuperarPlanilla('${cedula}')">
+                            🔍 Buscar y Descargar mi Planilla (PDF)
+                        </button>
+                    </div>
+                `;
             } else {
                 cedulaDisponible = true;
+                desbloquearFormularioPorCedulaRegistrada();
                 setFieldValid(input, 'err-cedula');
-                statusLabel.innerHTML = '<span style="color:#10b981; font-size:0.75rem; font-weight:700;">✓ Cédula disponible</span>';
+                statusLabel.innerHTML = '<span style="color:#10b981; font-size:0.75rem; font-weight:700;">✓ Cédula disponible para inscripción</span>';
             }
         }
     } catch (e) {
         cedulaDisponible = true;
+        desbloquearFormularioPorCedulaRegistrada();
         statusLabel.innerHTML = '';
     }
 }
@@ -925,6 +1119,8 @@ function initFormSubmit() {
         };
 
         ultimoRegistroAspirante = { ...payload };
+        window.ultimoRegistroAspirante = ultimoRegistroAspirante;
+        window.capturedPhotoBase64 = capturedPhotoBase64;
 
         btnSubmit.disabled = true;
         if (spinner) spinner.style.display = 'inline-block';
@@ -1029,6 +1225,16 @@ function llenarPlanillaImpresion(data, info) {
     setTxt('p-tipo-inst', ultimoRegistroAspirante.tipo_colegio);
     setTxt('p-plantel', ultimoRegistroAspirante.inst_grad_alum);
     setTxt('p-firma-ci', `${info.tipoCed} - ${info.numCed}`);
+    setTxt('p-qr-ci', `${info.tipoCed} - ${info.numCed}`);
+    setTxt('p-qr-folio', data.folio || ultimoRegistroAspirante.folio || 'IUAC-2026-REG');
+
+    // Generar el código QR de la cédula en la parte inferior de la planilla
+    const qrCanvas = document.getElementById('planilla-qr-canvas');
+    if (qrCanvas && typeof window.dibujarQREnCanvas === 'function') {
+        const cedRaw = String(data.cedula || ultimoRegistroAspirante.ced_alum || '').replace(/\D/g, '');
+        const qrTexto = `IUAC-2026|CI:${info.tipoCed}-${cedRaw}|FOLIO:${data.folio || 'IUAC-2026'}|CARRERA:${ultimoRegistroAspirante.carrera || ''}|ASPIRANTE:${info.nomCompleto}`;
+        window.dibujarQREnCanvas(qrCanvas, qrTexto, 140);
+    }
 
     // Fotografía en la planilla oficial impresa
     const imgPlanilla = document.getElementById('planilla-foto-img');
@@ -1043,7 +1249,22 @@ function llenarPlanillaImpresion(data, info) {
     }
 }
 
-// ── IMPRIMIR PLANILLA OFICIAL PARA EL DEPARTAMENTO DE CAPTACIÓN (PUNTO 4.5) ──
-function imprimirPlanillaOficial() {
-    window.print();
+// ── DESCARGAR PLANILLA OFICIAL EN PDF DIRECTO AL DISPOSITIVO (CON QR) ────────
+async function imprimirPlanillaOficial() {
+    const btn = document.getElementById('btn-imprimir-planilla');
+    const txtOriginal = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Generando archivo PDF...';
+    }
+    try {
+        if (typeof window.descargarPlanillaPDFOficial === 'function') {
+            await window.descargarPlanillaPDFOficial(ultimoRegistroAspirante);
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = txtOriginal || '📥 Descargar Planilla de Pre-Inscripción (PDF)';
+        }
+    }
 }

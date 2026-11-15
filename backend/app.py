@@ -7,7 +7,13 @@ from config import Config
 from database import init_db_pool, check_db_health
 from security import create_limiter, apply_security_headers, check_honeypot, contains_malicious_payload
 from validations import validate_aspirante_payload, validar_cedula_venezolana
-from db_aspirantes import check_cedula_exists, check_correo_exists, get_active_carreras, insert_aspirante_web
+from db_aspirantes import (
+    check_cedula_exists,
+    check_correo_exists,
+    get_active_carreras,
+    insert_aspirante_web,
+    obtener_aspirante_por_cedula
+)
 from export_aspirantes import obtener_aspirantes_web, exportar_a_sql, exportar_a_csv, marcar_como_procesados
 
 # Directorios de frontend y uploads
@@ -91,6 +97,32 @@ def api_validar_cedula(cedula):
         })
     except Exception as e:
         return jsonify({"ok": False, "error": "No se pudo verificar la cédula en este momento."}), 500
+
+# ── 4.1 RECUPERACIÓN / CONSULTA DE PLANILLA DE ASPIRANTE INSCRITO ────────────
+@app.route('/api/aspirantes/planilla/<cedula>', methods=['GET'])
+@limiter.limit("30 per minute")
+def api_obtener_planilla_aspirante(cedula):
+    ok_ced, ced_clean, err_ced = validar_cedula_venezolana(cedula)
+    if not ok_ced:
+        return jsonify({"ok": False, "error": err_ced}), 400
+
+    datos, err_db = obtener_aspirante_por_cedula(ced_clean)
+    if not datos:
+        return jsonify({"ok": False, "error": err_db or "No se encontró registro para la cédula indicada."}), 404
+
+    folio = f"IUAC-{Config.ANIO_PROCESO}-{datos['ced_alum']}"
+    datos['folio'] = folio
+    datos['nombres'] = f"{datos.get('nom_alum', '')} {datos.get('ape_alum', '')}".strip()
+
+    return jsonify({
+        "ok": True,
+        "folio": folio,
+        "cedula": datos['ced_alum'],
+        "nombres": datos['nombres'],
+        "carrera": datos.get('carrera', ''),
+        "fecha_registro": datos.get('fecha_registro', ''),
+        "aspirante": datos
+    }), 200
 
 # ── 5. REGISTRO PRINCIPAL DEL ASPIRANTE ───────────────────────────────────────
 @app.route('/api/aspirantes/registrar', methods=['POST'])
