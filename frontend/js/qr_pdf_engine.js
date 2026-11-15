@@ -325,9 +325,11 @@ function crearBlobPDFDesdeJPEGDataURL(jpegDataUrl, imgWidthPx, imgHeightPx) {
 // ══════════════════════════════════════════════════════════════════════════════
 function cargarImagenPromesa(src) {
     return new Promise((resolve) => {
-        if (!src) return resolve(null);
+        if (!src || typeof src !== 'string') return resolve(null);
         const img = new Image();
-        img.crossOrigin = 'anonymous';
+        if (!src.startsWith('data:')) {
+            img.crossOrigin = 'anonymous';
+        }
         img.onload = () => resolve(img);
         img.onerror = () => resolve(null);
         img.src = src;
@@ -372,10 +374,15 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     const contentW = W - M * 2;
     let y = 46;
 
-    // Cargar logo IUAC y foto del aspirante
+    // Cargar logo IUAC y foto del aspirante (desde foto_base64, foto_alum en BD o captura en memoria)
+    const srcFoto = reg.foto_base64 ||
+                    (typeof reg.foto_alum === 'string' && reg.foto_alum.startsWith('data:image/') ? reg.foto_alum : null) ||
+                    window.capturedPhotoBase64 ||
+                    null;
+
     const [logoImg, fotoImg] = await Promise.all([
         cargarImagenPromesa('img/logo_iuac.png'),
-        cargarImagenPromesa(reg.foto_base64 || window.capturedPhotoBase64 || null)
+        cargarImagenPromesa(srcFoto)
     ]);
 
     // 1. ENCABEZADO INSTITUCIONAL

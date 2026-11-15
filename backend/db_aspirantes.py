@@ -8,31 +8,40 @@ logger = logging.getLogger("IUAC_DB_OPS")
 
 def guardar_foto_aspirante(foto_base64, cedula_str, upload_dir):
     """
-    Decodifica una imagen en base64 y la guarda en disco de forma segura.
-    Retorna el nombre del archivo guardado o None.
+    Valida una imagen en base64, guarda una copia en disco y retorna la cadena
+    data:image/jpeg;base64,... para almacenarla directamente en el campo foto_alum
+    de la tabla academico.estudiantes en PostgreSQL (persistencia total en la nube y en vaciado SQL).
     """
     if not foto_base64 or not isinstance(foto_base64, str):
         return None
     try:
         if ',' in foto_base64:
-            _, encoded = foto_base64.split(',', 1)
+            header, encoded = foto_base64.split(',', 1)
         else:
+            header = 'data:image/jpeg;base64'
             encoded = foto_base64
 
+        encoded = encoded.strip()
         img_bytes = base64.b64decode(encoded)
-        if len(img_bytes) > 6 * 1024 * 1024:  # Máx 6MB
+        if len(img_bytes) > 6 * 1024 * 1024:  # Máx 6MB ya comprimida
             logger.warning(f"Foto excede tamaño permitido: {len(img_bytes)} bytes")
             return None
 
-        os.makedirs(upload_dir, exist_ok=True)
-        filename = f"foto_{cedula_str}.jpg"
-        filepath = os.path.join(upload_dir, filename)
-        with open(filepath, 'wb') as f:
-            f.write(img_bytes)
-        logger.info(f"Foto de aspirante guardada: {filename}")
-        return filename
+        # Guardar copia física si el directorio es escribible
+        try:
+            os.makedirs(upload_dir, exist_ok=True)
+            filename = f"foto_{cedula_str}.jpg"
+            filepath = os.path.join(upload_dir, filename)
+            with open(filepath, 'wb') as f:
+                f.write(img_bytes)
+        except Exception:
+            pass
+
+        data_uri = f"data:image/jpeg;base64,{encoded}"
+        logger.info(f"Foto de aspirante procesada para BD ({len(img_bytes)} bytes): {cedula_str}")
+        return data_uri
     except Exception as e:
-        logger.warning(f"No se pudo guardar foto del aspirante {cedula_str}: {e}")
+        logger.warning(f"No se pudo procesar foto del aspirante {cedula_str}: {e}")
         return None
 
 def check_cedula_exists(cedula):
@@ -99,19 +108,25 @@ def obtener_aspirante_por_cedula(cedula):
         else:
             data['fecha_registro'] = ''
 
-        # Cargar foto en base64 si existe en disco para incrustarla en el PDF
+        # Cargar foto en base64 desde la columna foto_alum de la BD (o desde disco si es nombre de archivo antiguo)
         foto_base64 = None
-        foto_nombre = data.get('foto_alum')
-        if foto_nombre:
-            upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads', 'fotos'))
-            filepath = os.path.join(upload_dir, os.path.basename(str(foto_nombre)))
-            if os.path.exists(filepath):
-                try:
-                    with open(filepath, 'rb') as f:
-                        encoded = base64.b64encode(f.read()).decode('utf-8')
-                        foto_base64 = f"data:image/jpeg;base64,{encoded}"
-                except Exception:
-                    pass
+        foto_val = data.get('foto_alum')
+        if foto_val and isinstance(foto_val, str):
+            foto_str = foto_val.strip()
+            if foto_str.startswith('data:image/'):
+                foto_base64 = foto_str
+            elif len(foto_str) > 300 and not foto_str.endswith('.jpg') and not foto_str.endswith('.png'):
+                foto_base64 = f"data:image/jpeg;base64,{foto_str}"
+            else:
+                upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads', 'fotos'))
+                filepath = os.path.join(upload_dir, os.path.basename(foto_str))
+                if os.path.exists(filepath):
+                    try:
+                        with open(filepath, 'rb') as f:
+                            encoded = base64.b64encode(f.read()).decode('utf-8')
+                            foto_base64 = f"data:image/jpeg;base64,{encoded}"
+                    except Exception:
+                        pass
         data['foto_base64'] = foto_base64
         return data, None
     except Exception as e:
@@ -119,6 +134,41 @@ def obtener_aspirante_por_cedula(cedula):
         return None, "Error al consultar los datos del aspirante en la base de datos."
     finally:
         release_db(conn, cur)
+
+def actualizar_foto_aspirante(cedula, foto_base64):
+    """
+    Actualiza y guarda la fotografía directamente en el campo foto_alum de academico.estudiantes
+    para un aspirante ya registrado.
+    """
+    if not foto_base64:
+        return False, "No se recibió ninguna fotografía."
+    conn, cur = get_db_cursor()
+    if not conn:
+        return False, "No hay conexión disponible con la base de datos."
+    try:
+        ced_int = int(cedula)
+        upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads', 'fotos'))
+        foto_data_uri = guardar_foto_aspirante(foto_base64, f"V{ced_int}", upload_dir)
+        if not foto_data_uri:
+            return False, "El formato de la fotografía no es válido."
+
+        try:
+            cur.execute("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;")
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
+        cur.execute(
+            "UPDATE academico.estudiantes SET foto_alum = %s, updated_at = CURRENT_TIMESTAMP WHERE ced_alum = %s;",
+            (foto_data_uri, ced_int)
+        )
+        conn.commit()
+        release_db(conn, cur, commit=True)
+        return True, None
+    except Exception as e:
+        logger.error(f"Error actualizando foto de {cedula}: {e}")
+        release_db(conn, cur, commit=False)
+        return False, str(e)
 
 def get_active_carreras():
     """Retorna exclusivamente las carreras oficiales activas del IUAC (activo = TRUE)."""
@@ -166,9 +216,14 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
         if cur.fetchone():
             return False, f"El correo electrónico '{data['correo_alum']}' ya está asociado a otro aspirante."
 
-        # Procesar fotografía si fue capturada o subida
+        # Procesar fotografía si fue capturada o subida y asegurar que la columna foto_alum sea TEXT
         foto_nombre = None
         if data.get('foto_base64'):
+            try:
+                cur.execute("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;")
+                conn.commit()
+            except Exception:
+                conn.rollback()
             upload_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads', 'fotos'))
             foto_nombre = guardar_foto_aspirante(data.get('foto_base64'), f"{data.get('tipo_cedula', 'V')}{ced_int}", upload_dir)
 

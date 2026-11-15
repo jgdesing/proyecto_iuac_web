@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS academico.estudiantes (
     pais_alum VARCHAR(100) DEFAULT 'Venezuela',
     est_alum VARCHAR(100),
     ciu_alum VARCHAR(100),
-    foto_alum VARCHAR(255),
+    foto_alum TEXT,
     edad_alum INTEGER,
     correo_alum VARCHAR(150) UNIQUE,
     lugar_nac_alum VARCHAR(150),

@@ -499,6 +499,10 @@ function initRecuperarPlanillaModal() {
     const btnEjecutar = document.getElementById('btn-ejecutar-busqueda-planilla');
     const inputCed = document.getElementById('input-buscar-cedula');
     const errBox = document.getElementById('err-buscar-cedula');
+    const inputFotoRec = document.getElementById('input-recuperar-foto');
+    const btnSubirFotoRec = document.getElementById('btn-recuperar-subir-foto');
+    const statusFotoRec = document.getElementById('status-recuperar-foto');
+    let fotoRecuperacionBase64 = null;
 
     if (btnHero) {
         btnHero.addEventListener('click', () => abrirModalRecuperarPlanilla());
@@ -510,6 +514,37 @@ function initRecuperarPlanillaModal() {
         });
     }
     if (!modal) return;
+
+    if (btnSubirFotoRec && inputFotoRec) {
+        btnSubirFotoRec.addEventListener('click', () => inputFotoRec.click());
+        inputFotoRec.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            btnSubirFotoRec.textContent = '⏳ Optimizando foto...';
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const ratio = Math.min(600 / w, 750 / h, 1);
+                    w = Math.round(w * ratio);
+                    h = Math.round(h * ratio);
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    fotoRecuperacionBase64 = canvas.toDataURL('image/jpeg', 0.82);
+                    btnSubirFotoRec.textContent = '🔄 Cambiar Foto Seleccionada';
+                    if (statusFotoRec) {
+                        statusFotoRec.textContent = '✓ Fotografía lista para guardar en su registro y planilla PDF.';
+                        statusFotoRec.style.display = 'block';
+                    }
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     const cerrar = () => modal.classList.remove('active');
     if (btnCerrar) btnCerrar.addEventListener('click', cerrar);
@@ -555,6 +590,15 @@ function initRecuperarPlanillaModal() {
                     }
                 }
 
+                // 1.1 Si el aspirante adjuntó una fotografía para actualizar su registro en la BD, guardarla primero
+                if (fotoRecuperacionBase64) {
+                    await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ced_alum: ced, foto_base64: fotoRecuperacionBase64 })
+                    });
+                }
+
                 // 2. Consultar datos del aspirante en el servidor
                 const res = await fetch(`${API_BASE}/api/aspirantes/planilla/${ced}`);
                 const data = await res.json();
@@ -567,10 +611,11 @@ function initRecuperarPlanillaModal() {
                     return;
                 }
 
-                // 3. Cargar datos recuperados y disparar descarga directa del PDF de 1 página con QR
-                ultimoRegistroAspirante = { ...data.aspirante, folio: data.folio };
+                // 3. Cargar datos recuperados y disparar descarga directa del PDF de 1 página con QR y Foto
+                const fotoFinal = fotoRecuperacionBase64 || data.aspirante.foto_base64 || null;
+                ultimoRegistroAspirante = { ...data.aspirante, folio: data.folio, foto_base64: fotoFinal };
                 window.ultimoRegistroAspirante = ultimoRegistroAspirante;
-                capturedPhotoBase64 = data.aspirante.foto_base64 || null;
+                capturedPhotoBase64 = fotoFinal;
                 window.capturedPhotoBase64 = capturedPhotoBase64;
 
                 cerrar();

@@ -155,22 +155,25 @@
                     <div class="stat-label">Aspirantes Registrados</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-number" style="color:#16a34a;" id="carreras-activas">7</div>
+                    <div class="stat-number" style="color:#16a34a;" id="carreras-activas">5</div>
                     <div class="stat-label">Especialidades Activas</div>
                 </div>
             </div>
 
-            <h3 style="font-size:1.05rem; color:#0f172a; margin-bottom:0.5rem;">📥 Descargar Base de Datos Registrada:</h3>
+            <h3 style="font-size:1.05rem; color:#0f172a; margin-bottom:0.5rem;">📥 Descargar y Vaciar Información Capturada (Excel, CSV, SQL):</h3>
             <p style="font-size:0.86rem; color:#64748b;">
-                Descargue la información de todos los aspirantes capturados en el hosting para vaciarla a su sistema principal o abrirla en Excel:
+                Descargue la información de todos los aspirantes capturados en el hosting para abrirla en Excel, CSV o vaciarla directamente hacia su base de datos real <strong>bd_aspirantes (academico.estudiantes)</strong>:
             </p>
 
             <div class="export-actions">
+                <a href="#" id="btn-export-excel" class="btn-export btn-csv" style="background:#15803d;">
+                    📗 Descargar Excel (.XLS)
+                </a>
                 <a href="#" id="btn-export-csv" class="btn-export btn-csv">
-                    📊 Descargar para Excel (CSV)
+                    📊 Descargar CSV (Excel)
                 </a>
                 <a href="#" id="btn-export-sql" class="btn-export btn-sql">
-                    💾 Descargar Vaciado SQL (SisCE IUAC)
+                    💾 Descargar SQL Vaciado (bd_aspirantes)
                 </a>
                 <a href="#" id="btn-export-json" target="_blank" class="btn-export btn-json">
                     📋 Ver JSON Completo
@@ -186,11 +189,12 @@
                                 <th>Cédula</th>
                                 <th>Aspirante</th>
                                 <th>Carrera</th>
+                                <th>Foto en BD</th>
                                 <th>Fecha / Hora</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-recientes">
-                            <tr><td colspan="4" style="text-align:center;">Cargando...</td></tr>
+                            <tr><td colspan="5" style="text-align:center;">Cargando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -231,6 +235,7 @@
                     document.getElementById('total-aspirantes').textContent = data.total;
 
                     // Enlaces de descarga directa
+                    document.getElementById('btn-export-excel').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=excel`;
                     document.getElementById('btn-export-csv').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=csv`;
                     document.getElementById('btn-export-sql').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=sql`;
                     document.getElementById('btn-export-json').href = `/api/admin/exportar?key=${encodeURIComponent(currentAdminKey)}&format=json`;
@@ -243,11 +248,12 @@
                                 <td><strong>V-${u.cedula}</strong></td>
                                 <td>${u.nombre}</td>
                                 <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">${u.carrera}</span></td>
+                                <td>${u.posee_foto === 'SI' ? '<span style="color:#16a34a; font-weight:700;">✓ Guardada</span>' : '<span style="color:#94a3b8;">Sin foto</span>'}</td>
                                 <td>${u.fecha}</td>
                             </tr>
                         `).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">No hay registros aún.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No hay registros aún.</td></tr>';
                     }
                 } else {
                     errDiv.textContent = data.error || 'Clave incorrecta.';

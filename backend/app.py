@@ -12,9 +12,16 @@ from db_aspirantes import (
     check_correo_exists,
     get_active_carreras,
     insert_aspirante_web,
-    obtener_aspirante_por_cedula
+    obtener_aspirante_por_cedula,
+    actualizar_foto_aspirante
 )
-from export_aspirantes import obtener_aspirantes_web, exportar_a_sql, exportar_a_csv, marcar_como_procesados
+from export_aspirantes import (
+    obtener_aspirantes_web,
+    generar_contenido_sql,
+    generar_contenido_csv,
+    generar_contenido_excel,
+    marcar_como_procesados
+)
 
 # Directorios de frontend y uploads
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
@@ -124,6 +131,26 @@ def api_obtener_planilla_aspirante(cedula):
         "aspirante": datos
     }), 200
 
+# ── 4.2 ACTUALIZAR / GUARDAR FOTOGRAFÍA EN BD PARA ASPIRANTE YA INSCRITO ─────
+@app.route('/api/aspirantes/actualizar-foto', methods=['POST'])
+@limiter.limit("20 per minute")
+def api_actualizar_foto_aspirante():
+    payload = request.get_json(silent=True) or {}
+    cedula_raw = payload.get('ced_alum')
+    foto_base64 = payload.get('foto_base64')
+
+    ok_ced, ced_clean, err_ced = validar_cedula_venezolana(cedula_raw)
+    if not ok_ced:
+        return jsonify({"ok": False, "error": err_ced}), 400
+    if not foto_base64:
+        return jsonify({"ok": False, "error": "Debe adjuntar una fotografía válida."}), 400
+
+    exito, err_msg = actualizar_foto_aspirante(ced_clean, foto_base64)
+    if not exito:
+        return jsonify({"ok": False, "error": err_msg}), 400
+
+    return jsonify({"ok": True, "mensaje": "Fotografía guardada exitosamente en la base de datos."}), 200
+
 # ── 5. REGISTRO PRINCIPAL DEL ASPIRANTE ───────────────────────────────────────
 @app.route('/api/aspirantes/registrar', methods=['POST'])
 @limiter.limit(Config.RATELIMIT_SUBMIT)
@@ -192,16 +219,18 @@ def api_admin_resumen():
                 "cedula": r.get('ced_alum'),
                 "nombre": f"{r.get('nom_alum','')} {r.get('ape_alum','')}".strip(),
                 "carrera": r.get('carrera'),
+                "posee_foto": r.get('posee_foto', 'NO'),
                 "fecha": str(r.get('created_at', ''))[:16]
-            } for r in registros[-10:]
+            } for r in registros[-15:]
         ]
     })
 
-# ── 7. VACIADO / EXPORTACIÓN PARA EL SISTEMA CENTRAL ─────────────────────────
+# ── 7. VACIADO / EXPORTACIÓN PARA EL SISTEMA CENTRAL (EXCEL, CSV, SQL, JSON) ─
 @app.route('/api/admin/exportar', methods=['GET'])
 def api_admin_exportar():
     """
-    Endpoint administrativo para vaciar o descargar los aspirantes web.
+    Endpoint administrativo para vaciar o descargar los aspirantes web hacia
+    Excel (.xls), CSV (.csv), SQL para bd_aspirantes (.sql) o JSON.
     Protegido por clave secreta en cabecera 'X-Admin-Key' o query param '?key='.
     """
     auth_key = request.headers.get('X-Admin-Key') or request.args.get('key')
@@ -213,36 +242,31 @@ def api_admin_exportar():
 
     registros = obtener_aspirantes_web(solo_pendientes=solo_pend)
 
-    if formato == 'csv':
-        output_csv = io.StringIO()
-        if registros:
-            cols = [k for k in registros[0].keys() if k != 'foto_alum']
-            writer = csv.DictWriter(output_csv, fieldnames=cols, delimiter=';')
-            writer.writeheader()
-            for r in registros:
-                writer.writerow({k: r.get(k, '') for k in cols})
+    if formato == 'excel' or formato == 'xls':
+        excel_content = generar_contenido_excel(registros)
         return Response(
-            output_csv.getvalue(),
-            mimetype="text/csv",
-            headers={"Content-Disposition": f"attachment;filename=aspirantes_web_iuac.csv"}
+            excel_content.encode('utf-8'),
+            mimetype="application/vnd.ms-excel; charset=utf-8",
+            headers={"Content-Disposition": f"attachment;filename=aspirantes_iuac_{Config.ANIO_PROCESO}.xls"}
+        )
+
+    elif formato == 'csv':
+        csv_content = generar_contenido_csv(registros)
+        return Response(
+            csv_content.encode('utf-8'),
+            mimetype="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f"attachment;filename=aspirantes_iuac_{Config.ANIO_PROCESO}.csv"}
         )
 
     elif formato == 'json':
         return jsonify({"ok": True, "total": len(registros), "data": registros})
 
-    else: # Formato SQL por defecto
-        temp_sql = os.path.join(os.path.dirname(__file__), 'temp_export.sql')
-        exportar_a_sql(registros, temp_sql)
-        with open(temp_sql, 'r', encoding='utf-8') as f:
-            sql_content = f.read()
-        try:
-            os.remove(temp_sql)
-        except Exception:
-            pass
+    else:  # Formato SQL por defecto (para correr en bd_aspirantes -> academico.estudiantes)
+        sql_content = generar_contenido_sql(registros)
         return Response(
-            sql_content,
-            mimetype="application/sql",
-            headers={"Content-Disposition": f"attachment;filename=vaciado_iuac_{Config.ANIO_PROCESO}.sql"}
+            sql_content.encode('utf-8'),
+            mimetype="application/sql; charset=utf-8",
+            headers={"Content-Disposition": f"attachment;filename=vaciado_bd_aspirantes_iuac_{Config.ANIO_PROCESO}.sql"}
         )
 
 if __name__ == '__main__':
