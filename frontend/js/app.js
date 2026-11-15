@@ -77,10 +77,11 @@ function initPhotoCapture() {
             return;
         }
 
-        // Validar peso (máximo 6MB original)
-        if (file.size > 6 * 1024 * 1024) {
+        // Validar peso original del archivo: Permitir hasta 35MB (cámaras de 48MP/108MP de móviles modernos)
+        // ya que el motor Canvas del navegador la comprime automáticamente a ~100 KB para enviarla.
+        if (file.size > 35 * 1024 * 1024) {
             if (errFoto) {
-                errFoto.textContent = 'La imagen seleccionada supera el límite máximo de 6 MB.';
+                errFoto.textContent = 'La imagen seleccionada supera los 35 MB. Por favor seleccione una foto más liviana.';
                 errFoto.classList.add('visible');
             }
             fileInput.value = '';
@@ -88,6 +89,7 @@ function initPhotoCapture() {
         }
 
         if (errFoto) errFoto.classList.remove('visible');
+        btnSubir.textContent = '⏳ Optimizando foto...';
 
         // Redimensionar y optimizar con Canvas para ultra-eficiencia móvil
         const reader = new FileReader();
@@ -112,8 +114,8 @@ function initPhotoCapture() {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Exportar como JPEG optimizado (0.85 calidad)
-                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.85);
+                // Exportar como JPEG optimizado (0.82 calidad = ~80-120 KB)
+                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.82);
 
                 // Mostrar previsualización
                 if (imgPreview) {
@@ -124,7 +126,21 @@ function initPhotoCapture() {
                 if (btnQuitar) btnQuitar.style.display = 'inline-block';
                 btnSubir.textContent = '🔄 Cambiar Foto';
             };
+            img.onerror = () => {
+                if (errFoto) {
+                    errFoto.textContent = 'Error al procesar la imagen seleccionada. Intente con otra.';
+                    errFoto.classList.add('visible');
+                }
+                btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
+            };
             img.src = event.target.result;
+        };
+        reader.onerror = () => {
+            if (errFoto) {
+                errFoto.textContent = 'Error al leer el archivo en el dispositivo.';
+                errFoto.classList.add('visible');
+            }
+            btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
         };
         reader.readAsDataURL(file);
     });
