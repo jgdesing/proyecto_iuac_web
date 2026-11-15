@@ -693,10 +693,10 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.fillText('Escanee este código QR al presentar su planilla en el Departamento de Captación para verificar los datos del titular.', qrTextX, y + 110);
     ctx.fillText('Documento electrónico oficial generado en una (01) sola página por el Portal de Preinscripción del IUAC.', qrTextX, y + 130);
 
-    // Exportar como archivo PDF real de 1 sola página y descargarlo en el dispositivo
+    // Exportar como archivo PDF real de 1 sola página y descargarlo con nombre personalizado por aspirante (ced_alum)
     const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
     const pdfBlob = crearBlobPDFDesdeJPEGDataURL(jpegDataUrl, W, H);
-    const nombreArchivo = `Planilla_Preinscripcion_IUAC_${tipoCed}${cedNumRaw || '2026'}.pdf`;
+    const nombreArchivo = `planilla_pre-inscripcion-${cedNumRaw || 'aspirante'}.pdf`;
 
     const blobUrl = URL.createObjectURL(pdfBlob);
     const link = document.createElement('a');
