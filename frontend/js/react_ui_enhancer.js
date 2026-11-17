@@ -55,30 +55,30 @@
 
             rootEl.innerHTML = `
                 <div style="
-                    background: linear-gradient(90deg, #431407 0%, #7c2d12 50%, #9a3412 100%);
-                    color: #fff7ed;
+                    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
+                    color: #e2e8f0;
                     padding: 0.7rem 1.4rem;
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     flex-wrap: wrap;
                     gap: 0.75rem;
-                    border-bottom: 2px solid #e76d2d;
+                    border-bottom: 2px solid #427ab4;
                     font-size: 0.82rem;
                 ">
                     <div style="display:flex; align-items:center; gap:0.6rem;">
                         <span style="
-                            background: rgba(231, 109, 45, 0.35);
-                            border: 1px solid #fed7aa;
-                            color: #ffedd5;
+                            background: rgba(66, 122, 180, 0.35);
+                            border: 1px solid #a8c5e5;
+                            color: #ffffff;
                             padding: 0.18rem 0.6rem;
                             border-radius: 20px;
                             font-weight: 800;
                             font-size: 0.74rem;
                             letter-spacing: 0.4px;
                         ">⚛ UI REACTIVA</span>
-                        <span style="font-weight:700; color:#ffedd5;">
-                            Avance de Ficha: <strong style="color:#fed7aa;">${porcentaje}%</strong> (${completados}/${total} campos)
+                        <span style="font-weight:700; color:#dbeafe;">
+                            Avance de Ficha: <strong style="color:#ffffff;">${porcentaje}%</strong> (${completados}/${total} campos)
                         </span>
                     </div>
 
@@ -87,7 +87,7 @@
                             <div style="
                                 width: ${porcentaje}%;
                                 height: 100%;
-                                background: linear-gradient(90deg, #f97316 0%, #e76d2d 100%);
+                                background: linear-gradient(90deg, #4f79a5 0%, #427ab4 100%);
                                 border-radius: 10px;
                                 transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
                             "></div>
@@ -98,8 +98,8 @@
                             font-weight: 800;
                             font-size: 0.75rem;
                             background: ${tieneFoto ? 'rgba(16, 185, 129, 0.35)' : 'rgba(255, 255, 255, 0.16)'};
-                            border: 1px solid ${tieneFoto ? '#34d399' : 'rgba(254,215,170,0.45)'};
-                            color: ${tieneFoto ? '#a7f3d0' : '#fed7aa'};
+                            border: 1px solid ${tieneFoto ? '#34d399' : 'rgba(168, 197, 229, 0.45)'};
+                            color: ${tieneFoto ? '#a7f3d0' : '#cbd5e1'};
                             white-space: nowrap;
                         " title="${tieneFoto ? 'Destino: ' + nombreArchivoFoto : 'Suba su fotografía tipo carnet'}">
                             ${tieneFoto ? '📷 Foto Lista' : '📷 Foto Opcional'}

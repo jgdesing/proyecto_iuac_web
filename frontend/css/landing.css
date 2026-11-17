@@ -4,36 +4,35 @@
    ============================================================================== */
 
 :root {
-    --primary: #e76d2d;
-    /* Naranja Cálido / Terracota Vibrante de la Imagen */
-    --primary-light: #f97316;
-    /* Naranja Solar */
-    --accent: #ea580c;
-    /* Naranja Intenso */
-    --accent-hover: #c2410c;
-    --accent-indigo: #9a3412;
-    /* Terracota Oscuro */
-    --gold: #f59e0b;
-    /* Ámbar */
-    --gold-hover: #d97706;
-    --title-highlight: #ffedd5;
-    /* Crema Luminoso para Títulos en Cabeceras */
-    --title-section: #9a3412;
-    /* Terracota para Títulos de Secciones */
+    --primary: #427ab4;
+    /* Azul más oscuro y saturado de la paleta */
+    --primary-light: #4f79a5;
+    /* Azul pizarra medio */
+    --accent: #356292;
+    /* Azul corporativo */
+    --accent-hover: #294c72;
+    --accent-indigo: #1c2b3c;
+    /* Azul noche / contraste profundo para cintillo y footer */
+    --gold: #427ab4;
+    --gold-hover: #356292;
+    --title-highlight: #dbeafe;
+    /* Azul hielo luminoso para títulos */
+    --title-section: #1c2b3c;
+    /* Azul noche para títulos de sección */
     --success: #10b981;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --bg-page: #f1f3f9;
-    /* Fondo exterior de la página (gris suave / hielo de la imagen) */
-    --bg-card: linear-gradient(165deg, #fdf6ee 0%, #faeee3 50%, #f7e2d2 100%);
-    /* Fondo del formulario cálido / melocotón / crema exacto de la imagen */
-    --text-main: #2b2118;
-    --text-muted: #6c5a4d;
-    --border: #c9a990;
-    --border-focus: #c2410c;
-    --shadow-sm: 0 2px 6px rgba(154, 52, 18, 0.06);
-    --shadow-md: 0 8px 24px rgba(154, 52, 18, 0.1);
-    --shadow-lg: 0 18px 46px rgba(154, 52, 18, 0.16);
+    --bg-page: #edf2f7;
+    /* Fondo exterior de la página (gris suave / hielo) */
+    --bg-card: linear-gradient(165deg, #718ea9 0%, #6885a4 50%, #587593 100%);
+    /* Fondo azul pizarra exacto #6885a4 de la paleta */
+    --text-main: #1e293b;
+    --text-muted: #475569;
+    --border: #94a8be;
+    --border-focus: #427ab4;
+    --shadow-sm: 0 2px 6px rgba(28, 43, 60, 0.08);
+    --shadow-md: 0 8px 24px rgba(28, 43, 60, 0.14);
+    --shadow-lg: 0 18px 46px rgba(28, 43, 60, 0.22);
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 22px;
@@ -48,7 +47,7 @@
 }
 
 body {
-    background: #f1f3f9;
+    background: #edf2f7;
     background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.5;
@@ -57,16 +56,16 @@ body {
     flex-direction: column;
 }
 
-/* ── BARRA SUPERIOR INSTITUCIONAL ─────────────────────────────────────────── */
+/* ── BARRA SUPERIOR INSTITUCIONAL (CINTILLO CON CONTRASTE AZUL NOCHE) ────── */
 .navbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: linear-gradient(135deg, #431407 0%, #7c2d12 50%, #9a3412 100%);
+    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
     color: #ffffff;
     padding: 0;
-    box-shadow: 0 4px 20px rgba(67, 20, 7, 0.45);
-    border-bottom: 3px solid #e76d2d;
+    box-shadow: 0 4px 20px rgba(28, 43, 60, 0.5);
+    border-bottom: 3px solid #427ab4;
 }
 
 /* Sin imagen de fondo en navbar */
@@ -179,8 +178,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(231, 109, 45, 0.35);
-    border: 1.5px solid #fed7aa;
+    background: rgba(66, 122, 180, 0.35);
+    border: 1.5px solid #a8c5e5;
     color: #ffffff;
     font-size: 0.82rem;
     font-weight: 800;
@@ -190,7 +189,7 @@ body {
     margin-bottom: 1rem;
     letter-spacing: 0.6px;
     backdrop-filter: blur(6px);
-    box-shadow: 0 0 20px rgba(231, 109, 45, 0.45);
+    box-shadow: 0 0 20px rgba(66, 122, 180, 0.45);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
@@ -221,15 +220,15 @@ body {
     margin-top: 1.5rem;
 }
 
-/* ── BOTÓN INTERACTIVO "5 CARRERAS OFICIALES" CON FULL EFECTO Y ANIMACIÓN ── */
+/* ── BOTÓN INTERACTIVO "5 CARRERAS OFICIALES" CON EL AZUL MÁS OSCURO DE LA PALETA ── */
 .btn-carreras-hero {
     position: relative;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%);
-    border: 2px solid #fed7aa;
+    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%);
+    border: 2px solid #a8c5e5;
     color: #ffffff;
     padding: 0.78rem 1.55rem;
     border-radius: 30px;
@@ -237,49 +236,49 @@ body {
     font-weight: 800;
     cursor: pointer;
     backdrop-filter: blur(8px);
-    box-shadow: 0 4px 16px rgba(154, 52, 18, 0.35);
+    box-shadow: 0 4px 18px rgba(66, 122, 180, 0.45);
     transition: var(--transition);
     animation: btnPulseGlow 3.2s infinite ease-in-out;
 }
 
 .btn-carreras-hero:hover {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 100%);
     color: #ffffff;
     border-color: #ffffff;
-    box-shadow: 0 8px 24px rgba(194, 65, 12, 0.55);
+    box-shadow: 0 8px 24px rgba(66, 122, 180, 0.65);
     transform: translateY(-3px) scale(1.03);
 }
 
-/* ── BOTÓN DE BÚSQUEDA Y DESCARGA DIRECTA DE PLANILLA PDF ────────────────── */
+/* ── BOTÓN DE BÚSQUEDA Y DESCARGA DIRECTA DE PLANILLA PDF (AZUL CONTRASTE) ── */
 .btn-buscar-planilla-hero {
     position: relative;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    background: linear-gradient(135deg, #9a3412 0%, #7c2d12 50%, #431407 100%);
-    border: 2px solid #fed7aa;
+    background: linear-gradient(135deg, #283e56 0%, #1c2b3c 100%);
+    border: 2px solid #6885a4;
     color: #ffffff;
     padding: 0.78rem 1.5rem;
     border-radius: 30px;
     font-size: 0.92rem;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 4px 16px rgba(67, 20, 7, 0.4);
+    box-shadow: 0 4px 18px rgba(28, 43, 60, 0.45);
     transition: var(--transition);
 }
 
 .btn-buscar-planilla-hero:hover {
-    background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%);
-    border-color: #ffedd5;
+    background: linear-gradient(135deg, #365373 0%, #283e56 100%);
+    border-color: #a8c5e5;
     color: #ffffff;
-    box-shadow: 0 8px 24px rgba(154, 52, 18, 0.55);
+    box-shadow: 0 8px 24px rgba(66, 122, 180, 0.55);
     transform: translateY(-3px) scale(1.03);
 }
 
 .btn-carreras-badge {
     background: #ffffff;
-    color: #c2410c;
+    color: #2e5682;
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -292,15 +291,15 @@ body {
 }
 
 .btn-carreras-hero:hover .btn-carreras-badge {
-    background: #ffedd5;
-    color: #9a3412;
+    background: #dbeafe;
+    color: #1c2b3c;
 }
 
 .badge-acreditacion {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #ffedd5;
+    color: #dbeafe;
     font-size: 0.88rem;
     font-weight: 700;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
@@ -317,22 +316,22 @@ body {
 }
 
 .form-card {
-    background: linear-gradient(165deg, #fef4ea 0%, #f7e6d5 48%, #f3d7bf 100%);
+    background: linear-gradient(165deg, #718ea9 0%, #6885a4 50%, #587593 100%);
     border-radius: var(--radius-lg);
-    box-shadow: 0 20px 48px rgba(154, 52, 18, 0.12), 0 0 0 1px rgba(231, 109, 45, 0.14);
-    border: 1.5px solid #e0c2aa;
+    box-shadow: 0 20px 48px rgba(28, 43, 60, 0.25), 0 0 0 1px rgba(66, 122, 180, 0.2);
+    border: 1.5px solid #4a6783;
     overflow: hidden;
     backdrop-filter: blur(10px);
 }
 
-/* ── STEPPER ─────────────────────────────────────────────────────────────── */
+/* ── STEPPER (CINTILLO DE PASOS CON CONTRASTE AZUL NOCHE) ────────────────── */
 .stepper-header {
-    background: linear-gradient(90deg, #fdf4ec 0%, #fae6d6 100%);
+    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 100%);
     padding: 1.2rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1.5px solid #ebd8c8;
+    border-bottom: 1.5px solid #365373;
     gap: 0.5rem;
 }
 
@@ -352,15 +351,15 @@ body {
     transform: translateY(-50%);
     width: 25%;
     height: 2px;
-    background: #e5d5c5;
+    background: #365373;
 }
 
 .step-circle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #ebd8c8;
-    color: #78350f;
+    background: #283e56;
+    color: #cbd5e1;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,25 +376,25 @@ body {
 .step-title span:first-child {
     font-size: 0.72rem;
     font-weight: 700;
-    color: var(--text-muted);
+    color: #94a8be;
     text-transform: uppercase;
 }
 
 .step-title span:last-child {
     font-size: 0.9rem;
     font-weight: 800;
-    color: var(--text-main);
+    color: #ffffff;
 }
 
 .step-node.active .step-circle {
-    background: linear-gradient(135deg, #f97316 0%, #e76d2d 100%);
+    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 100%);
     color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(231, 109, 45, 0.25), 0 4px 12px rgba(194, 65, 12, 0.35);
+    box-shadow: 0 0 0 4px rgba(66, 122, 180, 0.35), 0 4px 12px rgba(46, 86, 130, 0.45);
     transform: scale(1.06);
 }
 
 .step-node.completed .step-circle {
-    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    background: linear-gradient(135deg, #356292 0%, #244870 100%);
     color: #ffffff;
 }
 
@@ -403,21 +402,21 @@ body {
     content: "✓";
 }
 
-/* ── FORMULARIO Y CAMPOS (CON FONDO TENUE CÁLIDO DE LA IMAGEN) ───────────── */
+/* ── FORMULARIO Y CAMPOS (CON FONDO AZUL PIZARRA #6885a4 DE LA PALETA) ──── */
 .form-body {
     padding: 2.2rem;
-    background: radial-gradient(circle at top right, rgba(231, 109, 45, 0.12), transparent 55%),
-                radial-gradient(circle at bottom left, rgba(254, 215, 170, 0.35), transparent 55%);
+    background: radial-gradient(circle at top right, rgba(66, 122, 180, 0.15), transparent 55%),
+                radial-gradient(circle at bottom left, rgba(28, 43, 60, 0.25), transparent 55%);
 }
 
 .step-pane {
     display: none;
     animation: fadeIn 0.3s ease-in-out;
-    background: #fdf5ed;
-    border: 1.5px solid #dec3ac;
+    background: #f1f5f9;
+    border: 1.5px solid #cbd5e1;
     border-radius: var(--radius-md);
     padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(124, 45, 18, 0.05);
+    box-shadow: 0 4px 16px rgba(28, 43, 60, 0.08);
 }
 
 .step-pane.active {
@@ -439,7 +438,7 @@ body {
 .section-title {
     font-size: 1.35rem;
     font-weight: 900;
-    background: linear-gradient(90deg, #9a3412 0%, #ea580c 60%, #c2410c 100%);
+    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 60%, #427ab4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -448,7 +447,7 @@ body {
     align-items: center;
     gap: 0.55rem;
     padding-left: 0.7rem;
-    border-left: 4px solid #e76d2d;
+    border-left: 4px solid #427ab4;
 }
 
 .section-subtitle {
@@ -686,10 +685,10 @@ textarea.form-control {
 /* ── ANIMACIONES Y EFECTOS NOTABLES EN LOS BOTONES DEL FORMULARIO ─────────── */
 @keyframes btnPulseGlow {
     0%, 100% {
-        box-shadow: 0 5px 16px rgba(231, 109, 45, 0.38), 0 0 0 0 rgba(249, 115, 22, 0.4);
+        box-shadow: 0 5px 16px rgba(66, 122, 180, 0.38), 0 0 0 0 rgba(79, 121, 165, 0.4);
     }
     50% {
-        box-shadow: 0 8px 24px rgba(194, 65, 12, 0.5), 0 0 0 5px rgba(249, 115, 22, 0);
+        box-shadow: 0 8px 24px rgba(46, 86, 130, 0.5), 0 0 0 5px rgba(79, 121, 165, 0);
     }
 }
 
@@ -702,11 +701,11 @@ textarea.form-control {
     }
 }
 
-/* ── FOOTER DEL FORMULARIO Y BOTONES ──────────────────────────────────────── */
+/* ── FOOTER DEL FORMULARIO Y BOTONES (CON CONTRASTE AZUL NOCHE) ──────────── */
 .form-footer {
-    background: linear-gradient(90deg, #faebd7 0%, #fceee0 100%);
+    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 100%);
     padding: 1.25rem 2.2rem;
-    border-top: 1.5px solid #ebd8c8;
+    border-top: 1.5px solid #365373;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -751,31 +750,31 @@ textarea.form-control {
 
 .btn-secondary {
     background: #ffffff;
-    color: #78350f;
-    border: 1.5px solid #e5d9cc;
-    box-shadow: 0 3px 10px rgba(120, 53, 15, 0.08);
+    color: #1e293b;
+    border: 1.5px solid #94a8be;
+    box-shadow: 0 3px 10px rgba(28, 43, 60, 0.08);
 }
 
 .btn-secondary:hover {
-    background: #fff8f1;
-    color: #9a3412;
-    border-color: #e76d2d;
+    background: #e2e8f0;
+    color: #1c2b3c;
+    border-color: #427ab4;
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 16px rgba(231, 109, 45, 0.2);
+    box-shadow: 0 6px 16px rgba(66, 122, 180, 0.2);
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%);
+    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%);
     color: #ffffff;
-    border: 1px solid #fed7aa;
-    box-shadow: 0 4px 15px rgba(154, 52, 18, 0.35);
+    border: 1px solid #a8c5e5;
+    box-shadow: 0 4px 15px rgba(66, 122, 180, 0.4);
     animation: btnPulseGlow 3.2s infinite ease-in-out;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 50%, #c2410c 100%);
+    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 50%, #356294 100%);
     transform: translateY(-3px) scale(1.025);
-    box-shadow: 0 10px 22px rgba(194, 65, 12, 0.48);
+    box-shadow: 0 10px 24px rgba(66, 122, 180, 0.55);
 }
 
 .btn-primary:active,
@@ -786,17 +785,17 @@ textarea.form-control {
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #ea580c 0%, #b43403 50%, #7c2d12 100%);
+    background: linear-gradient(135deg, #427ab4 0%, #2e5682 50%, #1c3b5e 100%);
     color: #ffffff;
-    border: 1.5px solid #fed7aa;
-    box-shadow: 0 4px 16px rgba(124, 45, 18, 0.4);
+    border: 1.5px solid #a8c5e5;
+    box-shadow: 0 4px 18px rgba(46, 86, 130, 0.45);
     animation: btnPulseGlow 2.8s infinite ease-in-out;
 }
 
 .btn-submit:hover {
-    background: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
+    background: linear-gradient(135deg, #4f79a5 0%, #356294 50%, #244870 100%);
     transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 12px 28px rgba(234, 88, 12, 0.6);
+    box-shadow: 0 12px 28px rgba(46, 86, 130, 0.6);
 }
 
 /* Efecto Ripple (Onda al hacer clic generada por React/JS) */
@@ -873,28 +872,28 @@ textarea.form-control {
 }
 
 .info-popup-header {
-    background: linear-gradient(135deg, #431407 0%, #7c2d12 50%, #9a3412 100%);
+    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
     color: #ffffff;
     padding: 0.85rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #e76d2d;
+    border-bottom: 2px solid #427ab4;
     flex-shrink: 0;
 }
 
 .info-popup-title {
     font-size: 0.98rem;
     font-weight: 800;
-    color: #ffedd5;
+    color: #dbeafe;
     display: flex;
     align-items: center;
     gap: 0.4rem;
 }
 
 .info-popup-close-btn {
-    background: rgba(231, 109, 45, 0.25);
-    border: 1px solid #fed7aa;
+    background: rgba(66, 122, 180, 0.28);
+    border: 1px solid #a8c5e5;
     color: #ffffff;
     font-size: 0.95rem;
     font-weight: 700;
@@ -905,13 +904,13 @@ textarea.form-control {
 }
 
 .info-popup-close-btn:hover {
-    background: rgba(231, 109, 45, 0.45);
+    background: rgba(66, 122, 180, 0.55);
     color: #ffffff;
     transform: scale(1.05);
 }
 
 .info-popup-banner {
-    background: linear-gradient(135deg, #7c2d12 0%, #e76d2d 100%);
+    background: linear-gradient(135deg, #283e56 0%, #427ab4 100%);
     color: #ffffff;
     padding: 1.15rem 1.25rem;
     text-align: center;
@@ -921,8 +920,8 @@ textarea.form-control {
 
 .info-popup-badge-proceso {
     display: inline-block;
-    background: #fed7aa;
-    color: #7c2d12;
+    background: #dbeafe;
+    color: #1c2b3c;
     font-weight: 900;
     font-size: 0.75rem;
     padding: 0.22rem 0.8rem;
@@ -999,31 +998,31 @@ textarea.form-control {
 }
 
 .modal-carreras-card {
-    background: linear-gradient(165deg, #ffffff 0%, #fdf6ee 55%, #faeee3 100%);
+    background: linear-gradient(165deg, #ffffff 0%, #f1f5f9 55%, #e2e8f0 100%);
     border-radius: var(--radius-lg);
     max-width: 880px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
-    border-top: 6px solid #e76d2d;
+    border-top: 6px solid #427ab4;
     animation: scaleUp 0.25s ease-out;
 }
 
 .modal-carreras-header {
-    background: linear-gradient(135deg, #7c2d12 0%, #e76d2d 100%);
+    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
     color: #ffffff;
     padding: 1.25rem 1.75rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #fed7aa;
+    border-bottom: 2px solid #427ab4;
 }
 
 .modal-carreras-header h3 {
     font-size: 1.35rem;
     font-weight: 900;
-    color: #fff7ed;
+    color: #ffffff;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     letter-spacing: 0.2px;
 }
@@ -1036,8 +1035,8 @@ textarea.form-control {
 }
 
 .carrera-card-item {
-    background: rgba(255, 255, 255, 0.9);
-    border: 1.5px solid #ebd7c7;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1.5px solid #cbd5e1;
     border-radius: var(--radius-md);
     padding: 1.25rem;
     transition: var(--transition);
@@ -1046,16 +1045,16 @@ textarea.form-control {
 }
 
 .carrera-card-item:hover {
-    border-color: #e76d2d;
-    background: #fffaf5;
-    box-shadow: 0 8px 22px rgba(231, 109, 45, 0.18);
+    border-color: #427ab4;
+    background: #f8fafc;
+    box-shadow: 0 8px 22px rgba(66, 122, 180, 0.2);
     transform: translateY(-4px);
 }
 
 .carrera-card-code {
     display: inline-block;
-    background: linear-gradient(135deg, #9a3412 0%, #e76d2d 100%);
-    color: #fff7ed;
+    background: linear-gradient(135deg, #283e56 0%, #427ab4 100%);
+    color: #ffffff;
     font-size: 0.82rem;
     font-weight: 900;
     padding: 0.22rem 0.65rem;
@@ -1206,8 +1205,8 @@ textarea.form-control {
 
 /* ── CAPTURA DE FOTOGRAFÍA DESDE EL MÓVIL ─────────────────────────────────── */
 .photo-capture-card {
-    background: linear-gradient(135deg, rgba(255, 252, 248, 0.95) 0%, rgba(250, 237, 225, 0.95) 100%);
-    border: 2px dashed #e76d2d;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 2px dashed #427ab4;
     border-radius: var(--radius-md);
     padding: 1.15rem;
     text-align: center;
@@ -1221,9 +1220,9 @@ textarea.form-control {
 }
 
 .photo-capture-card:hover {
-    border-color: #ea580c;
-    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-    box-shadow: 0 6px 18px rgba(231, 109, 45, 0.18);
+    border-color: #283e56;
+    background: linear-gradient(135deg, #ffffff 0%, #edf2f7 100%);
+    box-shadow: 0 6px 18px rgba(66, 122, 180, 0.25);
 }
 
 .photo-preview-box {
@@ -1270,20 +1269,20 @@ textarea.form-control {
 }
 
 .btn-camera-live {
-    background: linear-gradient(135deg, #7c2d12 0%, #c2410c 100%) !important;
-    border: 1.5px solid #fed7aa !important;
+    background: linear-gradient(135deg, #283e56 0%, #1c2b3c 100%) !important;
+    border: 1.5px solid #6885a4 !important;
 }
 
 .btn-camera-live:hover {
-    background: linear-gradient(135deg, #9a3412 0%, #ea580c 100%) !important;
+    background: linear-gradient(135deg, #365373 0%, #283e56 100%) !important;
 }
 
 .btn-photo-action {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%);
-    border: 1.5px solid #fed7aa;
-    box-shadow: 0 3px 12px rgba(154, 52, 18, 0.3);
+    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%);
+    border: 1.5px solid #a8c5e5;
+    box-shadow: 0 4px 14px rgba(66, 122, 180, 0.4);
     text-decoration: none;
     user-select: none;
     color: #ffffff;
@@ -1300,9 +1299,9 @@ textarea.form-control {
 }
 
 .btn-photo-action:hover {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 100%);
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 6px 18px rgba(194, 65, 12, 0.4);
+    box-shadow: 0 8px 20px rgba(66, 122, 180, 0.55);
     color: #ffffff;
 }
 
@@ -1323,20 +1322,20 @@ textarea.form-control {
 
 /* ── TARJETA UNIFICADA DE CÉDULA DEL REPRESENTANTE (MENORES DE EDAD) ──────── */
 .repres-card-unificada {
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    border: 2px dashed #f59e0b;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 2px dashed #427ab4;
     border-radius: 14px;
     padding: 1.4rem 1.6rem;
     margin: 0.85rem 0 0.5rem;
-    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
+    box-shadow: 0 4px 16px rgba(66, 122, 180, 0.15);
     box-sizing: border-box;
     width: 100%;
     transition: var(--transition);
 }
 
 .repres-card-unificada:hover {
-    border-color: #d97706;
-    box-shadow: 0 6px 20px rgba(217, 119, 6, 0.18);
+    border-color: #283e56;
+    box-shadow: 0 6px 20px rgba(40, 62, 86, 0.22);
 }
 
 /* Encabezado informativo (Imagen Anexa 1) */
@@ -1348,7 +1347,7 @@ textarea.form-control {
 .repres-title-unificado {
     margin: 0 0 0.45rem;
     font-size: 1.05rem;
-    color: #9a3412;
+    color: #1c2b3c;
     font-weight: 900;
     letter-spacing: 0.2px;
     line-height: 1.35;
@@ -1362,7 +1361,7 @@ textarea.form-control {
     max-width: 650px;
     margin: 0 auto;
     font-size: 0.84rem;
-    color: #78350f;
+    color: #334155;
     line-height: 1.45;
 }
 
@@ -1379,7 +1378,7 @@ textarea.form-control {
 /* Sub-contenedor de carga y escaneo (Imagen Anexa 2 - Unido en el mismo bloque) */
 .repres-upload-unificado {
     background: #ffffff;
-    border: 1.5px dashed #f59e0b;
+    border: 1.5px dashed #427ab4;
     border-radius: 12px;
     padding: 1.25rem 1.2rem;
     max-width: 520px;
@@ -1393,7 +1392,7 @@ textarea.form-control {
 .repres-upload-title {
     font-size: 0.95rem;
     font-weight: 800;
-    color: #9a3412;
+    color: #1c2b3c;
     margin-bottom: 0.35rem;
     line-height: 1.3;
 }
@@ -1409,7 +1408,7 @@ textarea.form-control {
     width: 170px;
     height: 110px;
     border-radius: 8px;
-    border: 2px solid #f59e0b;
+    border: 2px solid #427ab4;
     overflow: hidden;
     background: #f8fafc;
     margin: 0 auto 0.85rem;
@@ -1426,29 +1425,31 @@ textarea.form-control {
 }
 
 .btn-repres-subir {
-    background: linear-gradient(135deg, #ea580c 0%, #c2410c 50%, #9a3412 100%) !important;
-    border: 1.5px solid #fed7aa !important;
+    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%) !important;
+    border: 1.5px solid #a8c5e5 !important;
     font-size: 0.84rem !important;
     padding: 0.55rem 1.05rem !important;
     min-height: 42px;
+    color: #ffffff !important;
 }
 
 .btn-repres-subir:hover {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
-    box-shadow: 0 5px 16px rgba(194, 65, 12, 0.4) !important;
+    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 100%) !important;
+    box-shadow: 0 5px 16px rgba(66, 122, 180, 0.5) !important;
 }
 
 .btn-repres-escanear {
-    background: linear-gradient(135deg, #7c2d12 0%, #9a3412 100%) !important;
-    border: 1.5px solid #fed7aa !important;
+    background: linear-gradient(135deg, #283e56 0%, #1c2b3c 100%) !important;
+    border: 1.5px solid #6885a4 !important;
     font-size: 0.84rem !important;
     padding: 0.55rem 1.05rem !important;
     min-height: 42px;
+    color: #ffffff !important;
 }
 
 .btn-repres-escanear:hover {
-    background: linear-gradient(135deg, #9a3412 0%, #c2410c 100%) !important;
-    box-shadow: 0 5px 16px rgba(124, 45, 18, 0.4) !important;
+    background: linear-gradient(135deg, #365373 0%, #283e56 100%) !important;
+    box-shadow: 0 5px 16px rgba(28, 43, 60, 0.5) !important;
 }
 
 .repres-status-msg {
@@ -1459,15 +1460,16 @@ textarea.form-control {
     text-align: center;
 }
 
-/* ── FOOTER INSTITUCIONAL ─────────────────────────────────────────────────── */
+/* ── FOOTER INSTITUCIONAL (CINTILLO INFERIOR CON CONTRASTE AZUL NOCHE) ───── */
 .footer {
-    background: linear-gradient(135deg, #1e1b4b 0%, #115e59 100%);
+    background: linear-gradient(135deg, #152230 0%, #1c2b3c 50%, #283e56 100%);
     color: #cbd5e1;
     padding: 2.2rem 1.5rem;
     margin-top: auto;
     text-align: center;
     font-size: 0.88rem;
-    border-top: 2px solid #2dd4bf;
+    border-top: 3px solid #427ab4;
+    box-shadow: 0 -4px 20px rgba(21, 34, 48, 0.4);
 }
 
 /* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
@@ -1837,22 +1839,22 @@ textarea.form-control {
     margin-top: 1.25rem;
     width: 100%;
     text-align: left;
-    border: 1.5px solid #ebd7c7;
+    border: 1.5px solid #cbd5e1;
     border-radius: 12px;
     overflow: hidden;
     background: #ffffff;
-    box-shadow: 0 4px 14px rgba(154, 52, 18, 0.08);
+    box-shadow: 0 4px 14px rgba(28, 43, 60, 0.08);
     transition: all 0.3s ease;
 }
 
 .accordion-descargas-wrapper:hover {
-    border-color: #e76d2d;
-    box-shadow: 0 6px 20px rgba(231, 109, 45, 0.15);
+    border-color: #427ab4;
+    box-shadow: 0 6px 20px rgba(66, 122, 180, 0.18);
 }
 
 .btn-accordion-toggle {
     width: 100%;
-    background: linear-gradient(135deg, #fffcf8 0%, #fdf2ea 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     border: none;
     outline: none;
     padding: 0.9rem 1.15rem;
@@ -1863,19 +1865,19 @@ textarea.form-control {
     font-family: inherit;
     font-size: 0.92rem;
     font-weight: 800;
-    color: #431407;
+    color: #1c2b3c;
     transition: background 0.25s ease, color 0.25s ease;
 }
 
 .btn-accordion-toggle:hover {
-    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-    color: #e76d2d;
+    background: linear-gradient(135deg, #eef3f8 0%, #dbe5f0 100%);
+    color: #427ab4;
 }
 
 .btn-accordion-toggle.active {
-    background: linear-gradient(135deg, #9a3412 0%, #e76d2d 100%);
+    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 100%);
     color: #ffffff;
-    border-bottom: 2px solid #fed7aa;
+    border-bottom: 2px solid #427ab4;
 }
 
 .accordion-toggle-title {
@@ -1887,12 +1889,12 @@ textarea.form-control {
 .accordion-toggle-icon {
     font-size: 0.85rem;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: #e76d2d;
+    color: #427ab4;
 }
 
 .btn-accordion-toggle.active .accordion-toggle-icon {
     transform: rotate(180deg);
-    color: #fed7aa;
+    color: #dbeafe;
 }
 
 .accordion-descargas-content {
@@ -1908,8 +1910,8 @@ textarea.form-control {
 }
 
 .descarga-item-card {
-    background: linear-gradient(165deg, #fffdfa 0%, #fff7ed 100%);
-    border: 1px solid #fed7aa;
+    background: linear-gradient(165deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #cbd5e1;
     border-radius: 10px;
     padding: 0.85rem 1rem;
     display: flex;
@@ -1921,9 +1923,9 @@ textarea.form-control {
 }
 
 .descarga-item-card:hover {
-    border-color: #e76d2d;
+    border-color: #427ab4;
     background: #ffffff;
-    box-shadow: 0 4px 12px rgba(231, 109, 45, 0.14);
+    box-shadow: 0 4px 12px rgba(66, 122, 180, 0.16);
     transform: translateY(-2px);
 }
 
@@ -1937,8 +1939,8 @@ textarea.form-control {
 .descarga-item-icon {
     font-size: 1.5rem;
     line-height: 1;
-    background: #fff7ed;
-    border: 1px solid #fed7aa;
+    background: #e2e8f0;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
     padding: 0.4rem;
 }
@@ -1946,20 +1948,20 @@ textarea.form-control {
 .descarga-item-name {
     font-size: 0.88rem;
     font-weight: 800;
-    color: #431407;
+    color: #1c2b3c;
     margin-bottom: 0.2rem;
 }
 
 .descarga-item-desc {
     font-size: 0.78rem;
-    color: #78350f;
+    color: #475569;
     line-height: 1.35;
     margin-bottom: 0.25rem;
 }
 
 .descarga-item-meta {
     font-size: 0.7rem;
-    color: #c2410c;
+    color: #2e5682;
     font-weight: 700;
     letter-spacing: 0.2px;
 }
@@ -1985,27 +1987,27 @@ textarea.form-control {
 }
 
 .btn-descarga-ver {
-    background: #fff7ed;
-    color: #9a3412;
-    border: 1px solid #fed7aa;
+    background: #eef3f8;
+    color: #1c2b3c;
+    border: 1px solid #b4c5d6;
 }
 
 .btn-descarga-ver:hover {
-    background: #ffedd5;
-    color: #7c2d12;
-    border-color: #ea580c;
+    background: #dbe5f0;
+    color: #0f172a;
+    border-color: #427ab4;
 }
 
 .btn-descarga-bajar {
-    background: linear-gradient(135deg, #f97316 0%, #e76d2d 100%);
+    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 100%);
     color: #ffffff;
-    border: 1px solid #ea580c;
-    box-shadow: 0 2px 6px rgba(231, 109, 45, 0.28);
+    border: 1px solid #427ab4;
+    box-shadow: 0 2px 6px rgba(66, 122, 180, 0.3);
 }
 
 .btn-descarga-bajar:hover {
-    background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+    background: linear-gradient(135deg, #5b8ec2 0%, #356294 100%);
     color: #ffffff;
-    box-shadow: 0 4px 10px rgba(231, 109, 45, 0.4);
+    box-shadow: 0 4px 10px rgba(66, 122, 180, 0.45);
     transform: translateY(-1px);
 }
