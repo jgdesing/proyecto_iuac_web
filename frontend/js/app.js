@@ -18,6 +18,8 @@ const MAPA_CARRERAS = {
 };
 
 let capturedPhotoBase64 = null;
+let capturedRepresDocBase64 = null;
+let capturedRepresDocExt = 'jpg';
 let ultimoRegistroAspirante = {};
 window.MAPA_CARRERAS = MAPA_CARRERAS;
 window.ultimoRegistroAspirante = ultimoRegistroAspirante;
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initRecuperarPlanillaModal();
     initStepper();
     initPhotoCapture();
+    initRepresentanteDocCapture();
     initGeoSelectors();
     initRealtimeValidations();
     initFormSubmit();
@@ -390,6 +393,115 @@ function initPhotoCapture() {
             if (typeof window.actualizarBarraReactivaIUAC === 'function') {
                 window.actualizarBarraReactivaIUAC();
             }
+        });
+    }
+}
+
+// ── CAPTURA Y SUBIDA DE CÉDULA DEL REPRESENTANTE (PARA MENORES DE EDAD) ─────
+function initRepresentanteDocCapture() {
+    const inputDoc = document.getElementById('input-file-repres-cedula');
+    const btnEscanearDoc = document.getElementById('btn-escanear-repres-cedula');
+    const previewBox = document.getElementById('preview-repres-cedula-box');
+    const previewImg = document.getElementById('preview-repres-cedula-img');
+    const previewPdf = document.getElementById('preview-repres-cedula-pdf');
+    const statusDoc = document.getElementById('status-repres-cedula');
+    const errDoc = document.getElementById('err-repres-cedula-doc');
+
+    const aplicarDocRepresentante = (base64Data, ext = 'jpg') => {
+        capturedRepresDocBase64 = base64Data;
+        capturedRepresDocExt = ext;
+        window.capturedRepresDocBase64 = capturedRepresDocBase64;
+        window.capturedRepresDocExt = capturedRepresDocExt;
+
+        if (previewBox) previewBox.style.display = 'block';
+        if (ext === 'pdf') {
+            if (previewImg) previewImg.style.display = 'none';
+            if (previewPdf) previewPdf.style.display = 'flex';
+        } else {
+            if (previewPdf) previewPdf.style.display = 'none';
+            if (previewImg) {
+                previewImg.src = base64Data;
+                previewImg.style.display = 'block';
+            }
+        }
+        if (statusDoc) {
+            statusDoc.textContent = '✓ Documento de identidad del representante cargado correctamente';
+            statusDoc.style.display = 'block';
+        }
+        if (errDoc) {
+            errDoc.textContent = '';
+            errDoc.classList.remove('visible');
+        }
+    };
+
+    if (inputDoc) {
+        inputDoc.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const name = file.name.toLowerCase();
+            const esPdf = file.type === 'application/pdf' || name.endsWith('.pdf');
+            const esImg = file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(name);
+
+            if (!esPdf && !esImg) {
+                if (errDoc) {
+                    errDoc.textContent = 'Formato no permitido. Solo se admiten archivos .JPG, .PNG o .PDF.';
+                    errDoc.classList.add('visible');
+                }
+                inputDoc.value = '';
+                return;
+            }
+
+            if (file.size > 8 * 1024 * 1024) {
+                if (errDoc) {
+                    errDoc.textContent = 'El archivo excede el tamaño máximo permitido de 8 MB.';
+                    errDoc.classList.add('visible');
+                }
+                inputDoc.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const ext = esPdf ? 'pdf' : (name.endsWith('.png') ? 'png' : 'jpg');
+                aplicarDocRepresentante(evt.target.result, ext);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (btnEscanearDoc) {
+        btnEscanearDoc.addEventListener('click', () => {
+            abrirVisorCamaraDispositivo((b64) => {
+                aplicarDocRepresentante(b64, 'jpg');
+            });
+        });
+    }
+
+    const inputsRepres = [
+        'asp-repres-cedula',
+        'asp-repres-nombre',
+        'asp-repres-apellido',
+        'asp-repres-telefono'
+    ];
+    inputsRepres.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => {
+                el.classList.remove('is-invalid');
+                const errBox = document.getElementById(`err-${id.replace('asp-', '')}`);
+                if (errBox) {
+                    errBox.textContent = '';
+                    errBox.classList.remove('visible');
+                }
+            });
+        }
+    });
+
+    const elRepresCed = document.getElementById('asp-repres-cedula');
+    if (elRepresCed) {
+        elRepresCed.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
         });
     }
 }
@@ -1093,6 +1205,15 @@ function initRealtimeValidations() {
                 edadInput.value = resValidacion.edadActual;
             }
 
+            const seccionMenor = document.getElementById('seccion-representante-menor');
+            if (seccionMenor) {
+                if (resValidacion.edadActual !== null && resValidacion.edadActual < 18) {
+                    seccionMenor.style.display = 'block';
+                } else {
+                    seccionMenor.style.display = 'none';
+                }
+            }
+
             if (!resValidacion.valido) {
                 setFieldInvalid(fecNacInput, 'err-fec_nac', resValidacion.error);
                 bloquearFormularioPorEdad(resValidacion.error);
@@ -1347,6 +1468,52 @@ function validateCurrentStep(step) {
             if (!primerErrorElement) primerErrorElement = lugarNac;
         }
 
+        // Validación de Fotografía Carnet (100% Obligatoria)
+        if (!capturedPhotoBase64) {
+            const errFoto = document.getElementById('err-foto');
+            if (errFoto) {
+                errFoto.textContent = 'La fotografía tipo carnet es obligatoria. Por favor suba un archivo o active su cámara.';
+                errFoto.classList.add('visible');
+            }
+            if (!primerErrorElement) primerErrorElement = document.getElementById('btn-subir-foto') || cedula;
+        }
+
+        // Si es menor de 18 años, validar datos y fotocopia de la cédula del representante
+        const edadInput = document.getElementById('asp-edad_alum');
+        const edadVal = parseInt(edadInput?.value || '99', 10);
+        if (edadVal < 18) {
+            const represCed = document.getElementById('asp-repres-cedula');
+            const represNom = document.getElementById('asp-repres-nombre');
+            const represApe = document.getElementById('asp-repres-apellido');
+            const represTel = document.getElementById('asp-repres-telefono');
+            const errDoc = document.getElementById('err-repres-cedula-doc');
+
+            if (!represCed || !/^\d{8}$/.test((represCed.value || '').trim())) {
+                setFieldInvalid(represCed, 'err-repres-cedula', 'Cédula del representante legal obligatoria (8 dígitos).');
+                if (!primerErrorElement) primerErrorElement = represCed;
+            }
+            if (!represNom || (represNom.value || '').trim().length < 2) {
+                setFieldInvalid(represNom, 'err-repres-nombre', 'Nombres del representante legal obligatorios.');
+                if (!primerErrorElement) primerErrorElement = represNom;
+            }
+            if (!represApe || (represApe.value || '').trim().length < 2) {
+                setFieldInvalid(represApe, 'err-repres-apellido', 'Apellidos del representante legal obligatorios.');
+                if (!primerErrorElement) primerErrorElement = represApe;
+            }
+            const telRepDigits = (represTel?.value || '').replace(/\D/g, '');
+            if (!represTel || telRepDigits.length < 10 || telRepDigits.length > 11) {
+                setFieldInvalid(represTel, 'err-repres-telefono', 'Teléfono del representante legal obligatorio (10 u 11 dígitos).');
+                if (!primerErrorElement) primerErrorElement = represTel;
+            }
+            if (!capturedRepresDocBase64) {
+                if (errDoc) {
+                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar la fotocopia de la cédula del representante.';
+                    errDoc.classList.add('visible');
+                }
+                if (!primerErrorElement) primerErrorElement = document.getElementById('btn-subir-repres-cedula') || represCed;
+            }
+        }
+
     } else if (step === 2) {
         const estado = document.getElementById('asp-est_alum');
         const ciudad = document.getElementById('asp-ciu_alum');
@@ -1377,6 +1544,11 @@ function validateCurrentStep(step) {
         if (movDigits.length !== 11 || !PREFIJOS_MOVILES.includes(movDigits.slice(0, 4))) {
             setFieldInvalid(telemov, 'err-telemov', 'Teléfono celular venezolano obligatorio (11 dígitos).');
             if (!primerErrorElement) primerErrorElement = telemov;
+        }
+        const habDigits = telehab.value.replace(/\D/g, '');
+        if (!telehab.value || habDigits.length < 10 || habDigits.length > 11) {
+            setFieldInvalid(telehab, 'err-telehab', 'Teléfono de habitación o secundario obligatorio (10 u 11 dígitos).');
+            if (!primerErrorElement) primerErrorElement = telehab;
         }
         if (!correo.value || !REGEX_EMAIL.test(correo.value)) {
             setFieldInvalid(correo, 'err-correo', 'Correo electrónico no válido.');
@@ -1435,12 +1607,19 @@ function initFormSubmit() {
             if (!errorPaso3) errorPaso3 = instGrad;
         }
 
+        if (!obsEl?.value || obsEl.value.trim().length < 2) {
+            setFieldInvalid(obsEl, 'err-observaciones', 'Observaciones obligatorias (escriba "Ninguna" si no posee observaciones adicionales).');
+            if (!errorPaso3) errorPaso3 = obsEl;
+        }
+
         if (errorPaso3) {
             mostrarAvisoScroll(errorPaso3.id);
             return;
         }
 
-        // Construir Payload sanitizado sin espacios residuales
+        const valEdad = parseInt(document.getElementById('asp-edad_alum')?.value || '0', 10);
+
+        // Construir Payload sanitizado sin espacios residuales (100% de los campos obligatorios)
         const payload = {
             website_url_hp: document.getElementById('website_url_hp')?.value || '',
 
@@ -1449,6 +1628,7 @@ function initFormSubmit() {
             nom_alum: document.getElementById('asp-nom_alum')?.value?.trim().replace(/\s{2,}/g, ' '),
             ape_alum: document.getElementById('asp-ape_alum')?.value?.trim().replace(/\s{2,}/g, ' '),
             fec_nac_alum: document.getElementById('asp-fec_nac_alum')?.value,
+            edad_alum: valEdad,
             sex_alum: document.getElementById('asp-sex_alum')?.value || 'M',
             est_civil_alum: document.getElementById('asp-est_civil_alum')?.value || 'Soltero/a',
             lugar_nac_alum: document.getElementById('asp-lugar_nac_alum')?.value?.trim().replace(/\s{2,}/g, ' ') || '',
@@ -1467,12 +1647,28 @@ function initFormSubmit() {
             inst_grad_alum: instGrad.value,
             ano_grad_alum: valAno,
             tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || 'Público',
-            observaciones: obsEl?.value || 'Preinscripción Web',
+            observaciones: obsEl?.value || 'Ninguna',
             foto_ext: capturedPhotoExt || 'jpg',
             foto_base64: capturedPhotoBase64 || null
         };
 
-        ultimoRegistroAspirante = { ...payload };
+        // Si es menor de 18 años, incluir recaudos obligatorios del representante legal
+        if (valEdad < 18) {
+            const represNom = (document.getElementById('asp-repres-nombre')?.value || '').trim();
+            const represApe = (document.getElementById('asp-repres-apellido')?.value || '').trim();
+            payload.ced_repres = (document.getElementById('asp-repres-cedula')?.value || '').replace(/\D/g, '').trim();
+            payload.nom_repres = `${represNom} ${represApe}`.trim();
+            payload.parentesco_repres = document.getElementById('asp-repres-parentesco')?.value || 'Padre/Madre/Tutor';
+            payload.telemov_repres = (document.getElementById('asp-repres-telefono')?.value || '').trim();
+            payload.repres_doc_base64 = capturedRepresDocBase64 || null;
+            payload.repres_doc_ext = capturedRepresDocExt || 'jpg';
+        }
+
+        ultimoRegistroAspirante = {
+            ...payload,
+            foto_base64: capturedPhotoBase64,
+            repres_doc_base64: capturedRepresDocBase64
+        };
         window.ultimoRegistroAspirante = ultimoRegistroAspirante;
         window.capturedPhotoBase64 = capturedPhotoBase64;
 
@@ -1609,9 +1805,15 @@ async function imprimirPlanillaOficial() {
     const txtOriginal = btn ? btn.innerHTML : '';
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '⏳ Generando archivo PDF...';
+        btn.innerHTML = '⏳ Generando archivo PDF con fotografía...';
     }
     try {
+        if (!ultimoRegistroAspirante) {
+            ultimoRegistroAspirante = {};
+        }
+        if (!ultimoRegistroAspirante.foto_base64 && (capturedPhotoBase64 || window.capturedPhotoBase64)) {
+            ultimoRegistroAspirante.foto_base64 = capturedPhotoBase64 || window.capturedPhotoBase64;
+        }
         if (typeof window.descargarPlanillaPDFOficial === 'function') {
             await window.descargarPlanillaPDFOficial(ultimoRegistroAspirante);
         }
@@ -1622,3 +1824,21 @@ async function imprimirPlanillaOficial() {
         }
     }
 }
+
+// ── CONTROL DEL ACORDEÓN DE INSTRUCTIVOS Y DESCARGAS OFICIALES (PDF) ─────────
+function toggleAcordeonDescargas() {
+    const btn = document.getElementById('btn-toggle-descargas');
+    const panel = document.getElementById('accordion-descargas-panel');
+    if (!btn || !panel) return;
+    const isExpanded = btn.classList.contains('active');
+    if (isExpanded) {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-expanded', 'false');
+        panel.style.display = 'none';
+    } else {
+        btn.classList.add('active');
+        btn.setAttribute('aria-expanded', 'true');
+        panel.style.display = 'block';
+    }
+}
+window.toggleAcordeonDescargas = toggleAcordeonDescargas;

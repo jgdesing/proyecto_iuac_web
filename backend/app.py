@@ -23,26 +23,60 @@ from export_aspirantes import (
     marcar_como_procesados
 )
 
-# Directorios de frontend y carpeta oficial fotos_aspirantes
+# Directorios de frontend, fotos_aspirantes, descargas y cedulas_representantes
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
 UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'fotos_aspirantes'))
+DESCARGAS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'descargas'))
+DESCARGAS_FRONTEND_DIR = os.path.join(FRONTEND_DIR, 'descargas')
+REPRESENTANTES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cedulas_representantes'))
+REPRESENTANTES_FRONTEND_DIR = os.path.join(FRONTEND_DIR, 'cedulas_representantes')
+
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(FRONTEND_DIR, 'fotos_aspirantes'), exist_ok=True)
+os.makedirs(DESCARGAS_DIR, exist_ok=True)
+os.makedirs(DESCARGAS_FRONTEND_DIR, exist_ok=True)
+os.makedirs(REPRESENTANTES_DIR, exist_ok=True)
+os.makedirs(REPRESENTANTES_FRONTEND_DIR, exist_ok=True)
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 app.config.from_object(Config)
 
-# CORS seguro
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+# CORS universal para permitir peticiones API y carga de imágenes en Canvas/PDF
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Servir fotos subidas de aspirantes desde la carpeta fotos_aspirantes
 @app.route('/fotos_aspirantes/<path:filename>', methods=['GET'])
 def serve_foto_aspirante(filename):
-    return send_from_directory(UPLOAD_DIR, filename)
+    frontend_fotos = os.path.join(FRONTEND_DIR, 'fotos_aspirantes')
+    target_dir = UPLOAD_DIR if os.path.exists(os.path.join(UPLOAD_DIR, filename)) else frontend_fotos
+    resp = send_from_directory(target_dir, filename)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
 
 @app.route('/uploads/fotos/<path:filename>', methods=['GET'])
 def serve_foto(filename):
-    return send_from_directory(UPLOAD_DIR, filename)
+    resp = send_from_directory(UPLOAD_DIR, filename)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
+# Servir fotocopias y escaneos de cédula de representantes (menores de edad)
+@app.route('/cedulas_representantes/<path:filename>', methods=['GET'])
+def serve_cedula_repres(filename):
+    target_dir = REPRESENTANTES_DIR if os.path.exists(os.path.join(REPRESENTANTES_DIR, filename)) else REPRESENTANTES_FRONTEND_DIR
+    resp = send_from_directory(target_dir, filename)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
+
+# Servir instructivos y documentos PDF desde la carpeta /descargas
+@app.route('/descargas/<path:filename>', methods=['GET'])
+def serve_descarga(filename):
+    as_attachment = request.args.get('download', '0') == '1'
+    target_dir = DESCARGAS_DIR if os.path.exists(os.path.join(DESCARGAS_DIR, filename)) else DESCARGAS_FRONTEND_DIR
+    resp = send_from_directory(target_dir, filename, as_attachment=as_attachment, mimetype='application/pdf')
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
 
 # Blindaje de Seguridad: Rate Limiting
 limiter = create_limiter(app)

@@ -326,14 +326,113 @@ function crearBlobPDFDesdeJPEGDataURL(jpegDataUrl, imgWidthPx, imgHeightPx) {
 function cargarImagenPromesa(src) {
     return new Promise((resolve) => {
         if (!src || typeof src !== 'string') return resolve(null);
-        const img = new Image();
-        if (!src.startsWith('data:')) {
-            img.crossOrigin = 'anonymous';
+        let srcFinal = src.trim();
+
+        // Si es una cadena Base64 pura sin prefijo data:
+        if (!srcFinal.startsWith('data:') && !srcFinal.startsWith('/') && !srcFinal.startsWith('http') && srcFinal.length > 50) {
+            const esPng = srcFinal.startsWith('iVBORw');
+            srcFinal = (esPng ? 'data:image/png;base64,' : 'data:image/jpeg;base64,') + srcFinal;
         }
-        img.onload = () => resolve(img);
-        img.onerror = () => resolve(null);
-        img.src = src;
+
+        // Si es Data URI (Base64), cargar directo sin red (imposible que manche el Canvas)
+        if (srcFinal.startsWith('data:')) {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = srcFinal;
+            return;
+        }
+
+        // Si es URL del servidor (/fotos_aspirantes/...), descargar con fetch como Blob
+        // y convertir con FileReader a Data URL local para que el Canvas NUNCA se vuelva 'tainted'
+        fetch(srcFinal, { mode: 'cors' })
+            .then(res => {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.blob();
+            })
+            .then(blob => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const imgBlob = new Image();
+                    imgBlob.onload = () => resolve(imgBlob);
+                    imgBlob.onerror = () => resolve(null);
+                    imgBlob.src = reader.result;
+                };
+                reader.onerror = () => resolve(null);
+                reader.readAsDataURL(blob);
+            })
+            .catch(() => {
+                // Fallback directo con crossOrigin anónimo
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => resolve(img);
+                img.onerror = () => resolve(null);
+                img.src = srcFinal;
+            });
     });
+}
+
+async function obtenerImagenFotoCarnet(reg) {
+    const r = reg || window.ultimoRegistroAspirante || {};
+
+    // 1. Probar variables en memoria directa (máxima prioridad, fidelidad y nitidez)
+    const fuentesDirectas = [
+        r.foto_base64,
+        window.capturedPhotoBase64,
+        window.ultimoRegistroAspirante?.foto_base64,
+        (typeof r.foto_alum === 'string' && r.foto_alum.length > 50 && !r.foto_alum.endsWith('.jpg') && !r.foto_alum.endsWith('.png')) ? r.foto_alum : null
+    ].filter(Boolean);
+
+    for (const src of fuentesDirectas) {
+        try {
+            const img = await cargarImagenPromesa(src);
+            if (img && (img.naturalWidth > 0 || img.width > 0)) return img;
+        } catch (_) {}
+    }
+
+    // 2. Probar elementos imagen ya montados en el DOM
+    const domSelectors = [
+        '#planilla-foto-img',
+        '#photo-preview-img',
+        '#preview-recuperar-foto-img',
+        '#asp-foto-preview'
+    ];
+    for (const sel of domSelectors) {
+        const el = document.querySelector(sel);
+        if (el && el.tagName === 'IMG' && el.src) {
+            try {
+                const img = await cargarImagenPromesa(el.src);
+                if (img && (img.naturalWidth > 0 || img.width > 0)) return img;
+            } catch (_) {}
+        }
+    }
+
+    // 3. Probar rutas físicas del servidor (/fotos_aspirantes/...)
+    const cedDigits = String(r.ced_alum || '').replace(/\D/g, '');
+    const rutasAProbar = [];
+    if (r.ruta_foto_archivo) rutasAProbar.push(r.ruta_foto_archivo);
+    if (r.enlace_foto) rutasAProbar.push(r.enlace_foto);
+    if (r.foto_alum && (r.foto_alum.endsWith('.jpg') || r.foto_alum.endsWith('.png'))) {
+        rutasAProbar.push(r.foto_alum.startsWith('/') ? r.foto_alum : `/fotos_aspirantes/${r.foto_alum}`);
+    }
+    if (cedDigits) {
+        if (typeof window.construirNombreFotoPersonalizado === 'function') {
+            rutasAProbar.push(`/fotos_aspirantes/${window.construirNombreFotoPersonalizado(cedDigits, r.nom_alum, r.ape_alum, 'jpg')}`);
+            rutasAProbar.push(`/fotos_aspirantes/${window.construirNombreFotoPersonalizado(cedDigits, r.nom_alum, r.ape_alum, 'png')}`);
+        }
+        rutasAProbar.push(`/fotos_aspirantes/aspirante-${cedDigits}.jpg`);
+        rutasAProbar.push(`/fotos_aspirantes/aspirante-${cedDigits}.png`);
+        rutasAProbar.push(`/fotos_aspirantes/foto_${cedDigits}.jpg`);
+    }
+
+    for (const ruta of rutasAProbar) {
+        try {
+            const img = await cargarImagenPromesa(ruta);
+            if (img && (img.naturalWidth > 0 || img.width > 0)) return img;
+        } catch (_) {}
+    }
+
+    return null;
 }
 
 async function descargarPlanillaPDFOficial(datosPlanilla) {
@@ -374,15 +473,10 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     const contentW = W - M * 2;
     let y = 46;
 
-    // Cargar logo IUAC y foto del aspirante (desde foto_base64, foto_alum en BD o captura en memoria)
-    const srcFoto = reg.foto_base64 ||
-                    (typeof reg.foto_alum === 'string' && reg.foto_alum.startsWith('data:image/') ? reg.foto_alum : null) ||
-                    window.capturedPhotoBase64 ||
-                    null;
-
+    // Cargar logo IUAC y foto del aspirante
     const [logoImg, fotoImg] = await Promise.all([
         cargarImagenPromesa('img/logo_iuac.png'),
-        cargarImagenPromesa(srcFoto)
+        obtenerImagenFotoCarnet(reg)
     ]);
 
     // 1. ENCABEZADO INSTITUCIONAL
@@ -536,6 +630,17 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
         { w: 0.25, label: 'EDAD:', value: edadCalc ? `${edadCalc} años` : '--' },
         { w: 0.50, label: 'LUGAR DE NACIMIENTO:', value: reg.lugar_nac_alum || '--' }
     ]);
+
+    // Fila adicional de Representante Legal si el aspirante es menor de edad
+    if ((edadCalc && edadCalc < 18) || reg.nom_repres) {
+        const represCedNum = reg.ced_repres ? Number(String(reg.ced_repres).replace(/\D/g, '')).toLocaleString('es-VE') : '--';
+        drawTableRow([
+            { w: 0.40, label: 'REPRESENTANTE LEGAL (MENOR DE EDAD):', value: reg.nom_repres || '--', bg: '#fffbeb', valColor: '#9a3412' },
+            { w: 0.22, label: 'C.I. REPRESENTANTE:', value: reg.ced_repres ? `V-${represCedNum}` : '--', bg: '#fffbeb' },
+            { w: 0.18, label: 'PARENTESCO:', value: reg.parentesco_repres || 'Madre', bg: '#fffbeb' },
+            { w: 0.20, label: 'TELÉFONO REPRES.:', value: reg.telemov_repres || '--', bg: '#fffbeb' }
+        ], 50);
+    }
     y += 12;
 
     // SECCIÓN 2: DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO
@@ -579,7 +684,8 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
 
     // SECCIÓN 4: RECAUDOS EXIGIDOS
     drawSectionHeader('4. RECAUDOS EXIGIDOS PARA LA CONSIGNACIÓN EN EL DEPARTAMENTO DE CAPTACIÓN');
-    const recBoxH = 88;
+    const esMenor = (edadCalc && edadCalc < 18) || Boolean(reg.nom_repres);
+    const recBoxH = esMenor ? 104 : 88;
     ctx.fillStyle = '#f8fafc';
     ctx.fillRect(M, y, contentW, recBoxH);
     ctx.strokeStyle = '#475569';
@@ -598,6 +704,12 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.fillText('[  ] Fondo negro y copia del Título de Bachiller o Constancia de 5° Año.', col2X, y + 24);
     ctx.fillText('[  ] 02 Fotos tipo carnet en fondo blanco (recientes y formales).', col2X, y + 50);
     ctx.fillText('[  ] Comprobante de Registro del Sistema Nacional de Ingreso (SNI).', col2X, y + 76);
+
+    if (esMenor) {
+        ctx.fillStyle = '#9a3412';
+        ctx.font = 'bold 12.5px Arial, sans-serif';
+        ctx.fillText('[ X ] Fotocopia de Cédula del Representante Legal (Consignada en Portal IUAC).', col1X, y + 96);
+    }
     y += recBoxH + 12;
 
     // SECCIÓN 5: DECLARACIÓN JURADA Y FIRMAS

@@ -179,7 +179,7 @@ def validate_aspirante_payload(data):
     cleaned['sex_alum'] = sex
     cleaned['est_civil_alum'] = limpiar_texto_estricto(data.get('est_civil_alum', 'Soltero/a'))[:50]
 
-    # 5. Teléfonos
+    # 5. Teléfonos (Ambos obligatorios)
     tel_mov_raw = data.get('telemov_alum')
     ok_mov, tel_mov, err_mov = validar_telefono_venezolano(tel_mov_raw, 'móvil')
     if not ok_mov:
@@ -187,13 +187,17 @@ def validate_aspirante_payload(data):
     cleaned['telemov_alum'] = tel_mov
 
     tel_hab_raw = data.get('telehabi_alum')
-    if tel_hab_raw and str(tel_hab_raw).strip():
-        ok_hab, tel_hab, err_hab = validar_telefono_venezolano(tel_hab_raw, 'habitación')
-        if not ok_hab:
+    if not tel_hab_raw or not str(tel_hab_raw).strip():
+        return False, None, "El teléfono de habitación o secundario es obligatorio."
+    ok_hab, tel_hab, err_hab = validar_telefono_venezolano(tel_hab_raw, 'habitación')
+    if not ok_hab:
+        # Si introdujo un celular como secundario, validar como móvil
+        ok_hab_mov, tel_hab_mov, err_hab_mov = validar_telefono_venezolano(tel_hab_raw, 'móvil')
+        if not ok_hab_mov:
             return False, None, err_hab
-        cleaned['telehabi_alum'] = tel_hab
+        cleaned['telehabi_alum'] = tel_hab_mov
     else:
-        cleaned['telehabi_alum'] = tel_mov
+        cleaned['telehabi_alum'] = tel_hab
 
     # 6. Correo Electrónico
     correo = limpiar_texto_estricto(data.get('correo_alum', '')).lower().replace(' ', '')
@@ -217,10 +221,12 @@ def validate_aspirante_payload(data):
     if not cleaned['direc_alum'] or len(cleaned['direc_alum']) < 8:
         return False, None, "Debe detallar su dirección de habitación completa (mínimo 8 caracteres)."
 
-    # 8. Datos Académicos
+    # 8. Datos Académicos (Todos obligatorios)
     cleaned['niv_acad_alum'] = limpiar_texto_estricto(data.get('niv_acad_alum', 'Bachiller'))[:150]
     cleaned['inst_grad_alum'] = limpiar_texto_estricto(data.get('inst_grad_alum', ''))[:200]
     cleaned['ubica_inst_muni_alum'] = limpiar_texto_estricto(data.get('ubica_inst_muni_alum', ''))[:150]
+    if not cleaned['inst_grad_alum'] or len(cleaned['inst_grad_alum']) < 3:
+        return False, None, "Debe ingresar el nombre de la institución o plantel de egreso."
     
     ano_grad = data.get('ano_grad_alum')
     if ano_grad and str(ano_grad).isdigit():
@@ -229,25 +235,73 @@ def validate_aspirante_payload(data):
             return False, None, f"El año de graduación debe ser válido (entre 1990 y {date.today().year + 1})."
         cleaned['ano_grad_alum'] = ano_int
     else:
-        cleaned['ano_grad_alum'] = date.today().year
+        return False, None, "El año de graduación es obligatorio."
 
     cleaned['tipo_colegio'] = limpiar_texto_estricto(data.get('tipo_colegio', 'Público'))[:50]
 
-    # 9. Carrera de Postulación IUAC
+    # 9. Carrera de Postulación IUAC (Obligatoria)
     carrera = limpiar_texto_estricto(data.get('carrera', '')).upper()
     if carrera not in CARRERAS_VALIDAS:
         return False, None, f"La carrera seleccionada '{carrera}' no es válida. Seleccione una carrera de la oferta académica oficial."
     cleaned['carrera'] = carrera
 
-    # 10. Metadatos del Sistema y Fotografía
-    cleaned['foto_base64'] = data.get('foto_base64')
+    # 10. Fotografía Carnet (100% Obligatoria)
+    foto_raw = data.get('foto_base64')
+    if not foto_raw:
+        return False, None, "La fotografía tipo carnet es obligatoria. Por favor suba un archivo o active su cámara."
+    cleaned['foto_base64'] = foto_raw
     foto_ext_raw = str(data.get('foto_ext') or 'jpg').strip().lower().lstrip('.')
     cleaned['foto_ext'] = 'png' if foto_ext_raw == 'png' else 'jpg'
+
+    # 11. Datos y Fotocopia de Cédula del Representante (Obligatorio si es menor de 18 años)
+    if cleaned['edad_alum'] < 18:
+        repres_ced_raw = data.get('ced_repres')
+        if not repres_ced_raw:
+            return False, None, "Por ser menor de 18 años, la cédula del representante legal es obligatoria."
+        ok_repres_ced, repres_ced_int, err_repres_ced = validar_cedula_venezolana(repres_ced_raw)
+        if not ok_repres_ced:
+            return False, None, f"Cédula del representante inválida: {err_repres_ced}"
+        cleaned['ced_repres'] = str(repres_ced_int)
+
+        repres_nom = limpiar_texto_estricto(data.get('nom_repres', ''))
+        if not repres_nom or len(repres_nom) < 3:
+            return False, None, "Debe ingresar el nombre y apellido completos del representante legal."
+        cleaned['nom_repres'] = repres_nom
+
+        cleaned['parentesco_repres'] = limpiar_texto_estricto(data.get('parentesco_repres', 'Madre'))[:50]
+        
+        repres_tel_raw = data.get('telemov_repres')
+        if not repres_tel_raw:
+            return False, None, "El teléfono de contacto del representante legal es obligatorio."
+        ok_repres_tel, repres_tel, err_repres_tel = validar_telefono_venezolano(repres_tel_raw, 'móvil')
+        if not ok_repres_tel:
+            # Probar si es fijo
+            ok_repres_fijo, repres_fijo, _ = validar_telefono_venezolano(repres_tel_raw, 'habitación')
+            if not ok_repres_fijo:
+                return False, None, f"Teléfono del representante inválido: {err_repres_tel}"
+            cleaned['telemov_repres'] = repres_fijo
+        else:
+            cleaned['telemov_repres'] = repres_tel
+
+        repres_doc = data.get('repres_doc_base64')
+        if not repres_doc:
+            return False, None, "Por ser menor de edad, debe subir o escanear la fotocopia de la cédula del representante legal."
+        cleaned['repres_doc_base64'] = repres_doc
+        repres_ext_raw = str(data.get('repres_doc_ext') or 'jpg').strip().lower().lstrip('.')
+        cleaned['repres_doc_ext'] = 'png' if repres_ext_raw == 'png' else ('pdf' if repres_ext_raw == 'pdf' else 'jpg')
+    else:
+        cleaned['ced_repres'] = None
+        cleaned['nom_repres'] = None
+        cleaned['parentesco_repres'] = None
+        cleaned['telemov_repres'] = None
+        cleaned['repres_doc_base64'] = None
+        cleaned['repres_doc_ext'] = None
+
     cleaned['modalidad_ing'] = 'REGULAR'
     cleaned['condicion_resi'] = 'EXTERNO'
     cleaned['turno_class'] = 'DIURNO'
     cleaned['canal_inscripcion'] = 'WEB'
     cleaned['status_alum'] = 'REGISTRADO_WEB'
-    cleaned['observaciones'] = limpiar_texto_estricto(data.get('observaciones', 'Inscripción vía formulario público web'))[:500]
+    cleaned['observaciones'] = limpiar_texto_estricto(data.get('observaciones', 'Ninguna'))[:500] or 'Ninguna'
 
     return True, cleaned, None

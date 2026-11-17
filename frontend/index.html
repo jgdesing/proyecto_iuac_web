@@ -12,7 +12,7 @@
     <link rel="shortcut icon" type="image/png" href="img/logo_iuac.png?v=3">
 
     <!-- Estilos de Alto Rendimiento -->
-    <link rel="stylesheet" href="css/landing.css?v=4.0">
+    <link rel="stylesheet" href="css/landing.css?v=4.1">
 </head>
 <body>
 
@@ -436,6 +436,112 @@
                                     <input type="text" class="form-control" id="asp-nacionalidad_alum" value="VENEZOLANA" readonly style="background:#f1f5f9;">
                                 </div>
                             </div>
+
+                            <!-- SECCIÓN ESPECIAL OBLIGATORIA SI EL ASPIRANTE ES MENOR DE EDAD (< 18 AÑOS) -->
+                            <div class="col-12" id="seccion-representante-menor" style="display:none;">
+                                <div style="background:linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border:2px dashed #f59e0b; border-radius:12px; padding:1.25rem; margin-top:0.75rem; box-shadow:0 3px 12px rgba(245, 158, 11, 0.12);">
+                                    <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.75rem;">
+                                        <span style="font-size:1.6rem; line-height:1;">👨‍👧</span>
+                                        <div>
+                                            <h4 style="margin:0; font-size:1rem; color:#9a3412; font-weight:900; letter-spacing:0.2px;">
+                                                Datos y Cédula del Representante Legal (Obligatorio para Menores de 18 Años)
+                                            </h4>
+                                            <p style="margin:0.2rem 0 0; font-size:0.8rem; color:#78350f; line-height:1.4;">
+                                                Conforme a las leyes de la República Bolivariana de Venezuela, todo aspirante menor de edad debe registrar los datos y la fotocopia/escaneo de la cédula de su representante legal.
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-grid">
+                                        <!-- Tipo de Cédula y Cédula del Representante -->
+                                        <div class="col-4">
+                                            <div class="form-group">
+                                                <label>Tipo C.I. <span class="req">*</span></label>
+                                                <select class="form-control" id="asp-repres-tipo_cedula">
+                                                    <option value="V" selected>V - Venezolano</option>
+                                                    <option value="E">E - Extranjero</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="form-group">
+                                                <label>Cédula del Representante <span class="req">*</span></label>
+                                                <input type="text" class="form-control" id="asp-repres-cedula" placeholder="Ej: 12345678" maxlength="8" inputmode="numeric">
+                                                <div class="field-error-msg" id="err-repres-cedula"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Nombres y Apellidos del Representante -->
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Nombres del Representante <span class="req">*</span></label>
+                                                <input type="text" class="form-control" id="asp-repres-nombre" placeholder="Ej: María Elena">
+                                                <div class="field-error-msg" id="err-repres-nombre"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Apellidos del Representante <span class="req">*</span></label>
+                                                <input type="text" class="form-control" id="asp-repres-apellido" placeholder="Ej: Rodríguez Pérez">
+                                                <div class="field-error-msg" id="err-repres-apellido"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Parentesco y Teléfono -->
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Parentesco / Filiación <span class="req">*</span></label>
+                                                <select class="form-control" id="asp-repres-parentesco">
+                                                    <option value="Madre" selected>Madre</option>
+                                                    <option value="Padre">Padre</option>
+                                                    <option value="Tutor Legal">Tutor Legal</option>
+                                                    <option value="Abuelo/a">Abuelo / Abuela</option>
+                                                </select>
+                                                <div class="field-error-msg" id="err-repres-parentesco"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Teléfono del Representante <span class="req">*</span></label>
+                                                <input type="tel" class="form-control" id="asp-repres-telefono" placeholder="Ej: 0414-1234567" maxlength="12" inputmode="tel">
+                                                <div class="field-error-msg" id="err-repres-telefono"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Subir o Escanear Fotocopia de Cédula del Representante -->
+                                        <div class="col-12">
+                                            <div class="photo-capture-card" style="border:2px dashed #f59e0b; background:#ffffff; margin-bottom:0.25rem;">
+                                                <label style="font-size:0.86rem; font-weight:800; color:#9a3412; margin-bottom:0.25rem; display:block;">
+                                                    📄 Fotocopia / Escaneo de Cédula del Representante <span class="req">*</span>
+                                                </label>
+                                                <div style="font-size:0.75rem; color:#475569; margin-bottom:0.6rem; text-align:center;">
+                                                    Formatos permitidos: <strong>.JPG, .PNG o .PDF</strong> (Máx. <strong>8 MB</strong>) — <em>Obligatorio para menores</em>
+                                                </div>
+
+                                                <div id="preview-repres-cedula-box" style="display:none; width:160px; height:105px; border-radius:8px; border:2px solid #f59e0b; overflow:hidden; background:#f8fafc; margin:0 auto 0.6rem; box-shadow:0 3px 10px rgba(0,0,0,0.1);">
+                                                    <img id="preview-repres-cedula-img" alt="Cédula Representante" style="width:100%; height:100%; object-fit:cover; display:none;">
+                                                    <div id="preview-repres-cedula-pdf" style="display:none; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:0.75rem; color:#9a3412; font-weight:800;">
+                                                        <span style="font-size:1.8rem;">📄</span>
+                                                        <span>Documento PDF</span>
+                                                    </div>
+                                                </div>
+
+                                                <input type="file" id="input-file-repres-cedula" class="file-input-hidden" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf">
+                                                <div class="photo-buttons-dual">
+                                                    <label for="input-file-repres-cedula" class="btn-photo-action" id="btn-subir-repres-cedula" style="font-size:0.8rem; padding:0.5rem 0.9rem; border-color:#d97706;">
+                                                        📂 Subir Cédula (.JPG / .PNG / .PDF)
+                                                    </label>
+                                                    <button type="button" class="btn-photo-action btn-camera-live" id="btn-escanear-repres-cedula" style="font-size:0.8rem; padding:0.5rem 0.9rem;">
+                                                        📷 Escanear con Cámara
+                                                    </button>
+                                                </div>
+                                                <div id="status-repres-cedula" style="font-size:0.78rem; color:#15803d; font-weight:800; margin-top:0.4rem; display:none;"></div>
+                                                <div class="field-error-msg" id="err-repres-cedula-doc" style="margin-top:0.35rem;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -487,8 +593,8 @@
                             </div>
                             <div class="col-6 lockable-field">
                                 <div class="form-group">
-                                    <label>Teléfono Habitación / Secundario</label>
-                                    <input type="tel" class="form-control" id="asp-telehabi_alum" placeholder="Ej: 0243-2345678 o 0414-0000000" maxlength="12" inputmode="tel">
+                                    <label>Teléfono Habitación / Secundario <span class="req">*</span></label>
+                                    <input type="tel" class="form-control" id="asp-telehabi_alum" placeholder="Ej: 0243-2345678 o 0414-0000000" maxlength="12" inputmode="tel" required>
                                     <div class="field-error-msg" id="err-telehab"></div>
                                 </div>
                             </div>
@@ -569,8 +675,9 @@
 
                             <div class="col-12 lockable-field">
                                 <div class="form-group">
-                                    <label>Observaciones Adicionales (Opcional)</label>
-                                    <textarea class="form-control" id="asp-observaciones" placeholder="Indique alguna condición o dato de interés para su inscripción..."></textarea>
+                                    <label>Observaciones del Aspirante <span class="req">*</span></label>
+                                    <textarea class="form-control" id="asp-observaciones" placeholder="Indique alguna condición o dato de interés (escriba 'Ninguna' si no tiene)..." required>Ninguna</textarea>
+                                    <div class="field-error-msg" id="err-observaciones"></div>
                                 </div>
                             </div>
                         </div>
@@ -642,6 +749,63 @@
                 <button type="button" class="btn btn-secondary" onclick="location.reload()">
                     Finalizar y Cerrar
                 </button>
+            </div>
+
+            <!-- Acordeón Desplegable: Instructivos y Documentos Oficiales en PDF -->
+            <div class="accordion-descargas-wrapper">
+                <button type="button" class="btn-accordion-toggle" id="btn-toggle-descargas" aria-expanded="false" onclick="window.toggleAcordeonDescargas && window.toggleAcordeonDescargas()">
+                    <span class="accordion-toggle-title">
+                        📚 Instructivos y Documentos Descargables (PDF)
+                    </span>
+                    <span class="accordion-toggle-icon" id="accordion-descargas-arrow">▼</span>
+                </button>
+                <div class="accordion-descargas-content" id="accordion-descargas-panel" style="display:none;">
+                    <div class="accordion-descargas-body">
+                        <p style="font-size:0.8rem; color:#475569; margin-bottom:0.75rem; line-height:1.4;">
+                            Descargue a su computadora, teléfono móvil o consulte en línea los instructivos oficiales del proceso de captación:
+                        </p>
+                        
+                        <!-- Documento 1: Instructivo de Admisión -->
+                        <div class="descarga-item-card">
+                            <div class="descarga-item-info">
+                                <div class="descarga-item-icon">📄</div>
+                                <div>
+                                    <div class="descarga-item-name">Instructivo Oficial de Admisión IUAC 2026-2027</div>
+                                    <div class="descarga-item-desc">Etapas del proceso, cronograma de consignación de carpetas y requisitos obligatorios.</div>
+                                    <div class="descarga-item-meta">PDF • Carpeta Oficial: /descargas • Oficial IUAC</div>
+                                </div>
+                            </div>
+                            <div class="descarga-item-actions">
+                                <a href="descargas/instructivo_admision_iuac_2026_2027.pdf" target="_blank" class="btn-descarga-action btn-descarga-ver" title="Abrir y leer documento en el navegador">
+                                    👁️ Ver
+                                </a>
+                                <a href="descargas/instructivo_admision_iuac_2026_2027.pdf" download="instructivo_admision_iuac_2026_2027.pdf" class="btn-descarga-action btn-descarga-bajar" title="Descargar PDF a su PC o móvil">
+                                    📥 Descargar
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Documento 2: Guía de Perfil Médico -->
+                        <div class="descarga-item-card">
+                            <div class="descarga-item-info">
+                                <div class="descarga-item-icon">🏥</div>
+                                <div>
+                                    <div class="descarga-item-name">Guía de Perfil Médico y Aptitud Física</div>
+                                    <div class="descarga-item-desc">Exámenes clínicos, oftalmológicos, auditivos y aptitud psicofísica por especialidad aeronáutica.</div>
+                                    <div class="descarga-item-meta">PDF • Carpeta Oficial: /descargas • Requisito de Salud</div>
+                                </div>
+                            </div>
+                            <div class="descarga-item-actions">
+                                <a href="descargas/guia_perfil_medico_y_recaudos_iuac.pdf" target="_blank" class="btn-descarga-action btn-descarga-ver" title="Abrir y leer documento en el navegador">
+                                    👁️ Ver
+                                </a>
+                                <a href="descargas/guia_perfil_medico_y_recaudos_iuac.pdf" download="guia_perfil_medico_y_recaudos_iuac.pdf" class="btn-descarga-action btn-descarga-bajar" title="Descargar PDF a su PC o móvil">
+                                    📥 Descargar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -789,8 +953,8 @@
 
     <!-- Scripts de Carga Ultra Rápida -->
     <script src="js/geo_data.js?v=2.2"></script>
-    <script src="js/qr_pdf_engine.js?v=1.2"></script>
-    <script src="js/react_ui_enhancer.js?v=1.2"></script>
-    <script src="js/app.js?v=3.2"></script>
+    <script src="js/qr_pdf_engine.js?v=2.0"></script>
+    <script src="js/react_ui_enhancer.js?v=1.3"></script>
+    <script src="js/app.js?v=3.5"></script>
 </body>
 </html>

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  postgres_iuac_web:
+    image: postgres:15-alpine
+    container_name: iuac_web_db
+    restart: always
+    environment:
+      POSTGRES_DB: bd_aspirantes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lollipop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata_iuac:/var/lib/postgresql/data
+      - ./schema/001_create_academico_schema.sql:/docker-entrypoint-initdb.d/001_schema.sql
+      - ./schema/002_catalogos_iniciales.sql:/docker-entrypoint-initdb.d/002_catalogos.sql
+
+  iuac_landing_web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: iuac_web_app
+    restart: always
+    depends_on:
+      - postgres_iuac_web
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=postgres_iuac_web
+      - DB_PORT=5432
+      - DB_NAME=bd_aspirantes
+      - DB_USER=postgres
+      - DB_PASSWORD=lollipop
+      - PORT=5050
+      - SECRET_KEY=iuac_prod_secret_token_change_in_production
+      - ADMIN_API_KEY=iuac_admin_export_secure_key_2026
+    ports:
+      - "5050:5050"
+
+volumes:
+  pgdata_iuac:
+

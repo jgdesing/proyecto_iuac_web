@@ -12,6 +12,12 @@ logger = logging.getLogger("IUAC_DB_OPS")
 FOTOS_ASPIRANTES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'fotos_aspirantes'))
 FOTOS_ASPIRANTES_FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'fotos_aspirantes'))
 
+# Directorio oficial para alojar las fotocopias de cédula de representantes (/cedulas_representantes)
+CEDULAS_REPRES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cedulas_representantes'))
+CEDULAS_REPRES_FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'cedulas_representantes'))
+os.makedirs(CEDULAS_REPRES_DIR, exist_ok=True)
+os.makedirs(CEDULAS_REPRES_FRONTEND_DIR, exist_ok=True)
+
 def _normalizar_token_nombre(texto, fallback):
     """Extrae la primera palabra sin acentos ni caracteres especiales en minúscula."""
     if not texto or not str(texto).strip():
@@ -89,6 +95,80 @@ def guardar_foto_aspirante(foto_base64, cedula_str, upload_dir=None, nom_alum=''
         logger.warning(f"No se pudo procesar foto del aspirante {cedula_str}: {e}")
         return None, None
 
+def guardar_cedula_representante(doc_base64, cedula_aspirante, nom_repres='', ext='jpg'):
+    """
+    Guarda la fotocopia de la cédula del representante legal en /cedulas_representantes/
+    con nombre cedula_repres_<cedula_aspirante>.<ext>
+    Retorna (data_uri, filename)
+    """
+    if not doc_base64 or not isinstance(doc_base64, str):
+        return None, None
+    try:
+        if ',' in doc_base64:
+            header, encoded = doc_base64.split(',', 1)
+        else:
+            header = 'data:image/jpeg;base64'
+            encoded = doc_base64
+
+        encoded = encoded.strip()
+        doc_bytes = base64.b64decode(encoded)
+        if len(doc_bytes) > 8 * 1024 * 1024:  # Máx 8MB
+            logger.warning(f"Cédula representante excede tamaño permitido: {len(doc_bytes)} bytes")
+            return None, None
+
+        es_pdf = ('application/pdf' in header.lower()) or (str(ext).lower().lstrip('.') == 'pdf')
+        es_png = ('image/png' in header.lower()) or (str(ext).lower().lstrip('.') == 'png')
+        if es_pdf:
+            ext_final = 'pdf'
+            mime_type = 'application/pdf'
+        elif es_png:
+            ext_final = 'png'
+            mime_type = 'image/png'
+        else:
+            ext_final = 'jpg'
+            mime_type = 'image/jpeg'
+
+        ced_digits = re.sub(r'\D', '', str(cedula_aspirante)) or str(cedula_aspirante)
+        filename = f"cedula_repres_{ced_digits}.{ext_final}"
+
+        for target_dir in (CEDULAS_REPRES_DIR, CEDULAS_REPRES_FRONTEND_DIR):
+            try:
+                os.makedirs(target_dir, exist_ok=True)
+                for prev in glob.glob(os.path.join(target_dir, f"cedula_repres_{ced_digits}.*")):
+                    try:
+                        if os.path.basename(prev) != filename:
+                            os.remove(prev)
+                    except Exception:
+                        pass
+                filepath = os.path.join(target_dir, filename)
+                with open(filepath, 'wb') as f:
+                    f.write(doc_bytes)
+            except Exception:
+                pass
+
+        data_uri = f"data:{mime_type};base64,{encoded}"
+        logger.info(f"Cédula representante guardada en /cedulas_representantes/{filename} ({len(doc_bytes)} bytes)")
+        return data_uri, filename
+    except Exception as e:
+        logger.warning(f"No se pudo guardar cédula del representante para aspirante {cedula_aspirante}: {e}")
+        return None, None
+
+def asegurar_columnas_representante(cur, conn):
+    """Garantiza que las columnas para aspirantes menores de edad existan en academico.estudiantes."""
+    sentencias = [
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula_repres TEXT;",
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS ced_repres VARCHAR(20);",
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS nom_repres VARCHAR(150);",
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS parentesco_repres VARCHAR(50);",
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS telemov_repres VARCHAR(50);"
+    ]
+    for s in sentencias:
+        try:
+            cur.execute(s)
+            conn.commit()
+        except Exception:
+            conn.rollback()
+
 def check_cedula_exists(cedula):
     """Verifica si la cédula ya se encuentra registrada en academico.estudiantes."""
     conn, cur = get_db_cursor()
@@ -124,6 +204,7 @@ def obtener_aspirante_por_cedula(cedula):
         return None, "No hay conexión disponible con el servidor de base de datos."
     try:
         ced_int = int(cedula)
+        asegurar_columnas_representante(cur, conn)
         query = """
             SELECT
                 ced_alum, tipo_cedula, nom_alum, ape_alum, fec_nac_alum, edad_alum,
@@ -131,7 +212,8 @@ def obtener_aspirante_por_cedula(cedula):
                 lugar_nac_alum, nacionalidad_alum, foto_alum,
                 telemov_alum, telehabi_alum, correo_alum,
                 niv_acad_alum, inst_grad_alum, ano_grad_alum, tipo_colegio,
-                carrera, created_at
+                carrera, created_at,
+                fotocopia_cedula_repres, ced_repres, nom_repres, parentesco_repres, telemov_repres
             FROM academico.estudiantes
             WHERE ced_alum = %s
             LIMIT 1;
@@ -194,7 +276,17 @@ def obtener_aspirante_por_cedula(cedula):
                         pass
 
         data['foto_base64'] = foto_base64
-        data['ruta_foto_archivo'] = f"/fotos_aspirantes/{archivo_encontrado}" if foto_base64 else None
+        data['ruta_foto_archivo'] = f"/fotos_aspirantes/{archivo_encontrado}" if (foto_base64 or archivo_encontrado) else None
+        data['enlace_foto'] = data['ruta_foto_archivo']
+        
+        # Enlace a la cédula del representante si existe
+        repres_doc = data.get('fotocopia_cedula_repres')
+        if repres_doc and isinstance(repres_doc, str) and repres_doc.strip():
+            nombre_repres_doc = os.path.basename(repres_doc.strip())
+            data['enlace_cedula_repres'] = f"/cedulas_representantes/{nombre_repres_doc}"
+        else:
+            data['enlace_cedula_repres'] = None
+
         return data, None
     except Exception as e:
         logger.error(f"Error consultando aspirante por cédula {cedula}: {e}")
@@ -328,6 +420,19 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             )
             foto_nombre = foto_filename
 
+        # Asegurar columnas para representante legal y procesar documento si es menor de edad
+        asegurar_columnas_representante(cur, conn)
+        repres_doc_filename = None
+        if data.get('repres_doc_base64'):
+            _, repres_doc_filename = guardar_cedula_representante(
+                data.get('repres_doc_base64'),
+                str(ced_int),
+                nom_repres=data.get('nom_repres', ''),
+                ext=data.get('repres_doc_ext', 'jpg')
+            )
+
+        ruta_ced_repres = f"/cedulas_representantes/{repres_doc_filename}" if repres_doc_filename else None
+
         # 3. Columnas exactas que existen en academico.estudiantes
         columnas = [
             'ced_alum', 'tipo_cedula', 'nom_alum', 'ape_alum', 'fec_nac_alum', 'edad_alum',
@@ -336,8 +441,13 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             'telemov_alum', 'telehabi_alum', 'correo_alum',
             'niv_acad_alum', 'inst_grad_alum', 'ubica_inst_muni_alum', 'ano_grad_alum', 'tipo_colegio',
             'carrera', 'modalidad_ing', 'condicion_resi', 'turno_class',
-            'canal_inscripcion', 'status_alum', 'observaciones', 'is_active', 'creado_por', 'actualizado_por'
+            'canal_inscripcion', 'status_alum', 'observaciones', 'is_active', 'creado_por', 'actualizado_por',
+            'fotocopia_cedula_repres', 'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres'
         ]
+
+        obs_texto = str(data.get('observaciones') or 'Ninguna').strip()
+        if data.get('nom_repres'):
+            obs_texto += f" | Representante: {data.get('nom_repres')} (CI: {data.get('ced_repres')}, {data.get('parentesco_repres', 'Familiar')}, Tel: {data.get('telemov_repres')})"
 
         valores = [
             ced_int,
@@ -370,10 +480,15 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             data.get('turno_class', 'DIURNO'),
             'WEB',
             'REGISTRADO_WEB',
-            data.get('observaciones'),
+            obs_texto,
             True,
             'WEB_PUBLIC_FORM',
-            'WEB_PUBLIC_FORM'
+            'WEB_PUBLIC_FORM',
+            ruta_ced_repres,
+            data.get('ced_repres'),
+            data.get('nom_repres'),
+            data.get('parentesco_repres'),
+            data.get('telemov_repres')
         ]
 
         # Sanitización universal de última milla: limpiar espacios residuales o múltiples de cualquier cadena
