@@ -49,10 +49,188 @@ function checkFileProtocolBanner() {
     }
 }
 
-// ── CAPTURA Y VALIDACIÓN DE FOTOGRAFÍA DESDE MÓVIL/PC (PUNTO 5) ──────────────
+// ── CAPTURA Y VALIDACIÓN DE FOTOGRAFÍA (2 BOTONES: SUBIR .JPG/.PNG Y ACTIVAR CÁMARA) ──
+const TAMANO_MAX_ARCHIVO_FOTO = 5 * 1024 * 1024; // Máximo 5 MB permitidos para archivo .JPG o .PNG
+let streamCamaraActiva = null;
+let modoLenteCamara = 'user'; // 'user' (frontal/laptop) o 'environment' (trasera móvil)
+let callbackCapturaCamara = null;
+
+function detenerStreamCamara() {
+    if (streamCamaraActiva) {
+        streamCamaraActiva.getTracks().forEach(track => track.stop());
+        streamCamaraActiva = null;
+    }
+    const videoEl = document.getElementById('video-camara-vivo');
+    if (videoEl) {
+        videoEl.srcObject = null;
+    }
+}
+
+async function iniciarStreamEnModalCamara() {
+    const videoEl = document.getElementById('video-camara-vivo');
+    const errCam = document.getElementById('err-camara-vivo');
+    if (!videoEl) return false;
+
+    detenerStreamCamara();
+    if (errCam) {
+        errCam.textContent = '';
+        errCam.classList.remove('visible');
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        return false;
+    }
+
+    try {
+        streamCamaraActiva = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: { ideal: modoLenteCamara },
+                width: { ideal: 640 },
+                height: { ideal: 800 }
+            },
+            audio: false
+        });
+        videoEl.srcObject = streamCamaraActiva;
+        videoEl.style.transform = (modoLenteCamara === 'user') ? 'scaleX(-1)' : 'none';
+        await videoEl.play().catch(() => {});
+        return true;
+    } catch (err) {
+        // Reintentar con cualquier cámara disponible (ej. webcam USB de PC de escritorio)
+        try {
+            streamCamaraActiva = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            videoEl.srcObject = streamCamaraActiva;
+            videoEl.style.transform = 'scaleX(-1)';
+            await videoEl.play().catch(() => {});
+            return true;
+        } catch (err2) {
+            if (errCam) {
+                errCam.textContent = 'No se pudo acceder a la cámara del dispositivo. Verifique los permisos del navegador o utilice el botón "Subir Archivo (.JPG / .PNG)".';
+                errCam.classList.add('visible');
+            }
+            return false;
+        }
+    }
+}
+
+async function abrirVisorCamaraDispositivo(onFotoCapturada, inputFallbackEl) {
+    const modalCam = document.getElementById('modal-camara-vivo');
+    callbackCapturaCamara = onFotoCapturada;
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && modalCam) {
+        modalCam.classList.add('active');
+        const ok = await iniciarStreamEnModalCamara();
+        if (!ok && inputFallbackEl) {
+            modalCam.classList.remove('active');
+            detenerStreamCamara();
+            inputFallbackEl.click();
+        }
+    } else if (inputFallbackEl) {
+        inputFallbackEl.click();
+    }
+}
+
+function initModalCamaraVivo() {
+    const modalCam = document.getElementById('modal-camara-vivo');
+    const btnCerrar = document.getElementById('btn-cerrar-camara-vivo');
+    const btnCapturar = document.getElementById('btn-capturar-foto-vivo');
+    const btnGirar = document.getElementById('btn-cambiar-lente-vivo');
+    const videoEl = document.getElementById('video-camara-vivo');
+
+    if (!modalCam) return;
+
+    const cerrarCamara = () => {
+        detenerStreamCamara();
+        modalCam.classList.remove('active');
+    };
+
+    if (btnCerrar) btnCerrar.addEventListener('click', cerrarCamara);
+    modalCam.addEventListener('click', (e) => {
+        if (e.target === modalCam) cerrarCamara();
+    });
+
+    if (btnGirar) {
+        btnGirar.addEventListener('click', async () => {
+            modoLenteCamara = (modoLenteCamara === 'user') ? 'environment' : 'user';
+            await iniciarStreamEnModalCamara();
+        });
+    }
+
+    if (btnCapturar && videoEl) {
+        btnCapturar.addEventListener('click', () => {
+            if (!streamCamaraActiva || !videoEl.videoWidth) return;
+
+            const vw = videoEl.videoWidth;
+            const vh = videoEl.videoHeight;
+            const targetRatio = 320 / 400; // Proporción carnet 4:5
+            let cropW = vw;
+            let cropH = vh;
+
+            if (vw / vh > targetRatio) {
+                cropW = Math.round(vh * targetRatio);
+            } else {
+                cropH = Math.round(vw / targetRatio);
+            }
+            const sx = Math.round((vw - cropW) / 2);
+            const sy = Math.round((vh - cropH) / 2);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 400;
+            const ctx = canvas.getContext('2d');
+
+            if (modoLenteCamara === 'user') {
+                ctx.translate(320, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(videoEl, sx, sy, cropW, cropH, 0, 0, 320, 400);
+
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.72);
+            cerrarCamara();
+
+            if (typeof callbackCapturaCamara === 'function') {
+                callbackCapturaCamara(dataUrl);
+            }
+        });
+    }
+}
+
+function validarArchivoImagenJpgPng(file, errElement) {
+    if (!file) return false;
+    const nombre = (file.name || '').toLowerCase();
+    const tipo = (file.type || '').toLowerCase();
+    const esJpgOPng = tipo === 'image/jpeg' || tipo === 'image/jpg' || tipo === 'image/png' || /\.(jpe?g|png)$/i.test(nombre);
+
+    if (!esJpgOPng) {
+        if (errElement) {
+            errElement.textContent = '⚠️ Formato no permitido. Solo se admiten archivos .JPG o .PNG.';
+            errElement.classList.add('visible');
+        }
+        return false;
+    }
+
+    if (file.size > TAMANO_MAX_ARCHIVO_FOTO) {
+        const pesoMB = (file.size / (1024 * 1024)).toFixed(2);
+        if (errElement) {
+            errElement.textContent = `⚠️ El archivo seleccionado (${pesoMB} MB) excede el tamaño máximo requerido de 5 MB.`;
+            errElement.classList.add('visible');
+        }
+        return false;
+    }
+
+    if (errElement) {
+        errElement.textContent = '';
+        errElement.classList.remove('visible');
+    }
+    return true;
+}
+
 function initPhotoCapture() {
+    initModalCamaraVivo();
+
     const fileInput = document.getElementById('asp-foto_alum');
+    const fileInputCamFallback = document.getElementById('asp-foto-camara-fallback');
     const btnSubir = document.getElementById('btn-subir-foto');
+    const btnActivarCamara = document.getElementById('btn-activar-camara-principal');
     const btnQuitar = document.getElementById('btn-quitar-foto');
     const imgPreview = document.getElementById('photo-preview-img');
     const iconPlaceholder = document.getElementById('photo-placeholder-icon');
@@ -61,40 +239,51 @@ function initPhotoCapture() {
 
     if (!fileInput || !btnSubir) return;
 
-    // Solo usar .click() por JS si el elemento NO es un <label for="asp-foto_alum">
-    if (btnSubir.tagName !== 'LABEL') {
-        btnSubir.addEventListener('click', () => {
-            fileInput.click();
-        });
-    }
+    const aplicarFotoEnFormularioPrincipal = async (dataUrlBase64) => {
+        capturedPhotoBase64 = dataUrlBase64;
+        window.capturedPhotoBase64 = capturedPhotoBase64;
 
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;
-
-        // Validar tipo de imagen de forma amplia (compatible con todos los móviles y PC)
-        const esImagenValida = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp|bmp|gif|heic|heif)$/i.test(file.name || '');
-        if (!esImagenValida) {
-            if (errFoto) {
-                errFoto.textContent = 'Formato inválido. Seleccione una imagen (JPG, PNG o WebP).';
-                errFoto.classList.add('visible');
-            }
-            fileInput.value = '';
-            return;
+        if (imgPreview) {
+            imgPreview.src = capturedPhotoBase64;
+            imgPreview.style.display = 'block';
         }
-
-        if (file.size > 35 * 1024 * 1024) {
-            if (errFoto) {
-                errFoto.textContent = 'La imagen seleccionada supera los 35 MB. Por favor seleccione una foto más liviana.';
-                errFoto.classList.add('visible');
-            }
-            fileInput.value = '';
-            return;
-        }
-
+        if (iconPlaceholder) iconPlaceholder.style.display = 'none';
+        if (btnQuitar) btnQuitar.style.display = 'inline-block';
+        btnSubir.textContent = '📂 Cambiar Archivo (.JPG / .PNG)';
         if (errFoto) errFoto.classList.remove('visible');
-        btnSubir.textContent = '⏳ Optimizando foto...';
 
+        if (typeof window.actualizarBarraReactivaIUAC === 'function') {
+            window.actualizarBarraReactivaIUAC();
+        }
+
+        const cedActual = (document.getElementById('asp-ced_alum')?.value || '').replace(/\D/g, '').trim();
+        if (cedActual && cedActual.length >= 6 && cedActual.length <= 8) {
+            try {
+                const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ced_alum: cedActual, foto_base64: capturedPhotoBase64 })
+                });
+                const data = await res.json();
+                if (res.ok && data.ok && statusFotoPrincipal) {
+                    statusFotoPrincipal.textContent = `✓ Guardada en fotos_aspirantes/foto_${cedActual}.jpg`;
+                    statusFotoPrincipal.style.display = 'block';
+                }
+            } catch (_) {}
+        } else if (statusFotoPrincipal) {
+            statusFotoPrincipal.textContent = '✓ Fotografía lista (se alojará en fotos_aspirantes al registrar)';
+            statusFotoPrincipal.style.display = 'block';
+        }
+    };
+
+    const procesarArchivoSeleccionado = (file) => {
+        if (!validarArchivoImagenJpgPng(file, errFoto)) {
+            fileInput.value = '';
+            if (fileInputCamFallback) fileInputCamFallback.value = '';
+            return;
+        }
+
+        btnSubir.textContent = '⏳ Optimizando foto...';
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
@@ -102,8 +291,6 @@ function initPhotoCapture() {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
-
-                // Escalar manteniendo proporción carnet optimizada (máx 320x400 px = ~15-18 KB en BD)
                 const maxW = 320;
                 const maxH = 400;
                 if (width > maxW || height > maxH) {
@@ -111,73 +298,50 @@ function initPhotoCapture() {
                     width = Math.round(width * ratio);
                     height = Math.round(height * ratio);
                 }
-
                 canvas.width = width;
                 canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
 
-                // Exportar como JPEG ultra-optimizado para carnet PDF (0.72 calidad = ~15-18 KB)
-                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.72);
-                window.capturedPhotoBase64 = capturedPhotoBase64;
-
-                if (imgPreview) {
-                    imgPreview.src = capturedPhotoBase64;
-                    imgPreview.style.display = 'block';
-                }
-                if (iconPlaceholder) iconPlaceholder.style.display = 'none';
-                if (btnQuitar) btnQuitar.style.display = 'inline-block';
-                btnSubir.textContent = '🔄 Cambiar Foto';
+                const base64Opt = canvas.toDataURL('image/jpeg', 0.72);
                 fileInput.value = '';
-
-                if (typeof window.actualizarBarraReactivaIUAC === 'function') {
-                    window.actualizarBarraReactivaIUAC();
-                }
-
-                // Si ya escribió una cédula válida, alojar de inmediato en carpeta fotos_aspirantes y BD
-                const cedActual = (document.getElementById('asp-ced_alum')?.value || '').replace(/\D/g, '').trim();
-                if (cedActual && cedActual.length >= 6 && cedActual.length <= 8) {
-                    try {
-                        const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ ced_alum: cedActual, foto_base64: capturedPhotoBase64 })
-                        });
-                        const data = await res.json();
-                        if (res.ok && data.ok && statusFotoPrincipal) {
-                            statusFotoPrincipal.textContent = `✓ Guardada en fotos_aspirantes/foto_${cedActual}.jpg`;
-                            statusFotoPrincipal.style.display = 'block';
-                        }
-                    } catch (_) {}
-                } else if (statusFotoPrincipal) {
-                    statusFotoPrincipal.textContent = '✓ Fotografía lista (se alojará en fotos_aspirantes al registrar)';
-                    statusFotoPrincipal.style.display = 'block';
-                }
+                if (fileInputCamFallback) fileInputCamFallback.value = '';
+                await aplicarFotoEnFormularioPrincipal(base64Opt);
             };
             img.onerror = () => {
                 if (errFoto) {
-                    errFoto.textContent = 'Error al procesar la imagen seleccionada. Intente con otra.';
+                    errFoto.textContent = 'Error al procesar la imagen seleccionada. Intente con otro archivo .JPG o .PNG.';
                     errFoto.classList.add('visible');
                 }
-                btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
+                btnSubir.textContent = '📂 Subir Archivo (.JPG / .PNG)';
                 fileInput.value = '';
             };
             img.src = event.target.result;
         };
-        reader.onerror = () => {
-            if (errFoto) {
-                errFoto.textContent = 'Error al leer el archivo en el dispositivo.';
-                errFoto.classList.add('visible');
-            }
-            btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
-            fileInput.value = '';
-        };
         reader.readAsDataURL(file);
+    };
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) procesarArchivoSeleccionado(file);
     });
+
+    if (fileInputCamFallback) {
+        fileInputCamFallback.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) procesarArchivoSeleccionado(file);
+        });
+    }
+
+    if (btnActivarCamara) {
+        btnActivarCamara.addEventListener('click', () => {
+            abrirVisorCamaraDispositivo(aplicarFotoEnFormularioPrincipal, fileInputCamFallback);
+        });
+    }
 
     if (btnQuitar) {
         btnQuitar.addEventListener('click', () => {
             fileInput.value = '';
+            if (fileInputCamFallback) fileInputCamFallback.value = '';
             capturedPhotoBase64 = null;
             window.capturedPhotoBase64 = null;
             if (imgPreview) {
@@ -186,7 +350,7 @@ function initPhotoCapture() {
             }
             if (iconPlaceholder) iconPlaceholder.style.display = 'block';
             btnQuitar.style.display = 'none';
-            btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
+            btnSubir.textContent = '📂 Subir Archivo (.JPG / .PNG)';
             if (statusFotoPrincipal) statusFotoPrincipal.style.display = 'none';
             if (errFoto) errFoto.classList.remove('visible');
             if (typeof window.actualizarBarraReactivaIUAC === 'function') {
@@ -534,7 +698,9 @@ function initRecuperarPlanillaModal() {
     const errBox = document.getElementById('err-buscar-cedula');
     const inputFotoRec = document.getElementById('input-recuperar-foto');
     const btnSubirFotoRec = document.getElementById('btn-recuperar-subir-foto');
+    const btnCamaraRec = document.getElementById('btn-activar-camara-recuperar');
     const statusFotoRec = document.getElementById('status-recuperar-foto');
+    const errFotoRec = document.getElementById('err-recuperar-foto');
     let fotoRecuperacionBase64 = null;
 
     if (btnHero) {
@@ -548,6 +714,52 @@ function initRecuperarPlanillaModal() {
     }
     if (!modal) return;
 
+    const aplicarFotoEnModalRecuperacion = async (base64Img) => {
+        fotoRecuperacionBase64 = base64Img;
+        capturedPhotoBase64 = fotoRecuperacionBase64;
+        window.capturedPhotoBase64 = fotoRecuperacionBase64;
+
+        const previewBox = document.getElementById('preview-recuperar-foto-box');
+        const previewImg = document.getElementById('preview-recuperar-foto-img');
+        if (previewBox && previewImg) {
+            previewImg.src = fotoRecuperacionBase64;
+            previewBox.style.display = 'block';
+        }
+        if (btnSubirFotoRec) {
+            btnSubirFotoRec.textContent = '📂 Cambiar Archivo (.JPG / .PNG)';
+        }
+        if (errFotoRec) {
+            errFotoRec.textContent = '';
+            errFotoRec.classList.remove('visible');
+        }
+
+        const cedVal = (inputCed?.value || '').replace(/\D/g, '').trim();
+        if (cedVal && cedVal.length >= 6 && cedVal.length <= 8) {
+            try {
+                const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ced_alum: cedVal, foto_base64: fotoRecuperacionBase64 })
+                });
+                const data = await res.json();
+                if (statusFotoRec) {
+                    statusFotoRec.textContent = (res.ok && data.ok)
+                        ? `✓ Fotografía alojada en fotos_aspirantes/foto_${cedVal}.jpg y guardada en la BD.`
+                        : '✓ Fotografía lista para incluir en su planilla PDF.';
+                    statusFotoRec.style.display = 'block';
+                }
+            } catch (_) {
+                if (statusFotoRec) {
+                    statusFotoRec.textContent = '✓ Fotografía cargada. Se guardará al descargar la planilla.';
+                    statusFotoRec.style.display = 'block';
+                }
+            }
+        } else if (statusFotoRec) {
+            statusFotoRec.textContent = '✓ Fotografía lista. Ingrese su cédula arriba y presione Descargar.';
+            statusFotoRec.style.display = 'block';
+        }
+    };
+
     if (btnSubirFotoRec && inputFotoRec) {
         if (btnSubirFotoRec.tagName !== 'LABEL') {
             btnSubirFotoRec.addEventListener('click', () => inputFotoRec.click());
@@ -555,7 +767,11 @@ function initRecuperarPlanillaModal() {
         inputFotoRec.addEventListener('change', (e) => {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
-            btnSubirFotoRec.textContent = '⏳ Optimizando y subiendo foto...';
+            if (!validarArchivoImagenJpgPng(file, errFotoRec)) {
+                inputFotoRec.value = '';
+                return;
+            }
+            btnSubirFotoRec.textContent = '⏳ Optimizando foto...';
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const img = new Image();
@@ -568,50 +784,22 @@ function initRecuperarPlanillaModal() {
                     canvas.width = w;
                     canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    fotoRecuperacionBase64 = canvas.toDataURL('image/jpeg', 0.72);
-                    capturedPhotoBase64 = fotoRecuperacionBase64;
-                    window.capturedPhotoBase64 = fotoRecuperacionBase64;
-
-                    const previewBox = document.getElementById('preview-recuperar-foto-box');
-                    const previewImg = document.getElementById('preview-recuperar-foto-img');
-                    if (previewBox && previewImg) {
-                        previewImg.src = fotoRecuperacionBase64;
-                        previewBox.style.display = 'block';
-                    }
-
-                    btnSubirFotoRec.textContent = '🔄 Cambiar Fotografía Seleccionada';
+                    const b64 = canvas.toDataURL('image/jpeg', 0.72);
                     inputFotoRec.value = '';
-
-                    // Si ya ingresó la cédula en el campo de consulta, guardarla de inmediato en fotos_aspirantes y BD
-                    const cedVal = (inputCed?.value || '').replace(/\D/g, '').trim();
-                    if (cedVal && cedVal.length >= 6 && cedVal.length <= 8) {
-                        try {
-                            const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ ced_alum: cedVal, foto_base64: fotoRecuperacionBase64 })
-                            });
-                            const data = await res.json();
-                            if (statusFotoRec) {
-                                statusFotoRec.textContent = (res.ok && data.ok)
-                                    ? `✓ Fotografía alojada en fotos_aspirantes/foto_${cedVal}.jpg y guardada en la BD.`
-                                    : '✓ Fotografía lista para incluir en su planilla PDF.';
-                                statusFotoRec.style.display = 'block';
-                            }
-                        } catch (_) {
-                            if (statusFotoRec) {
-                                statusFotoRec.textContent = '✓ Fotografía cargada. Se guardará al descargar la planilla.';
-                                statusFotoRec.style.display = 'block';
-                            }
-                        }
-                    } else if (statusFotoRec) {
-                        statusFotoRec.textContent = '✓ Fotografía cargada. Ingrese su cédula arriba y presione Descargar.';
-                        statusFotoRec.style.display = 'block';
-                    }
+                    await aplicarFotoEnModalRecuperacion(b64);
                 };
                 img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
+        });
+    }
+
+    if (btnCamaraRec) {
+        btnCamaraRec.addEventListener('click', () => {
+            abrirVisorCamaraDispositivo(
+                aplicarFotoEnModalRecuperacion,
+                document.getElementById('asp-foto-camara-fallback')
+            );
         });
     }
 

@@ -179,17 +179,26 @@
                     <div class="field-error-msg" id="err-buscar-cedula"></div>
                 </div>
                 <div style="background:linear-gradient(135deg, #f0fdfa 0%, #eef2ff 100%); border:1.5px dashed #14b8a6; border-radius:10px; padding:0.85rem; margin-bottom:0.85rem; text-align:center;">
-                    <div style="font-size:0.82rem; color:#1e1b4b; font-weight:800; margin-bottom:0.5rem;">
-                        📷 ¿Su planilla aún no tiene foto? Adjúntela aquí para guardarla en <code style="color:#0f766e;">fotos_aspirantes</code> y en la BD:
+                    <div style="font-size:0.82rem; color:#1e1b4b; font-weight:800; margin-bottom:0.3rem;">
+                        📷 ¿Su planilla aún no tiene foto? Suba un archivo o active su cámara:
                     </div>
-                    <div id="preview-recuperar-foto-box" style="display:none; width:82px; height:102px; margin:0 auto 0.55rem; border-radius:8px; border:2px solid #0d9488; overflow:hidden; background:#ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.12);">
+                    <div style="font-size:0.74rem; color:#475569; margin-bottom:0.55rem;">
+                        Formatos permitidos: <strong>.JPG o .PNG</strong> (Tamaño máx. <strong>5 MB</strong>)
+                    </div>
+                    <div id="preview-recuperar-foto-box" style="display:none; width:86px; height:106px; margin:0 auto 0.6rem; border-radius:8px; border:2px solid #0d9488; overflow:hidden; background:#ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.12);">
                         <img id="preview-recuperar-foto-img" alt="Vista previa carnet" style="width:100%; height:100%; object-fit:cover; display:block;">
                     </div>
-                    <input type="file" id="input-recuperar-foto" class="file-input-hidden" accept="image/*,.jpg,.jpeg,.png,.webp">
-                    <label for="input-recuperar-foto" class="btn-photo-action" id="btn-recuperar-subir-foto" style="font-size:0.84rem; padding:0.52rem 1rem;">
-                        📷 Subir / Actualizar Fotografía Carnet (Opcional)
-                    </label>
+                    <input type="file" id="input-recuperar-foto" class="file-input-hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                    <div class="photo-buttons-dual">
+                        <label for="input-recuperar-foto" class="btn-photo-action" id="btn-recuperar-subir-foto" style="font-size:0.8rem; padding:0.5rem 0.85rem;">
+                            📂 Subir Archivo (.JPG / .PNG)
+                        </label>
+                        <button type="button" class="btn-photo-action btn-camera-live" id="btn-activar-camara-recuperar" style="font-size:0.8rem; padding:0.5rem 0.85rem;">
+                            📷 Activar Cámara
+                        </button>
+                    </div>
                     <div id="status-recuperar-foto" style="font-size:0.78rem; color:#0f766e; font-weight:800; margin-top:0.45rem; display:none;"></div>
+                    <div class="field-error-msg" id="err-recuperar-foto" style="margin-top:0.35rem;"></div>
                 </div>
                 <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:0.7rem 0.85rem; font-size:0.8rem; color:#0369a1; margin-bottom:1.1rem; line-height:1.4;">
                     🔒 <strong>Protección de Datos del Titular:</strong> Si consulta desde un dispositivo móvil con bloqueo biométrico activo, el sistema solicitará su <strong>Huella Dactilar</strong> para verificar que usted es el titular antes de descargar el documento.
@@ -197,6 +206,37 @@
                 <button type="button" class="btn btn-primary" id="btn-ejecutar-busqueda-planilla" style="width:100%;">
                     📥 Verificar y Descargar Planilla (PDF)
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MODAL DE CÁMARA EN VIVO (PARA LAPTOP, PC DE ESCRITORIO Y MÓVIL) ── -->
+    <div class="modal-carreras-overlay" id="modal-camara-vivo">
+        <div class="modal-carreras-card" style="max-width:460px;">
+            <div class="modal-carreras-header">
+                <h3>📷 Cámara en Vivo — Foto Carnet</h3>
+                <button type="button" class="info-popup-close-btn" id="btn-cerrar-camara-vivo" style="font-size:1.3rem;">
+                    ✕
+                </button>
+            </div>
+            <div style="padding:1.25rem; text-align:center;">
+                <p style="font-size:0.84rem; color:#475569; margin-bottom:0.75rem;">
+                    Ubique su rostro dentro del recuadro guía y presione <strong>Capturar Fotografía</strong>:
+                </p>
+                <div style="position:relative; width:240px; height:300px; margin:0 auto 1rem; border-radius:12px; overflow:hidden; background:#0f172a; border:3px solid #14b8a6; box-shadow:0 8px 24px rgba(30,27,75,0.25);">
+                    <video id="video-camara-vivo" autoplay playsinline muted style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1);"></video>
+                    <!-- Guía visual silueta carnet -->
+                    <div style="position:absolute; inset:14px; border:1.5px dashed rgba(153,246,228,0.75); border-radius:8px; pointer-events:none;"></div>
+                </div>
+                <div style="display:flex; gap:0.65rem; justify-content:center; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-primary" id="btn-capturar-foto-vivo" style="flex:1; min-width:170px;">
+                        📸 Capturar Fotografía
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="btn-cambiar-lente-vivo" title="Cambiar entre cámara frontal y trasera">
+                        🔄 Girar
+                    </button>
+                </div>
+                <div class="field-error-msg" id="err-camara-vivo" style="margin-top:0.6rem; text-align:center;"></div>
             </div>
         </div>
     </div>
@@ -277,17 +317,26 @@
                         <h3 class="section-title">👤 Datos Personales e Identificación</h3>
                         <p class="section-subtitle">Ingrese sus datos tal como aparecen en su documento de identidad oficial.</p>
 
-                        <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL O PC (PUNTO 5) -->
+                        <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL, LAPTOP O PC (PUNTO 5) -->
                         <div class="photo-capture-card">
                             <div class="photo-preview-box" id="photo-preview-box">
                                 <span class="photo-placeholder-icon" id="photo-placeholder-icon">👤</span>
                                 <img id="photo-preview-img" class="photo-preview-img" alt="Foto Aspirante">
                             </div>
                             <div class="photo-actions">
-                                <input type="file" id="asp-foto_alum" class="file-input-hidden" accept="image/*,.jpg,.jpeg,.png,.webp">
-                                <label for="asp-foto_alum" class="btn-photo-action" id="btn-subir-foto">
-                                    📷 Tomar Foto / Subir Imagen
-                                </label>
+                                <div style="font-size:0.78rem; color:#475569; font-weight:600; margin-bottom:0.2rem;">
+                                    Fotografía Tipo Carnet — Formatos <strong>.JPG o .PNG</strong> (Máx. <strong>5 MB</strong>)
+                                </div>
+                                <input type="file" id="asp-foto_alum" class="file-input-hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                <input type="file" id="asp-foto-camara-fallback" class="file-input-hidden" accept="image/jpeg,image/png" capture="user">
+                                <div class="photo-buttons-dual">
+                                    <label for="asp-foto_alum" class="btn-photo-action" id="btn-subir-foto">
+                                        📂 Subir Archivo (.JPG / .PNG)
+                                    </label>
+                                    <button type="button" class="btn-photo-action btn-camera-live" id="btn-activar-camara-principal">
+                                        📷 Activar Cámara (Laptop / Móvil)
+                                    </button>
+                                </div>
                                 <button type="button" class="btn-photo-remove" id="btn-quitar-foto" style="display:none;">
                                     ✕ Quitar Foto
                                 </button>
@@ -742,6 +791,6 @@
     <script src="js/geo_data.js?v=2.2"></script>
     <script src="js/qr_pdf_engine.js?v=1.2"></script>
     <script src="js/react_ui_enhancer.js?v=1.0"></script>
-    <script src="js/app.js?v=2.9"></script>
+    <script src="js/app.js?v=3.0"></script>
 </body>
 </html>
