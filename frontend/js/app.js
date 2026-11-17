@@ -477,33 +477,6 @@ function initRepresentanteDocCapture() {
             });
         });
     }
-
-    const inputsRepres = [
-        'asp-repres-cedula',
-        'asp-repres-nombre',
-        'asp-repres-apellido',
-        'asp-repres-telefono'
-    ];
-    inputsRepres.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('input', () => {
-                el.classList.remove('is-invalid');
-                const errBox = document.getElementById(`err-${id.replace('asp-', '')}`);
-                if (errBox) {
-                    errBox.textContent = '';
-                    errBox.classList.remove('visible');
-                }
-            });
-        }
-    });
-
-    const elRepresCed = document.getElementById('asp-repres-cedula');
-    if (elRepresCed) {
-        elRepresCed.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
-        });
-    }
 }
 
 // ── 1. POPUP INFORMATIVO INICIAL DE ACREDITACIÓN / ADMISIÓN (IMAGEN 6) ────────
@@ -1478,39 +1451,19 @@ function validateCurrentStep(step) {
             if (!primerErrorElement) primerErrorElement = document.getElementById('btn-subir-foto') || cedula;
         }
 
-        // Si es menor de 18 años, validar datos y fotocopia de la cédula del representante
+        // Si es menor de 18 años, validar fotocopia de la cédula del representante
         const edadInput = document.getElementById('asp-edad_alum');
         const edadVal = parseInt(edadInput?.value || '99', 10);
         if (edadVal < 18) {
-            const represCed = document.getElementById('asp-repres-cedula');
-            const represNom = document.getElementById('asp-repres-nombre');
-            const represApe = document.getElementById('asp-repres-apellido');
-            const represTel = document.getElementById('asp-repres-telefono');
             const errDoc = document.getElementById('err-repres-cedula-doc');
-
-            if (!represCed || !/^\d{8}$/.test((represCed.value || '').trim())) {
-                setFieldInvalid(represCed, 'err-repres-cedula', 'Cédula del representante legal obligatoria (8 dígitos).');
-                if (!primerErrorElement) primerErrorElement = represCed;
-            }
-            if (!represNom || (represNom.value || '').trim().length < 2) {
-                setFieldInvalid(represNom, 'err-repres-nombre', 'Nombres del representante legal obligatorios.');
-                if (!primerErrorElement) primerErrorElement = represNom;
-            }
-            if (!represApe || (represApe.value || '').trim().length < 2) {
-                setFieldInvalid(represApe, 'err-repres-apellido', 'Apellidos del representante legal obligatorios.');
-                if (!primerErrorElement) primerErrorElement = represApe;
-            }
-            const telRepDigits = (represTel?.value || '').replace(/\D/g, '');
-            if (!represTel || telRepDigits.length < 10 || telRepDigits.length > 11) {
-                setFieldInvalid(represTel, 'err-repres-telefono', 'Teléfono del representante legal obligatorio (10 u 11 dígitos).');
-                if (!primerErrorElement) primerErrorElement = represTel;
-            }
             if (!capturedRepresDocBase64) {
                 if (errDoc) {
-                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar la fotocopia de la cédula del representante.';
+                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar o escanear la fotocopia de la cédula de su representante legal.';
                     errDoc.classList.add('visible');
                 }
-                if (!primerErrorElement) primerErrorElement = document.getElementById('btn-subir-repres-cedula') || represCed;
+                if (!primerErrorElement) {
+                    primerErrorElement = document.getElementById('btn-subir-repres-cedula') || document.getElementById('seccion-representante-menor');
+                }
             }
         }
 
@@ -1654,14 +1607,12 @@ function initFormSubmit() {
 
         // Si es menor de 18 años, incluir recaudos obligatorios del representante legal
         if (valEdad < 18) {
-            const represNom = (document.getElementById('asp-repres-nombre')?.value || '').trim();
-            const represApe = (document.getElementById('asp-repres-apellido')?.value || '').trim();
-            payload.ced_repres = (document.getElementById('asp-repres-cedula')?.value || '').replace(/\D/g, '').trim();
-            payload.nom_repres = `${represNom} ${represApe}`.trim();
-            payload.parentesco_repres = document.getElementById('asp-repres-parentesco')?.value || 'Padre/Madre/Tutor';
-            payload.telemov_repres = (document.getElementById('asp-repres-telefono')?.value || '').trim();
             payload.repres_doc_base64 = capturedRepresDocBase64 || null;
             payload.repres_doc_ext = capturedRepresDocExt || 'jpg';
+            payload.ced_repres = 'Adjunta';
+            payload.nom_repres = 'Representante Legal';
+            payload.parentesco_repres = 'Representante Legal';
+            payload.telemov_repres = payload.telemov_alum || '';
         }
 
         ultimoRegistroAspirante = {

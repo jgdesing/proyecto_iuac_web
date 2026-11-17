@@ -633,12 +633,9 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
 
     // Fila adicional de Representante Legal si el aspirante es menor de edad
     if ((edadCalc && edadCalc < 18) || reg.nom_repres) {
-        const represCedNum = reg.ced_repres ? Number(String(reg.ced_repres).replace(/\D/g, '')).toLocaleString('es-VE') : '--';
         drawTableRow([
-            { w: 0.40, label: 'REPRESENTANTE LEGAL (MENOR DE EDAD):', value: reg.nom_repres || '--', bg: '#fffbeb', valColor: '#9a3412' },
-            { w: 0.22, label: 'C.I. REPRESENTANTE:', value: reg.ced_repres ? `V-${represCedNum}` : '--', bg: '#fffbeb' },
-            { w: 0.18, label: 'PARENTESCO:', value: reg.parentesco_repres || 'Madre', bg: '#fffbeb' },
-            { w: 0.20, label: 'TELÉFONO REPRES.:', value: reg.telemov_repres || '--', bg: '#fffbeb' }
+            { w: 0.50, label: 'CONDICIÓN LEGAL DEL ASPIRANTE:', value: 'MENOR DE EDAD (REQUIERE REPRESENTANTE)', bg: '#fffbeb', valColor: '#9a3412' },
+            { w: 0.50, label: 'FOTOCOPIA CÉDULA REPRESENTANTE:', value: 'CONSIGNADA / ALOJADA EN SISTEMA IUAC', bg: '#fffbeb', valColor: '#0f766e' }
         ], 50);
     }
     y += 12;

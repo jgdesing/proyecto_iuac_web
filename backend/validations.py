@@ -254,41 +254,25 @@ def validate_aspirante_payload(data):
     cleaned['foto_ext'] = 'png' if foto_ext_raw == 'png' else 'jpg'
 
     # 11. Datos y Fotocopia de Cédula del Representante (Obligatorio si es menor de 18 años)
+    # Por requerimiento oficial, el único recaudo obligatorio del representante es su fotocopia/escaneo de cédula
     if cleaned['edad_alum'] < 18:
-        repres_ced_raw = data.get('ced_repres')
-        if not repres_ced_raw:
-            return False, None, "Por ser menor de 18 años, la cédula del representante legal es obligatoria."
-        ok_repres_ced, repres_ced_int, err_repres_ced = validar_cedula_venezolana(repres_ced_raw)
-        if not ok_repres_ced:
-            return False, None, f"Cédula del representante inválida: {err_repres_ced}"
-        cleaned['ced_repres'] = str(repres_ced_int)
-
-        repres_nom = limpiar_texto_estricto(data.get('nom_repres', ''))
-        if not repres_nom or len(repres_nom) < 3:
-            return False, None, "Debe ingresar el nombre y apellido completos del representante legal."
-        cleaned['nom_repres'] = repres_nom
-
-        cleaned['parentesco_repres'] = limpiar_texto_estricto(data.get('parentesco_repres', 'Madre'))[:50]
-        
-        repres_tel_raw = data.get('telemov_repres')
-        if not repres_tel_raw:
-            return False, None, "El teléfono de contacto del representante legal es obligatorio."
-        ok_repres_tel, repres_tel, err_repres_tel = validar_telefono_venezolano(repres_tel_raw, 'móvil')
-        if not ok_repres_tel:
-            # Probar si es fijo
-            ok_repres_fijo, repres_fijo, _ = validar_telefono_venezolano(repres_tel_raw, 'habitación')
-            if not ok_repres_fijo:
-                return False, None, f"Teléfono del representante inválido: {err_repres_tel}"
-            cleaned['telemov_repres'] = repres_fijo
-        else:
-            cleaned['telemov_repres'] = repres_tel
-
         repres_doc = data.get('repres_doc_base64')
         if not repres_doc:
-            return False, None, "Por ser menor de edad, debe subir o escanear la fotocopia de la cédula del representante legal."
+            return False, None, "Por ser menor de edad, debe subir o escanear la fotocopia de la cédula de su representante legal."
         cleaned['repres_doc_base64'] = repres_doc
         repres_ext_raw = str(data.get('repres_doc_ext') or 'jpg').strip().lower().lstrip('.')
         cleaned['repres_doc_ext'] = 'png' if repres_ext_raw == 'png' else ('pdf' if repres_ext_raw == 'pdf' else 'jpg')
+
+        repres_ced_raw = data.get('ced_repres')
+        if repres_ced_raw and str(repres_ced_raw).strip() and str(repres_ced_raw).strip() != 'Adjunta':
+            ok_repres_ced, repres_ced_int, _ = validar_cedula_venezolana(repres_ced_raw)
+            cleaned['ced_repres'] = str(repres_ced_int) if ok_repres_ced else 'Adjunta'
+        else:
+            cleaned['ced_repres'] = 'Adjunta'
+
+        cleaned['nom_repres'] = str(data.get('nom_repres') or 'Representante Legal').strip()[:150]
+        cleaned['parentesco_repres'] = str(data.get('parentesco_repres') or 'Representante Legal').strip()[:50]
+        cleaned['telemov_repres'] = str(data.get('telemov_repres') or cleaned.get('telemov_alum', '')).strip()[:50]
     else:
         cleaned['ced_repres'] = None
         cleaned['nom_repres'] = None
