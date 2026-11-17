@@ -45,7 +45,13 @@
         const render = () => {
             const { completados, total, porcentaje, tieneFoto } = calcularEstadoActual();
             const cedVal = (document.getElementById('asp-ced_alum')?.value || '').trim();
-            const nombreArchivoFoto = cedVal ? `fotos_aspirantes/foto_${cedVal}.jpg` : 'fotos_aspirantes/';
+            const nomVal = (document.getElementById('asp-nom_alum')?.value || '').trim();
+            const apeVal = (document.getElementById('asp-ape_alum')?.value || '').trim();
+            const extVal = window.capturedPhotoExt || 'jpg';
+            const nombrePersonalizado = (typeof window.construirNombreFotoPersonalizado === 'function')
+                ? window.construirNombreFotoPersonalizado(cedVal, nomVal, apeVal, extVal)
+                : `primer_nom_primer_ape-${cedVal || 'ced_aspirante'}.${extVal}`;
+            const nombreArchivoFoto = `/fotos_aspirantes/${nombrePersonalizado}`;
 
             rootEl.innerHTML = `
                 <div style="

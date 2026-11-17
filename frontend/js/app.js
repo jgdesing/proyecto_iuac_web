@@ -54,6 +54,25 @@ const TAMANO_MAX_ARCHIVO_FOTO = 5 * 1024 * 1024; // Máximo 5 MB permitidos para
 let streamCamaraActiva = null;
 let modoLenteCamara = 'user'; // 'user' (frontal/laptop) o 'environment' (trasera móvil)
 let callbackCapturaCamara = null;
+let capturedPhotoExt = 'jpg';
+window.capturedPhotoExt = capturedPhotoExt;
+
+function normalizarTokenNombreJS(texto, fallback) {
+    if (!texto || !String(texto).trim()) return fallback;
+    const primera = String(texto).trim().split(/\s+/)[0];
+    const sinAcentos = primera.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const limpio = sinAcentos.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    return limpio || fallback;
+}
+
+function construirNombreFotoPersonalizado(cedStr, nomStr, apeStr, ext = 'jpg') {
+    const cedDigits = String(cedStr || '').replace(/\D/g, '') || 'ced_aspirante';
+    const primerNom = normalizarTokenNombreJS(nomStr, 'primer_nom');
+    const primerApe = normalizarTokenNombreJS(apeStr, 'primer_ape');
+    const extClean = (String(ext || 'jpg').toLowerCase().replace('.', '') === 'png') ? 'png' : 'jpg';
+    return `${primerNom}_${primerApe}-${cedDigits}.${extClean}`;
+}
+window.construirNombreFotoPersonalizado = construirNombreFotoPersonalizado;
 
 function detenerStreamCamara() {
     if (streamCamaraActiva) {
@@ -239,9 +258,11 @@ function initPhotoCapture() {
 
     if (!fileInput || !btnSubir) return;
 
-    const aplicarFotoEnFormularioPrincipal = async (dataUrlBase64) => {
+    const aplicarFotoEnFormularioPrincipal = async (dataUrlBase64, extFormato = 'jpg') => {
         capturedPhotoBase64 = dataUrlBase64;
+        capturedPhotoExt = (extFormato === 'png') ? 'png' : 'jpg';
         window.capturedPhotoBase64 = capturedPhotoBase64;
+        window.capturedPhotoExt = capturedPhotoExt;
 
         if (imgPreview) {
             imgPreview.src = capturedPhotoBase64;
@@ -257,21 +278,31 @@ function initPhotoCapture() {
         }
 
         const cedActual = (document.getElementById('asp-ced_alum')?.value || '').replace(/\D/g, '').trim();
-        if (cedActual && cedActual.length >= 6 && cedActual.length <= 8) {
+        const nomActual = (document.getElementById('asp-nom_alum')?.value || '').trim();
+        const apeActual = (document.getElementById('asp-ape_alum')?.value || '').trim();
+        const nombreEsperado = construirNombreFotoPersonalizado(cedActual, nomActual, apeActual, capturedPhotoExt);
+
+        if (cedActual && /^\d{8}$/.test(cedActual)) {
             try {
                 const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ced_alum: cedActual, foto_base64: capturedPhotoBase64 })
+                    body: JSON.stringify({
+                        ced_alum: cedActual,
+                        nom_alum: nomActual,
+                        ape_alum: apeActual,
+                        foto_ext: capturedPhotoExt,
+                        foto_base64: capturedPhotoBase64
+                    })
                 });
                 const data = await res.json();
                 if (res.ok && data.ok && statusFotoPrincipal) {
-                    statusFotoPrincipal.textContent = `✓ Guardada en fotos_aspirantes/foto_${cedActual}.jpg`;
+                    statusFotoPrincipal.textContent = `✓ Guardada en ${data.archivo || ('/fotos_aspirantes/' + nombreEsperado)}`;
                     statusFotoPrincipal.style.display = 'block';
                 }
             } catch (_) {}
         } else if (statusFotoPrincipal) {
-            statusFotoPrincipal.textContent = '✓ Fotografía lista (se alojará en fotos_aspirantes al registrar)';
+            statusFotoPrincipal.textContent = `✓ Fotografía lista (/fotos_aspirantes/${nombreEsperado})`;
             statusFotoPrincipal.style.display = 'block';
         }
     };
@@ -282,6 +313,9 @@ function initPhotoCapture() {
             if (fileInputCamFallback) fileInputCamFallback.value = '';
             return;
         }
+
+        const esPng = (file.type && file.type.toLowerCase() === 'image/png') || /\.png$/i.test(file.name || '');
+        const extElegida = esPng ? 'png' : 'jpg';
 
         btnSubir.textContent = '⏳ Optimizando foto...';
         const reader = new FileReader();
@@ -305,7 +339,7 @@ function initPhotoCapture() {
                 const base64Opt = canvas.toDataURL('image/jpeg', 0.72);
                 fileInput.value = '';
                 if (fileInputCamFallback) fileInputCamFallback.value = '';
-                await aplicarFotoEnFormularioPrincipal(base64Opt);
+                await aplicarFotoEnFormularioPrincipal(base64Opt, extElegida);
             };
             img.onerror = () => {
                 if (errFoto) {
@@ -714,10 +748,12 @@ function initRecuperarPlanillaModal() {
     }
     if (!modal) return;
 
-    const aplicarFotoEnModalRecuperacion = async (base64Img) => {
+    const aplicarFotoEnModalRecuperacion = async (base64Img, extFormato = 'jpg') => {
         fotoRecuperacionBase64 = base64Img;
         capturedPhotoBase64 = fotoRecuperacionBase64;
+        capturedPhotoExt = (extFormato === 'png') ? 'png' : 'jpg';
         window.capturedPhotoBase64 = fotoRecuperacionBase64;
+        window.capturedPhotoExt = capturedPhotoExt;
 
         const previewBox = document.getElementById('preview-recuperar-foto-box');
         const previewImg = document.getElementById('preview-recuperar-foto-img');
@@ -734,17 +770,21 @@ function initRecuperarPlanillaModal() {
         }
 
         const cedVal = (inputCed?.value || '').replace(/\D/g, '').trim();
-        if (cedVal && cedVal.length >= 6 && cedVal.length <= 8) {
+        if (cedVal && /^\d{8}$/.test(cedVal)) {
             try {
                 const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ced_alum: cedVal, foto_base64: fotoRecuperacionBase64 })
+                    body: JSON.stringify({
+                        ced_alum: cedVal,
+                        foto_ext: capturedPhotoExt,
+                        foto_base64: fotoRecuperacionBase64
+                    })
                 });
                 const data = await res.json();
                 if (statusFotoRec) {
                     statusFotoRec.textContent = (res.ok && data.ok)
-                        ? `✓ Fotografía alojada en fotos_aspirantes/foto_${cedVal}.jpg y guardada en la BD.`
+                        ? `✓ Fotografía alojada en ${data.archivo || ('/fotos_aspirantes/aspirante-' + cedVal + '.' + capturedPhotoExt)} y guardada en la BD.`
                         : '✓ Fotografía lista para incluir en su planilla PDF.';
                     statusFotoRec.style.display = 'block';
                 }
@@ -771,6 +811,9 @@ function initRecuperarPlanillaModal() {
                 inputFotoRec.value = '';
                 return;
             }
+            const esPng = (file.type && file.type.toLowerCase() === 'image/png') || /\.png$/i.test(file.name || '');
+            const extElegida = esPng ? 'png' : 'jpg';
+
             btnSubirFotoRec.textContent = '⏳ Optimizando foto...';
             const reader = new FileReader();
             reader.onload = (ev) => {
@@ -786,7 +829,7 @@ function initRecuperarPlanillaModal() {
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     const b64 = canvas.toDataURL('image/jpeg', 0.72);
                     inputFotoRec.value = '';
-                    await aplicarFotoEnModalRecuperacion(b64);
+                    await aplicarFotoEnModalRecuperacion(b64, extElegida);
                 };
                 img.src = ev.target.result;
             };
@@ -822,9 +865,9 @@ function initRecuperarPlanillaModal() {
     if (btnEjecutar) {
         btnEjecutar.addEventListener('click', async () => {
             const ced = (inputCed?.value || '').replace(/\D/g, '').trim();
-            if (!ced || ced.length < 6 || ced.length > 8) {
+            if (!ced || !/^\d{8}$/.test(ced)) {
                 if (errBox) {
-                    errBox.textContent = 'Por favor ingrese un número de cédula válido (entre 6 y 8 dígitos).';
+                    errBox.textContent = 'Por favor ingrese un número de cédula válido de 8 dígitos numéricos (solo dígitos, ej: 30123456).';
                     errBox.classList.add('visible');
                 }
                 return;
@@ -852,7 +895,11 @@ function initRecuperarPlanillaModal() {
                     await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ced_alum: ced, foto_base64: fotoRecuperacionBase64 })
+                        body: JSON.stringify({
+                            ced_alum: ced,
+                            foto_ext: capturedPhotoExt || 'jpg',
+                            foto_base64: fotoRecuperacionBase64
+                        })
                     });
                 }
 
@@ -960,8 +1007,8 @@ function initRealtimeValidations() {
                 statusLabel.innerHTML = '';
                 cedulaDisponible = false;
                 desbloquearFormularioPorCedulaRegistrada();
-            } else if (val.length < 6) {
-                setFieldInvalid(cedulaInput, 'err-cedula', 'La cédula debe tener entre 6 y 8 dígitos.');
+            } else if (val.length < 8) {
+                setFieldInvalid(cedulaInput, 'err-cedula', 'La cédula debe contener exactamente 8 dígitos (solo números).');
                 statusLabel.innerHTML = '';
                 cedulaDisponible = false;
                 desbloquearFormularioPorCedulaRegistrada();
@@ -1239,6 +1286,10 @@ async function verificarCedulaRemota(cedula) {
                 setFieldValid(input, 'err-cedula');
                 statusLabel.innerHTML = '<span style="color:#10b981; font-size:0.75rem; font-weight:700;">✓ Cédula disponible para inscripción</span>';
             }
+        } else {
+            cedulaDisponible = false;
+            setFieldInvalid(input, 'err-cedula', data.error || 'La cédula debe contener exactamente 8 dígitos numéricos.');
+            statusLabel.innerHTML = '';
         }
     } catch (e) {
         cedulaDisponible = true;
@@ -1264,8 +1315,8 @@ function validateCurrentStep(step) {
         if (apellidos) apellidos.value = apellidos.value.trim().replace(/\s{2,}/g, ' ');
         if (lugarNac) lugarNac.value = lugarNac.value.trim().replace(/\s{2,}/g, ' ');
 
-        if (!cedula.value || cedula.value.length < 6) {
-            setFieldInvalid(cedula, 'err-cedula', 'Cédula obligatoria (mínimo 6 dígitos).');
+        if (!cedula.value || !/^\d{8}$/.test(cedula.value.trim())) {
+            setFieldInvalid(cedula, 'err-cedula', 'Cédula obligatoria de exactamente 8 dígitos numéricos (solo dígitos).');
             if (!primerErrorElement) primerErrorElement = cedula;
         }
 
@@ -1417,6 +1468,7 @@ function initFormSubmit() {
             ano_grad_alum: valAno,
             tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || 'Público',
             observaciones: obsEl?.value || 'Preinscripción Web',
+            foto_ext: capturedPhotoExt || 'jpg',
             foto_base64: capturedPhotoBase64 || null
         };
 

@@ -69,7 +69,7 @@ def verificar_criterio_edad_iuac(fecha_nac):
 
 def validar_cedula_venezolana(cedula):
     """
-    Valida que la cédula sea un número entero de 6 a 8 dígitos.
+    Valida que la cédula contenga exactamente 8 dígitos numéricos (solo dígitos).
     Retorna (es_valido, cedula_int, error)
     """
     if not cedula:
@@ -77,14 +77,14 @@ def validar_cedula_venezolana(cedula):
     
     ced_str = str(cedula).upper().replace('V-', '').replace('E-', '').replace('.', '').replace(' ', '').strip()
     if not ced_str.isdigit():
-        return False, None, "La cédula debe contener exclusivamente números."
+        return False, None, "La cédula debe contener exclusivamente números (solo dígitos)."
     
-    if len(ced_str) < 6 or len(ced_str) > 8:
-        return False, None, "La cédula debe tener entre 6 y 8 dígitos numéricos válidos."
+    if len(ced_str) != 8:
+        return False, None, "La cédula debe contener exactamente 8 dígitos numéricos (ej: 30123456)."
     
     ced_int = int(ced_str)
-    if ced_int < 1000000 or ced_int > 99999999:
-        return False, None, "El número de cédula está fuera del rango válido."
+    if ced_int < 10000000 or ced_int > 99999999:
+        return False, None, "El número de cédula debe tener 8 dígitos numéricos válidos."
 
     return True, ced_int, None
 
@@ -241,6 +241,8 @@ def validate_aspirante_payload(data):
 
     # 10. Metadatos del Sistema y Fotografía
     cleaned['foto_base64'] = data.get('foto_base64')
+    foto_ext_raw = str(data.get('foto_ext') or 'jpg').strip().lower().lstrip('.')
+    cleaned['foto_ext'] = 'png' if foto_ext_raw == 'png' else 'jpg'
     cleaned['modalidad_ing'] = 'REGULAR'
     cleaned['condicion_resi'] = 'EXTERNO'
     cleaned['turno_class'] = 'DIURNO'

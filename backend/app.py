@@ -143,6 +143,9 @@ def api_actualizar_foto_aspirante():
     payload = request.get_json(silent=True) or {}
     cedula_raw = payload.get('ced_alum')
     foto_base64 = payload.get('foto_base64')
+    nom_alum = payload.get('nom_alum', '')
+    ape_alum = payload.get('ape_alum', '')
+    foto_ext = payload.get('foto_ext', 'jpg')
 
     ok_ced, ced_clean, err_ced = validar_cedula_venezolana(cedula_raw)
     if not ok_ced:
@@ -150,14 +153,22 @@ def api_actualizar_foto_aspirante():
     if not foto_base64:
         return jsonify({"ok": False, "error": "Debe adjuntar una fotografía válida."}), 400
 
-    exito, err_msg = actualizar_foto_aspirante(ced_clean, foto_base64)
+    exito, nombre_archivo, err_msg = actualizar_foto_aspirante(
+        ced_clean,
+        foto_base64,
+        nom_alum=nom_alum,
+        ape_alum=ape_alum,
+        ext=foto_ext
+    )
     if not exito:
         return jsonify({"ok": False, "error": err_msg}), 400
 
+    ruta_rel = f"/fotos_aspirantes/{nombre_archivo}"
     return jsonify({
         "ok": True,
-        "archivo": f"fotos_aspirantes/foto_{ced_clean}.jpg",
-        "mensaje": f"Fotografía alojada en fotos_aspirantes/foto_{ced_clean}.jpg y guardada en la base de datos."
+        "nombre_archivo": nombre_archivo,
+        "archivo": ruta_rel,
+        "mensaje": f"Fotografía alojada en {ruta_rel} y guardada en la base de datos."
     }), 200
 
 # ── 5. REGISTRO PRINCIPAL DEL ASPIRANTE ───────────────────────────────────────
