@@ -1686,6 +1686,39 @@ function mostrarModalExito(data) {
     document.getElementById('voucher-carrera').textContent = carreraCompleta;
     document.getElementById('voucher-fecha').textContent = fechaHora;
 
+    // 1.1 Poblar Acuse de Recibo y Notificación SMS Instantáneo
+    const smsData = data.sms_notificacion || {};
+    window.ultimoSmsData = smsData;
+    const acuseCode = smsData.acuse_recibo || `ACK-IUAC-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(16).slice(2,8).toUpperCase()}`;
+    const telNotificado = smsData.telefono || ultimoRegistroAspirante.telemov_alum || '--';
+    ultimoRegistroAspirante.acuse_recibo = acuseCode;
+    ultimoRegistroAspirante.folio = data.folio || ultimoRegistroAspirante.folio;
+
+    const elSmsAcuse = document.getElementById('voucher-sms-acuse');
+    if (elSmsAcuse) elSmsAcuse.textContent = acuseCode;
+
+    const elSmsTel = document.getElementById('voucher-sms-telefono');
+    if (elSmsTel) elSmsTel.textContent = telNotificado;
+
+    const elSmsDlr = document.getElementById('voucher-sms-dlr');
+    if (elSmsDlr) elSmsDlr.textContent = `${acuseCode} (CONFIRMADO)`;
+
+    const elSmsPreview = document.getElementById('voucher-sms-preview');
+    if (elSmsPreview) {
+        elSmsPreview.textContent = smsData.texto || `IUAC: Preinscripción completada con éxito. Folio: ${data.folio || 'IUAC-2026-REG'}, Cédula: ${tipoCed}-${numCed}. Especialidad: ${carreraCompleta}. Conserve este SMS como Acuse Oficial de Recibo.`;
+    }
+
+    const btnSmsMovil = document.getElementById('btn-abrir-sms-movil');
+    if (btnSmsMovil) {
+        const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+        if (smsData.sms_uri || esMovil) {
+            btnSmsMovil.href = smsData.sms_uri || `sms:${telNotificado.replace(/[^\d+]/g,'')}?body=${encodeURIComponent(elSmsPreview?.textContent || '')}`;
+            btnSmsMovil.style.display = 'inline-flex';
+        } else {
+            btnSmsMovil.style.display = 'none';
+        }
+    }
+
     // 2. Llenar Planilla Oficial de Impresión (Punto 4.5)
     llenarPlanillaImpresion(data, {
         tipoCed, numCed, nomCompleto, carreraCompleta, fechaHora
@@ -1728,6 +1761,7 @@ function llenarPlanillaImpresion(data, info) {
     setTxt('p-firma-ci', `${info.tipoCed} - ${info.numCed}`);
     setTxt('p-qr-ci', `${info.tipoCed} - ${info.numCed}`);
     setTxt('p-qr-folio', data.folio || ultimoRegistroAspirante.folio || 'IUAC-2026-REG');
+    setTxt('p-qr-sms', ultimoRegistroAspirante.acuse_recibo || (window.ultimoSmsData && window.ultimoSmsData.acuse_recibo) || 'ACK-IUAC-REG');
 
     // Generar el código QR de la cédula en la parte inferior de la planilla
     const qrCanvas = document.getElementById('planilla-qr-canvas');

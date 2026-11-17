@@ -784,23 +784,30 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
 
     // Texto explicativo junto al QR en el pie de la planilla
     const qrTextX = M + 162;
+    const acuseRecibo = reg.acuse_recibo || (window.ultimoSmsData && window.ultimoSmsData.acuse_recibo) || 'ACK-IUAC-REGISTRADO';
+    const telMovil = reg.telemov_alum || 'Teléfono Registrado';
+
     ctx.textAlign = 'left';
     ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 15px Arial, sans-serif';
-    ctx.fillText('CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA E INSCRIPCIÓN — IUAC', qrTextX, y + 32);
+    ctx.fillText('CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA E INSCRIPCIÓN — IUAC', qrTextX, y + 27);
 
     ctx.fillStyle = '#0369a1';
-    ctx.font = 'bold 15px Arial, sans-serif';
-    ctx.fillText(`TITULAR: ${cedFormateada}  |  ${(reg.nom_alum || '')} ${(reg.ape_alum || '')}`.trim(), qrTextX, y + 58);
+    ctx.font = 'bold 14px Arial, sans-serif';
+    ctx.fillText(`TITULAR: ${cedFormateada}  |  ${(reg.nom_alum || '')} ${(reg.ape_alum || '')}`.trim(), qrTextX, y + 49);
 
     ctx.fillStyle = '#334155';
-    ctx.font = 'bold 13.5px Arial, sans-serif';
-    ctx.fillText(`FOLIO OFICIAL: ${folio}   •   ESPECIALIDAD: ${carreraTexto}`, qrTextX, y + 84);
+    ctx.font = 'bold 12.5px Arial, sans-serif';
+    ctx.fillText(`FOLIO: ${folio}   •   ESPECIALIDAD: ${carreraTexto}`, qrTextX, y + 71);
+
+    ctx.fillStyle = '#166534';
+    ctx.font = 'bold 12px Arial, sans-serif';
+    ctx.fillText(`ACUSE RECIBO SMS: ${acuseRecibo}   •   NOTIFICADO A: ${telMovil}`, qrTextX, y + 93);
 
     ctx.fillStyle = '#475569';
-    ctx.font = '12.5px Arial, sans-serif';
-    ctx.fillText('Escanee este código QR al presentar su planilla en el Departamento de Captación para verificar los datos del titular.', qrTextX, y + 110);
-    ctx.fillText('Documento electrónico oficial generado en una (01) sola página por el Portal de Preinscripción del IUAC.', qrTextX, y + 130);
+    ctx.font = '11.5px Arial, sans-serif';
+    ctx.fillText('Escanee el código QR en Captación para validar los datos del titular y el acuse de recibo institucional.', qrTextX, y + 114);
+    ctx.fillText('Documento electrónico oficial generado en una (01) sola página por el Portal de Admisión IUAC.', qrTextX, y + 132);
 
     // Exportar como archivo PDF real de 1 sola página y descargarlo con nombre personalizado por aspirante (ced_alum)
     const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);

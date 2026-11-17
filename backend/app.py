@@ -15,6 +15,7 @@ from db_aspirantes import (
     obtener_aspirante_por_cedula,
     actualizar_foto_aspirante
 )
+from sms_service import enviar_sms_instantaneo, consultar_acuse_recibo
 from export_aspirantes import (
     obtener_aspirantes_web,
     generar_contenido_sql,
@@ -241,6 +242,14 @@ def api_registrar_aspirante():
     # Generar folio de comprobante institucional
     folio = f"IUAC-{Config.ANIO_PROCESO}-{cleaned_data['ced_alum']}"
 
+    # 5. Envío automático e instantáneo de SMS de recordatorio con acuse de recibo
+    sms_resultado = None
+    try:
+        sms_resultado = enviar_sms_instantaneo(cleaned_data, folio=folio)
+        app.logger.info(f"SMS despachado con éxito a {cleaned_data.get('telemov_alum')}. Acuse: {sms_resultado.get('acuse_recibo')}")
+    except Exception as e_sms:
+        app.logger.warning(f"Aviso no bloqueante al enviar SMS: {e_sms}")
+
     return jsonify({
         "ok": True,
         "mensaje": "¡Preinscripción registrada exitosamente en el IUAC!",
@@ -248,8 +257,46 @@ def api_registrar_aspirante():
         "cedula": cleaned_data['ced_alum'],
         "nombres": f"{cleaned_data['nom_alum']} {cleaned_data['ape_alum']}",
         "carrera": cleaned_data['carrera'],
-        "fecha_registro": cleaned_data['fec_nac_alum']
+        "fecha_registro": cleaned_data['fec_nac_alum'],
+        "sms_notificacion": sms_resultado
     }), 201
+
+# ── 5.1. CONSULTA DE ACUSE DE RECIBO DE SMS ───────────────────────────────────
+@app.route('/api/sms/acuse/<identificador>', methods=['GET'])
+def api_consultar_acuse_sms(identificador):
+    """Consulta el acuse de recibo y estatus de entrega del SMS por acuse, cédula o folio."""
+    acuse_info = consultar_acuse_recibo(identificador)
+    if not acuse_info:
+        return jsonify({
+            "ok": False,
+            "error": "No se encontró acuse de recibo para el identificador suministrado."
+        }), 404
+    return jsonify({
+        "ok": True,
+        "acuse": acuse_info
+    }), 200
+
+# ── 5.2. REENVÍO O ACUSE MANUAL DE SMS ─────────────────────────────────────────
+@app.route('/api/sms/reenviar', methods=['POST'])
+@limiter.limit("5 per minute")
+def api_reenviar_sms():
+    """Permite reenviar el SMS de confirmación al aspirante verificado por su cédula."""
+    payload = request.get_json(silent=True) or {}
+    cedula_raw = payload.get('cedula')
+    if not cedula_raw:
+        return jsonify({"ok": False, "error": "Debe suministrar la cédula del aspirante."}), 400
+
+    aspirante = obtener_aspirante_por_cedula(cedula_raw)
+    if not aspirante:
+        return jsonify({"ok": False, "error": "Aspirante no encontrado."}), 404
+
+    folio = f"IUAC-{Config.ANIO_PROCESO}-{aspirante['ced_alum']}"
+    sms_resultado = enviar_sms_instantaneo(aspirante, folio=folio)
+    return jsonify({
+        "ok": True,
+        "mensaje": "SMS de recordatorio reenviado con éxito.",
+        "sms_notificacion": sms_resultado
+    }), 200
 
 # ── 6. PANEL DE CONTROL Y RESUMEN ADMINISTRATIVO ──────────────────────────────
 @app.route('/api/admin/resumen', methods=['GET'])

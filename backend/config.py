@@ -31,3 +31,10 @@ class Config:
     # Rate Limiting
     RATELIMIT_DEFAULT = os.getenv("RATELIMIT_DEFAULT", "300 per day;60 per hour")
     RATELIMIT_SUBMIT = os.getenv("RATELIMIT_SUBMIT", "10 per minute")
+
+    # ── Servicio de Notificación Instantánea SMS y Acuse de Recibo ──
+    SMS_PROVIDER = os.getenv("SMS_PROVIDER", "IUAC_GATEWAY")
+    SMS_SENDER_ID = os.getenv("SMS_SENDER_ID", "IUAC-OFICIAL")
+    TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+    TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+    TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")
