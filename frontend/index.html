@@ -12,7 +12,7 @@
     <link rel="shortcut icon" type="image/png" href="img/logo_iuac.png?v=3">
 
     <!-- Estilos de Alto Rendimiento -->
-    <link rel="stylesheet" href="css/landing.css?v=3.3">
+    <link rel="stylesheet" href="css/landing.css?v=4.0">
 </head>
 <body>
 
@@ -178,15 +178,18 @@
                     <input type="text" class="form-control" id="input-buscar-cedula" placeholder="Ej: 11270783" maxlength="8" inputmode="numeric">
                     <div class="field-error-msg" id="err-buscar-cedula"></div>
                 </div>
-                <div style="background:#f8fafc; border:1px dashed #93c5fd; border-radius:8px; padding:0.75rem; margin-bottom:0.85rem; text-align:center;">
-                    <div style="font-size:0.8rem; color:#334155; font-weight:700; margin-bottom:0.45rem;">
-                        📷 ¿Su planilla aún no tiene foto? Adjúntela aquí para guardarla en la BD:
+                <div style="background:linear-gradient(135deg, #f0fdfa 0%, #eef2ff 100%); border:1.5px dashed #14b8a6; border-radius:10px; padding:0.85rem; margin-bottom:0.85rem; text-align:center;">
+                    <div style="font-size:0.82rem; color:#1e1b4b; font-weight:800; margin-bottom:0.5rem;">
+                        📷 ¿Su planilla aún no tiene foto? Adjúntela aquí para guardarla en <code style="color:#0f766e;">fotos_aspirantes</code> y en la BD:
                     </div>
-                    <input type="file" id="input-recuperar-foto" accept="image/jpeg,image/png,image/webp" capture="user" style="display:none;">
-                    <button type="button" class="btn-photo-action" id="btn-recuperar-subir-foto" style="font-size:0.82rem; padding:0.45rem 0.9rem;">
+                    <div id="preview-recuperar-foto-box" style="display:none; width:82px; height:102px; margin:0 auto 0.55rem; border-radius:8px; border:2px solid #0d9488; overflow:hidden; background:#ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.12);">
+                        <img id="preview-recuperar-foto-img" alt="Vista previa carnet" style="width:100%; height:100%; object-fit:cover; display:block;">
+                    </div>
+                    <input type="file" id="input-recuperar-foto" class="file-input-hidden" accept="image/*,.jpg,.jpeg,.png,.webp">
+                    <label for="input-recuperar-foto" class="btn-photo-action" id="btn-recuperar-subir-foto" style="font-size:0.84rem; padding:0.52rem 1rem;">
                         📷 Subir / Actualizar Fotografía Carnet (Opcional)
-                    </button>
-                    <div id="status-recuperar-foto" style="font-size:0.76rem; color:#10b981; font-weight:700; margin-top:0.35rem; display:none;"></div>
+                    </label>
+                    <div id="status-recuperar-foto" style="font-size:0.78rem; color:#0f766e; font-weight:800; margin-top:0.45rem; display:none;"></div>
                 </div>
                 <div style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:0.7rem 0.85rem; font-size:0.8rem; color:#0369a1; margin-bottom:1.1rem; line-height:1.4;">
                     🔒 <strong>Protección de Datos del Titular:</strong> Si consulta desde un dispositivo móvil con bloqueo biométrico activo, el sistema solicitará su <strong>Huella Dactilar</strong> para verificar que usted es el titular antes de descargar el documento.
@@ -202,6 +205,9 @@
     <main class="main-wrapper">
         <div class="form-card" id="form-card-container">
             
+            <!-- Barra Reactiva de Estado y Progreso en Tiempo Real -->
+            <div id="react-assistant-root"></div>
+
             <!-- Stepper de Progreso -->
             <div class="stepper-header">
                 <div class="step-node active" data-step="1">
@@ -271,20 +277,21 @@
                         <h3 class="section-title">👤 Datos Personales e Identificación</h3>
                         <p class="section-subtitle">Ingrese sus datos tal como aparecen en su documento de identidad oficial.</p>
 
-                        <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL (PUNTO 5) -->
+                        <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL O PC (PUNTO 5) -->
                         <div class="photo-capture-card">
                             <div class="photo-preview-box" id="photo-preview-box">
                                 <span class="photo-placeholder-icon" id="photo-placeholder-icon">👤</span>
                                 <img id="photo-preview-img" class="photo-preview-img" alt="Foto Aspirante">
                             </div>
                             <div class="photo-actions">
-                                <input type="file" id="asp-foto_alum" accept="image/jpeg,image/png,image/webp" capture="user" style="display:none;">
-                                <button type="button" class="btn-photo-action" id="btn-subir-foto">
+                                <input type="file" id="asp-foto_alum" class="file-input-hidden" accept="image/*,.jpg,.jpeg,.png,.webp">
+                                <label for="asp-foto_alum" class="btn-photo-action" id="btn-subir-foto">
                                     📷 Tomar Foto / Subir Imagen
-                                </button>
+                                </label>
                                 <button type="button" class="btn-photo-remove" id="btn-quitar-foto" style="display:none;">
                                     ✕ Quitar Foto
                                 </button>
+                                <div id="status-foto-principal" style="font-size:0.78rem; color:#0f766e; font-weight:800; display:none;"></div>
                                 <div class="field-error-msg" id="err-foto"></div>
                             </div>
                         </div>
@@ -734,6 +741,7 @@
     <!-- Scripts de Carga Ultra Rápida -->
     <script src="js/geo_data.js?v=2.2"></script>
     <script src="js/qr_pdf_engine.js?v=1.2"></script>
-    <script src="js/app.js?v=2.7"></script>
+    <script src="js/react_ui_enhancer.js?v=1.0"></script>
+    <script src="js/app.js?v=2.9"></script>
 </body>
 </html>

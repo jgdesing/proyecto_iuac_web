@@ -23,10 +23,11 @@ from export_aspirantes import (
     marcar_como_procesados
 )
 
-# Directorios de frontend y uploads
+# Directorios de frontend y carpeta oficial fotos_aspirantes
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
-UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'uploads', 'fotos'))
+UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'fotos_aspirantes'))
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(os.path.join(FRONTEND_DIR, 'fotos_aspirantes'), exist_ok=True)
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 app.config.from_object(Config)
@@ -34,7 +35,11 @@ app.config.from_object(Config)
 # CORS seguro
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-# Servir fotos subidas de aspirantes
+# Servir fotos subidas de aspirantes desde la carpeta fotos_aspirantes
+@app.route('/fotos_aspirantes/<path:filename>', methods=['GET'])
+def serve_foto_aspirante(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
 @app.route('/uploads/fotos/<path:filename>', methods=['GET'])
 def serve_foto(filename):
     return send_from_directory(UPLOAD_DIR, filename)
@@ -149,7 +154,11 @@ def api_actualizar_foto_aspirante():
     if not exito:
         return jsonify({"ok": False, "error": err_msg}), 400
 
-    return jsonify({"ok": True, "mensaje": "Fotografía guardada exitosamente en la base de datos."}), 200
+    return jsonify({
+        "ok": True,
+        "archivo": f"fotos_aspirantes/foto_{ced_clean}.jpg",
+        "mensaje": f"Fotografía alojada en fotos_aspirantes/foto_{ced_clean}.jpg y guardada en la base de datos."
+    }), 200
 
 # ── 5. REGISTRO PRINCIPAL DEL ASPIRANTE ───────────────────────────────────────
 @app.route('/api/aspirantes/registrar', methods=['POST'])

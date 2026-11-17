@@ -57,29 +57,32 @@ function initPhotoCapture() {
     const imgPreview = document.getElementById('photo-preview-img');
     const iconPlaceholder = document.getElementById('photo-placeholder-icon');
     const errFoto = document.getElementById('err-foto');
+    const statusFotoPrincipal = document.getElementById('status-foto-principal');
 
     if (!fileInput || !btnSubir) return;
 
-    btnSubir.addEventListener('click', () => {
-        fileInput.click();
-    });
+    // Solo usar .click() por JS si el elemento NO es un <label for="asp-foto_alum">
+    if (btnSubir.tagName !== 'LABEL') {
+        btnSubir.addEventListener('click', () => {
+            fileInput.click();
+        });
+    }
 
     fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
+        const file = e.target.files && e.target.files[0];
         if (!file) return;
 
-        // Validar tipo MIME
-        if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+        // Validar tipo de imagen de forma amplia (compatible con todos los móviles y PC)
+        const esImagenValida = (file.type && file.type.startsWith('image/')) || /\.(jpe?g|png|webp|bmp|gif|heic|heif)$/i.test(file.name || '');
+        if (!esImagenValida) {
             if (errFoto) {
-                errFoto.textContent = 'Formato de imagen inválido. Solo se admiten JPG, PNG o WebP.';
+                errFoto.textContent = 'Formato inválido. Seleccione una imagen (JPG, PNG o WebP).';
                 errFoto.classList.add('visible');
             }
             fileInput.value = '';
             return;
         }
 
-        // Validar peso original del archivo: Permitir hasta 35MB (cámaras de 48MP/108MP de móviles modernos)
-        // ya que el motor Canvas del navegador la comprime automáticamente a ~100 KB para enviarla.
         if (file.size > 35 * 1024 * 1024) {
             if (errFoto) {
                 errFoto.textContent = 'La imagen seleccionada supera los 35 MB. Por favor seleccione una foto más liviana.';
@@ -92,18 +95,17 @@ function initPhotoCapture() {
         if (errFoto) errFoto.classList.remove('visible');
         btnSubir.textContent = '⏳ Optimizando foto...';
 
-        // Redimensionar y optimizar con Canvas para ultra-eficiencia móvil
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
-            img.onload = () => {
+            img.onload = async () => {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
                 let height = img.height;
 
-                // Escalar manteniendo proporción carnet (máx 600x750)
-                const maxW = 600;
-                const maxH = 750;
+                // Escalar manteniendo proporción carnet optimizada (máx 320x400 px = ~15-18 KB en BD)
+                const maxW = 320;
+                const maxH = 400;
                 if (width > maxW || height > maxH) {
                     const ratio = Math.min(maxW / width, maxH / height);
                     width = Math.round(width * ratio);
@@ -115,10 +117,10 @@ function initPhotoCapture() {
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
 
-                // Exportar como JPEG optimizado (0.82 calidad = ~80-120 KB)
-                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.82);
+                // Exportar como JPEG ultra-optimizado para carnet PDF (0.72 calidad = ~15-18 KB)
+                capturedPhotoBase64 = canvas.toDataURL('image/jpeg', 0.72);
+                window.capturedPhotoBase64 = capturedPhotoBase64;
 
-                // Mostrar previsualización
                 if (imgPreview) {
                     imgPreview.src = capturedPhotoBase64;
                     imgPreview.style.display = 'block';
@@ -126,6 +128,31 @@ function initPhotoCapture() {
                 if (iconPlaceholder) iconPlaceholder.style.display = 'none';
                 if (btnQuitar) btnQuitar.style.display = 'inline-block';
                 btnSubir.textContent = '🔄 Cambiar Foto';
+                fileInput.value = '';
+
+                if (typeof window.actualizarBarraReactivaIUAC === 'function') {
+                    window.actualizarBarraReactivaIUAC();
+                }
+
+                // Si ya escribió una cédula válida, alojar de inmediato en carpeta fotos_aspirantes y BD
+                const cedActual = (document.getElementById('asp-ced_alum')?.value || '').replace(/\D/g, '').trim();
+                if (cedActual && cedActual.length >= 6 && cedActual.length <= 8) {
+                    try {
+                        const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ced_alum: cedActual, foto_base64: capturedPhotoBase64 })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.ok && statusFotoPrincipal) {
+                            statusFotoPrincipal.textContent = `✓ Guardada en fotos_aspirantes/foto_${cedActual}.jpg`;
+                            statusFotoPrincipal.style.display = 'block';
+                        }
+                    } catch (_) {}
+                } else if (statusFotoPrincipal) {
+                    statusFotoPrincipal.textContent = '✓ Fotografía lista (se alojará en fotos_aspirantes al registrar)';
+                    statusFotoPrincipal.style.display = 'block';
+                }
             };
             img.onerror = () => {
                 if (errFoto) {
@@ -133,6 +160,7 @@ function initPhotoCapture() {
                     errFoto.classList.add('visible');
                 }
                 btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
+                fileInput.value = '';
             };
             img.src = event.target.result;
         };
@@ -142,6 +170,7 @@ function initPhotoCapture() {
                 errFoto.classList.add('visible');
             }
             btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
+            fileInput.value = '';
         };
         reader.readAsDataURL(file);
     });
@@ -150,6 +179,7 @@ function initPhotoCapture() {
         btnQuitar.addEventListener('click', () => {
             fileInput.value = '';
             capturedPhotoBase64 = null;
+            window.capturedPhotoBase64 = null;
             if (imgPreview) {
                 imgPreview.src = '';
                 imgPreview.style.display = 'none';
@@ -157,7 +187,11 @@ function initPhotoCapture() {
             if (iconPlaceholder) iconPlaceholder.style.display = 'block';
             btnQuitar.style.display = 'none';
             btnSubir.textContent = '📷 Tomar Foto / Subir Imagen';
+            if (statusFotoPrincipal) statusFotoPrincipal.style.display = 'none';
             if (errFoto) errFoto.classList.remove('visible');
+            if (typeof window.actualizarBarraReactivaIUAC === 'function') {
+                window.actualizarBarraReactivaIUAC();
+            }
         });
     }
 }
@@ -434,12 +468,11 @@ function bloquearFormularioPorCedulaRegistrada(cedula) {
         formCard.classList.add('locked-by-cedula');
     }
 
-    // Deshabilitar todos los demás campos y botones de navegación excepto el campo Cédula y el botón de búsqueda
+    // Deshabilitar todos los demás campos y botones de navegación excepto el campo Cédula, Foto y el botón de búsqueda
     document.querySelectorAll('.lockable-field input, .lockable-field select, .lockable-field textarea, .btn-nav').forEach(el => {
         el.disabled = true;
     });
     if (fecNac) fecNac.disabled = true;
-    if (btnFoto) btnFoto.disabled = true;
 }
 
 function desbloquearFormularioPorCedulaRegistrada() {
@@ -516,27 +549,63 @@ function initRecuperarPlanillaModal() {
     if (!modal) return;
 
     if (btnSubirFotoRec && inputFotoRec) {
-        btnSubirFotoRec.addEventListener('click', () => inputFotoRec.click());
+        if (btnSubirFotoRec.tagName !== 'LABEL') {
+            btnSubirFotoRec.addEventListener('click', () => inputFotoRec.click());
+        }
         inputFotoRec.addEventListener('change', (e) => {
-            const file = e.target.files[0];
+            const file = e.target.files && e.target.files[0];
             if (!file) return;
-            btnSubirFotoRec.textContent = '⏳ Optimizando foto...';
+            btnSubirFotoRec.textContent = '⏳ Optimizando y subiendo foto...';
             const reader = new FileReader();
             reader.onload = (ev) => {
                 const img = new Image();
-                img.onload = () => {
+                img.onload = async () => {
                     const canvas = document.createElement('canvas');
                     let w = img.width, h = img.height;
-                    const ratio = Math.min(600 / w, 750 / h, 1);
+                    const ratio = Math.min(320 / w, 400 / h, 1);
                     w = Math.round(w * ratio);
                     h = Math.round(h * ratio);
                     canvas.width = w;
                     canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    fotoRecuperacionBase64 = canvas.toDataURL('image/jpeg', 0.82);
-                    btnSubirFotoRec.textContent = '🔄 Cambiar Foto Seleccionada';
-                    if (statusFotoRec) {
-                        statusFotoRec.textContent = '✓ Fotografía lista para guardar en su registro y planilla PDF.';
+                    fotoRecuperacionBase64 = canvas.toDataURL('image/jpeg', 0.72);
+                    capturedPhotoBase64 = fotoRecuperacionBase64;
+                    window.capturedPhotoBase64 = fotoRecuperacionBase64;
+
+                    const previewBox = document.getElementById('preview-recuperar-foto-box');
+                    const previewImg = document.getElementById('preview-recuperar-foto-img');
+                    if (previewBox && previewImg) {
+                        previewImg.src = fotoRecuperacionBase64;
+                        previewBox.style.display = 'block';
+                    }
+
+                    btnSubirFotoRec.textContent = '🔄 Cambiar Fotografía Seleccionada';
+                    inputFotoRec.value = '';
+
+                    // Si ya ingresó la cédula en el campo de consulta, guardarla de inmediato en fotos_aspirantes y BD
+                    const cedVal = (inputCed?.value || '').replace(/\D/g, '').trim();
+                    if (cedVal && cedVal.length >= 6 && cedVal.length <= 8) {
+                        try {
+                            const res = await fetch(`${API_BASE}/api/aspirantes/actualizar-foto`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ ced_alum: cedVal, foto_base64: fotoRecuperacionBase64 })
+                            });
+                            const data = await res.json();
+                            if (statusFotoRec) {
+                                statusFotoRec.textContent = (res.ok && data.ok)
+                                    ? `✓ Fotografía alojada en fotos_aspirantes/foto_${cedVal}.jpg y guardada en la BD.`
+                                    : '✓ Fotografía lista para incluir en su planilla PDF.';
+                                statusFotoRec.style.display = 'block';
+                            }
+                        } catch (_) {
+                            if (statusFotoRec) {
+                                statusFotoRec.textContent = '✓ Fotografía cargada. Se guardará al descargar la planilla.';
+                                statusFotoRec.style.display = 'block';
+                            }
+                        }
+                    } else if (statusFotoRec) {
+                        statusFotoRec.textContent = '✓ Fotografía cargada. Ingrese su cédula arriba y presione Descargar.';
                         statusFotoRec.style.display = 'block';
                     }
                 };
