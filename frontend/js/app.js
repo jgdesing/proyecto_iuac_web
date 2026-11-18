@@ -46,7 +46,7 @@ function checkFileProtocolBanner() {
             <strong>ℹ️ Nota de Acceso:</strong> Ha abierto este archivo directamente con doble clic (<em>file://</em>). 
             Las peticiones se enviarán automáticamente a <code>http://127.0.0.1:5050</code>. 
             Para acceder desde su celular o red local, ingrese en su navegador a: 
-            <a href="http://127.0.0.1:5050" target="_blank" style="color:#0284c7; font-weight:bold; text-decoration:underline;">http://127.0.0.1:5050</a> o desde el móvil a <strong>http://10.40.111.19:5050</strong>.
+            <a href="http://127.0.0.1:5050" target="_blank" style="color:var(--t-dark); font-weight:bold; text-decoration:underline;">http://127.0.0.1:5050</a> o desde el móvil a <strong>http://10.40.111.19:5050</strong>.
         `;
         document.body.insertBefore(warningBanner, document.body.firstChild);
     }
@@ -1099,7 +1099,7 @@ function initRealtimeValidations() {
                 desbloquearFormularioPorCedulaRegistrada();
             } else {
                 setFieldValid(cedulaInput, 'err-cedula');
-                statusLabel.innerHTML = '<span style="color:#0284c7; font-size:0.75rem;">⏳ Comprobando disponibilidad...</span>';
+                statusLabel.innerHTML = '<span style="color:var(--t-dark); font-size:0.75rem;">⏳ Comprobando disponibilidad...</span>';
                 checkCedulaTimeout = setTimeout(() => verificarCedulaRemota(val), 350);
             }
         });

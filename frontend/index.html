@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <meta name="description"
         content="Portal Oficial de Preinscripción y Captura de Aspirantes del Instituto Universitario de Aeronáutica Civil (IUAC) - Admisión 2026.">
-    <meta name="theme-color" content="#0a192f">
+    <meta name="theme-color" content="#212121">
     <title>Preinscripción de Aspirantes | IUAC - Instituto Universitario de Aeronáutica Civil</title>
 
     <!-- Favicon Oficial IUAC -->
@@ -14,7 +14,11 @@
     <link rel="shortcut icon" type="image/png" href="img/logo_iuac.png?v=3">
 
     <!-- Estilos de Alto Rendimiento -->
-    <link rel="stylesheet" href="css/landing.css?v=6.0">
+    <!-- Tema de color: se aplica antes de pintar para evitar parpadeo (rojo = predeterminado) -->
+    <script>
+        (function () { try { var t = localStorage.getItem('iuac_tema_color'); if (t === 'azul' || t === 'ocre') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
+    </script>
+    <link rel="stylesheet" href="css/landing.css?v=7.0">
 </head>
 
 <body>
@@ -34,14 +38,14 @@
             <div class="info-popup-banner">
                 <span class="info-popup-badge-proceso">Proceso de Pre-Inscripción</span>
                 <h3>Instituto Universitario de Aeronáutica Civil</h3>
-                <p style="font-size:0.92rem; color:#bae6fd; margin:0;">Convocatoria 2026 - 2027</p>
+                <p style="font-size:0.92rem; color:var(--t-highlight); margin:0;">Convocatoria 2026 - 2027</p>
             </div>
 
             <div class="info-popup-body">
-                <p style="margin-bottom:0.85rem; font-weight:700; color:#0f172a;">
+                <p style="margin-bottom:0.85rem; font-weight:700; color:#1a1a1a;">
                     ¿Deseas formarte como profesional aeronáutico o certificar tu trayectoria en la aviación civil?
                 </p>
-                <p style="margin-bottom:1rem; color:#475569;">
+                <p style="margin-bottom:1rem; color:#525252;">
                     El <strong>IUAC</strong> abre su proceso de preinscripción en línea para bachilleres y aspirantes a
                     las 5 carreras aeronáuticas oficiales avaladas por el INAC y la OACI.
                 </p>
@@ -89,6 +93,12 @@
                     <span class="nav-institution-title">Instituto Universitario de Aeronáutica Civil</span>
                 </div>
             </a>
+            <div class="theme-switcher" role="group" aria-label="Seleccionar color del sistema">
+                <span class="theme-switcher-label">Color</span>
+                <button type="button" class="theme-btn theme-btn-azul" data-theme-value="azul" title="Tema azul claro" aria-label="Tema azul claro" aria-pressed="false"></button>
+                <button type="button" class="theme-btn theme-btn-ocre" data-theme-value="ocre" title="Tema amarillo ocre claro" aria-label="Tema amarillo ocre claro" aria-pressed="false"></button>
+                <button type="button" class="theme-btn theme-btn-rojo active" data-theme-value="rojo" title="Tema rojo (predeterminado)" aria-label="Tema rojo (predeterminado)" aria-pressed="true"></button>
+            </div>
         </div>
     </header>
 
@@ -183,7 +193,7 @@
                 </button>
             </div>
             <div style="padding:1.5rem;">
-                <p style="font-size:0.9rem; color:#475569; margin-bottom:1rem; line-height:1.45;">
+                <p style="font-size:0.9rem; color:#525252; margin-bottom:1rem; line-height:1.45;">
                     Si usted ya completó su registro y desea descargar nuevamente su <strong>Planilla Oficial de
                         Pre-Inscripción en PDF</strong>, ingrese su número de cédula:
                 </p>
@@ -194,15 +204,15 @@
                     <div class="field-error-msg" id="err-buscar-cedula"></div>
                 </div>
                 <div
-                    style="background:linear-gradient(135deg, #f0fdfa 0%, #eef2ff 100%); border:1.5px dashed #14b8a6; border-radius:10px; padding:0.85rem; margin-bottom:0.85rem; text-align:center;">
-                    <div style="font-size:0.82rem; color:#1e1b4b; font-weight:800; margin-bottom:0.3rem;">
+                    style="background:linear-gradient(135deg, var(--t-pane) 0%, var(--t-pane-2) 100%); border:1.5px dashed var(--t-main); border-radius:10px; padding:0.85rem; margin-bottom:0.85rem; text-align:center;">
+                    <div style="font-size:0.82rem; color:var(--f-1); font-weight:800; margin-bottom:0.3rem;">
                         📷 ¿Su planilla aún no tiene foto? Suba un archivo o active su cámara:
                     </div>
-                    <div style="font-size:0.74rem; color:#475569; margin-bottom:0.55rem;">
+                    <div style="font-size:0.74rem; color:#525252; margin-bottom:0.55rem;">
                         Formatos permitidos: <strong>.JPG o .PNG</strong> (Tamaño máx. <strong>5 MB</strong>)
                     </div>
                     <div id="preview-recuperar-foto-box"
-                        style="display:none; width:86px; height:106px; margin:0 auto 0.6rem; border-radius:8px; border:2px solid #0d9488; overflow:hidden; background:#ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.12);">
+                        style="display:none; width:86px; height:106px; margin:0 auto 0.6rem; border-radius:8px; border:2px solid var(--t-main); overflow:hidden; background:#ffffff; box-shadow:0 3px 10px rgba(0,0,0,0.12);">
                         <img id="preview-recuperar-foto-img" alt="Vista previa carnet"
                             style="width:100%; height:100%; object-fit:cover; display:block;">
                     </div>
@@ -219,12 +229,12 @@
                         </button>
                     </div>
                     <div id="status-recuperar-foto"
-                        style="font-size:0.78rem; color:#0f766e; font-weight:800; margin-top:0.45rem; display:none;">
+                        style="font-size:0.78rem; color:var(--t-dark); font-weight:800; margin-top:0.45rem; display:none;">
                     </div>
                     <div class="field-error-msg" id="err-recuperar-foto" style="margin-top:0.35rem;"></div>
                 </div>
                 <div
-                    style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:0.7rem 0.85rem; font-size:0.8rem; color:#0369a1; margin-bottom:1.1rem; line-height:1.4;">
+                    style="background:var(--t-pane); border:1px solid var(--t-pane-3); border-radius:8px; padding:0.7rem 0.85rem; font-size:0.8rem; color:var(--t-dark); margin-bottom:1.1rem; line-height:1.4;">
                     🔒 <strong>Protección de Datos del Titular:</strong> Si consulta desde un dispositivo móvil con
                     bloqueo biométrico activo, el sistema solicitará su <strong>Huella Dactilar</strong> para verificar
                     que usted es el titular antes de descargar el documento.
@@ -247,11 +257,11 @@
                 </button>
             </div>
             <div style="padding:1.25rem; text-align:center;">
-                <p style="font-size:0.84rem; color:#475569; margin-bottom:0.75rem;">
+                <p style="font-size:0.84rem; color:#525252; margin-bottom:0.75rem;">
                     Ubique su rostro dentro del recuadro guía y presione <strong>Capturar Fotografía</strong>:
                 </p>
                 <div
-                    style="position:relative; width:240px; height:300px; margin:0 auto 1rem; border-radius:12px; overflow:hidden; background:#0f172a; border:3px solid #14b8a6; box-shadow:0 8px 24px rgba(30,27,75,0.25);">
+                    style="position:relative; width:240px; height:300px; margin:0 auto 1rem; border-radius:12px; overflow:hidden; background:#1a1a1a; border:3px solid var(--t-main); box-shadow:0 8px 24px rgba(var(--rgb-frame),0.25);">
                     <video id="video-camara-vivo" autoplay playsinline muted
                         style="width:100%; height:100%; object-fit:cover; transform:scaleX(-1);"></video>
                     <!-- Guía visual silueta carnet -->
@@ -362,7 +372,7 @@
                                 <img id="photo-preview-img" class="photo-preview-img" alt="Foto Aspirante">
                             </div>
                             <div class="photo-actions">
-                                <div style="font-size:0.78rem; color:#475569; font-weight:600; margin-bottom:0.2rem;">
+                                <div style="font-size:0.78rem; color:#525252; font-weight:600; margin-bottom:0.2rem;">
                                     Fotografía Tipo Carnet — Formatos <strong>.JPG o .PNG</strong> (Máx. <strong>5
                                         MB</strong>)
                                 </div>
@@ -384,7 +394,7 @@
                                     ✕ Quitar Foto
                                 </button>
                                 <div id="status-foto-principal"
-                                    style="font-size:0.78rem; color:#0f766e; font-weight:800; display:none;"></div>
+                                    style="font-size:0.78rem; color:var(--t-dark); font-weight:800; display:none;"></div>
                                 <div class="field-error-msg" id="err-foto"></div>
                             </div>
                         </div>
@@ -632,8 +642,8 @@
                             <!-- Carrera IUAC -->
                             <div class="col-12 lockable-field">
                                 <div class="form-group"
-                                    style="background:#f0f9ff; border:2px solid #bae6fd; padding:1.25rem; border-radius:12px;">
-                                    <label style="font-size:1.05rem; color:#0369a1;">
+                                    style="background:var(--t-pane); border:2px solid var(--t-pane-3); padding:1.25rem; border-radius:12px;">
+                                    <label style="font-size:1.05rem; color:var(--t-dark);">
                                         ✈ Carrera / Especialidad de Postulación <span class="req">*</span>
                                     </label>
                                     <select class="form-control" id="asp-carrera" required
@@ -728,9 +738,9 @@
     <div class="modal-overlay" id="modal-exito">
         <div class="modal-card">
             <div class="modal-icon-success">✓</div>
-            <h3 style="font-size:1.45rem; font-weight:800; color:#0f172a; margin-bottom:0.25rem;">¡Preinscripción
+            <h3 style="font-size:1.45rem; font-weight:800; color:#1a1a1a; margin-bottom:0.25rem;">¡Preinscripción
                 Exitosa!</h3>
-            <p style="color:#64748b; font-size:0.88rem; margin-bottom:0.75rem;">Sus datos han sido capturados y
+            <p style="color:#6b6b6b; font-size:0.88rem; margin-bottom:0.75rem;">Sus datos han sido capturados y
                 registrados de forma segura en la plataforma del IUAC.</p>
 
             <div class="voucher-box">
@@ -749,7 +759,7 @@
 
                 <div class="voucher-item-centered">
                     <span class="voucher-label-centered">Carrera de Postulación</span>
-                    <span class="voucher-value-centered" id="voucher-carrera" style="color:#0369a1;">Control de Tránsito
+                    <span class="voucher-value-centered" id="voucher-carrera" style="color:var(--t-dark);">Control de Tránsito
                         Aéreo (CTA)</span>
                 </div>
 
@@ -813,7 +823,7 @@
                 </button>
                 <div class="accordion-descargas-content" id="accordion-descargas-panel" style="display:none;">
                     <div class="accordion-descargas-body">
-                        <p style="font-size:0.8rem; color:#475569; margin-bottom:0.75rem; line-height:1.4;">
+                        <p style="font-size:0.8rem; color:#525252; margin-bottom:0.75rem; line-height:1.4;">
                             Descargue a su computadora, teléfono móvil o consulte en línea los instructivos oficiales
                             del proceso de captación:
                         </p>
@@ -955,7 +965,7 @@
                 <tr style="background:#f1f5f9;">
                     <td colspan="3" style="font-size:9pt; padding:6px;">
                         <strong>ESPECIALIDAD AERONÁUTICA DE POSTULACIÓN:</strong><br>
-                        <span id="p-carrera" style="font-weight:900; color:#0369a1; font-size:10pt;">--</span>
+                        <span id="p-carrera" style="font-weight:900; color:#1a1a1a; font-size:10pt;">--</span>
                     </td>
                 </tr>
                 <tr>
@@ -1010,11 +1020,11 @@
             </div>
             <!-- 6. CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA EN LA PARTE INFERIOR -->
             <div class="p-qr-footer-box"
-                style="margin-top:8px; border:1px solid #0f172a; background:#f8fafc; padding:6px 10px; display:flex; align-items:center; gap:12px;">
+                style="margin-top:8px; border:1px solid #1a1a1a; background:#f8fafc; padding:6px 10px; display:flex; align-items:center; gap:12px;">
                 <canvas id="planilla-qr-canvas" width="90" height="90"
                     style="width:72px; height:72px; flex-shrink:0; border:1px solid #cbd5e1; background:#fff;"></canvas>
-                <div style="font-size:7pt; line-height:1.3; color:#0f172a; text-align:left;">
-                    <strong style="font-size:7.5pt; display:block; color:#0369a1;">CÓDIGO QR DE VERIFICACIÓN OFICIAL DE
+                <div style="font-size:7pt; line-height:1.3; color:#1a1a1a; text-align:left;">
+                    <strong style="font-size:7.5pt; display:block; color:#1a1a1a;">CÓDIGO QR DE VERIFICACIÓN OFICIAL DE
                         CÉDULA E INSCRIPCIÓN — IUAC</strong>
                     <span><strong>C.I. Titular:</strong> <span id="p-qr-ci">--</span> &nbsp;|&nbsp;
                         <strong>Folio:</strong> <span id="p-qr-folio">--</span> &nbsp;|&nbsp; <strong>Acuse
@@ -1030,15 +1040,16 @@
     <!-- ── FOOTER INSTITUCIONAL (CINTILLO INFERIOR, PUNTO 8) ── -->
     <footer class="footer">
         <p>© 2026 Instituto Universitario de Aeronáutica Civil (IUAC) - República Bolivariana de Venezuela.</p>
-        <p style="margin-top:0.35rem; font-size:0.78rem; color:#64748b;">Garantía de Privacidad y Protección de Datos
+        <p style="margin-top:0.35rem; font-size:0.78rem; color:#6b6b6b;">Garantía de Privacidad y Protección de Datos
             Personales de Aspirantes. Certificación Oficial INAC.</p>
     </footer>
 
     <!-- Scripts de Carga Ultra Rápida -->
+    <script src="js/theme_switcher.js?v=1.0"></script>
     <script src="js/geo_data.js?v=2.2"></script>
-    <script src="js/qr_pdf_engine.js?v=2.2"></script>
-    <script src="js/react_ui_enhancer.js?v=1.6"></script>
-    <script src="js/app.js?v=3.7"></script>
+    <script src="js/qr_pdf_engine.js?v=2.3"></script>
+    <script src="js/react_ui_enhancer.js?v=1.7"></script>
+    <script src="js/app.js?v=3.8"></script>
 </body>
 
 </html>

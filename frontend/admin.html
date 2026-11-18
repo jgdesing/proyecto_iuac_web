@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Administrativo | IUAC Aspirantes Web</title>
     <link rel="icon" type="image/png" href="img/favicon.png">
-    <link rel="stylesheet" href="css/landing.css?v=2.2">
+    <meta name="theme-color" content="#212121">
+    <!-- Tema de color: se aplica antes de pintar para evitar parpadeo (rojo = predeterminado) -->
+    <script>
+        (function () { try { var t = localStorage.getItem('iuac_tema_color'); if (t === 'azul' || t === 'ocre') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
+    </script>
+    <link rel="stylesheet" href="css/landing.css?v=7.0">
     <style>
         .admin-container {
             max-width: 800px;
@@ -17,13 +22,13 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             padding: 2rem;
-            border-top: 5px solid #0284c7;
+            border-top: 5px solid var(--t-main);
         }
         .admin-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--t-pane-3);
             padding-bottom: 1rem;
             margin-bottom: 1.5rem;
             flex-wrap: wrap;
@@ -36,8 +41,8 @@
             margin-bottom: 2rem;
         }
         .stat-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--t-pane);
+            border: 1px solid var(--t-pane-3);
             border-radius: 8px;
             padding: 1.25rem;
             text-align: center;
@@ -45,13 +50,13 @@
         .stat-number {
             font-size: 2.2rem;
             font-weight: 900;
-            color: #0369a1;
+            color: var(--t-dark);
         }
         .stat-label {
             font-size: 0.82rem;
             text-transform: uppercase;
             font-weight: 700;
-            color: #64748b;
+            color: #6b6b6b;
             margin-top: 0.2rem;
         }
         .btn-export {
@@ -69,12 +74,12 @@
             transition: all 0.2s;
             border: none;
         }
-        .btn-csv { background: #16a34a; }
-        .btn-csv:hover { background: #15803d; }
-        .btn-sql { background: #0284c7; }
-        .btn-sql:hover { background: #0369a1; }
-        .btn-json { background: #475569; }
-        .btn-json:hover { background: #334155; }
+        .btn-csv { background: var(--t-btn-1); }
+        .btn-csv:hover { background: var(--t-dark); }
+        .btn-sql { background: var(--t-btn-3); }
+        .btn-sql:hover { background: var(--t-darker); }
+        .btn-json { background: var(--f-3); }
+        .btn-json:hover { background: var(--f-1); }
         .export-actions {
             display: flex;
             gap: 1rem;
@@ -82,8 +87,8 @@
             margin-top: 1.5rem;
         }
         .login-box {
-            background: #f8fafc;
-            border: 1px solid #cbd5e1;
+            background: var(--t-pane);
+            border: 1px solid var(--t-pane-3);
             border-radius: 8px;
             padding: 1.5rem;
             max-width: 450px;
@@ -98,18 +103,18 @@
         }
         .recent-table th, .recent-table td {
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--t-pane-3);
             text-align: left;
         }
         .recent-table th {
-            background: #0f172a;
+            background: var(--f-1);
             color: #ffffff;
             font-size: 0.78rem;
             text-transform: uppercase;
         }
     </style>
 </head>
-<body style="background:#f1f5f9; min-height:100vh;">
+<body style="background:var(--t-page); min-height:100vh;">
 
     <header class="navbar">
         <div class="nav-container">
@@ -120,7 +125,13 @@
                     <span>Instituto Universitario de Aeronáutica Civil</span>
                 </div>
             </a>
-            <a href="/" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.8rem;">← Volver al Portal</a>
+            <div class="theme-switcher" role="group" aria-label="Seleccionar color del sistema">
+                <span class="theme-switcher-label">Color</span>
+                <button type="button" class="theme-btn theme-btn-azul" data-theme-value="azul" title="Tema azul claro" aria-label="Tema azul claro" aria-pressed="false"></button>
+                <button type="button" class="theme-btn theme-btn-ocre" data-theme-value="ocre" title="Tema amarillo ocre claro" aria-label="Tema amarillo ocre claro" aria-pressed="false"></button>
+                <button type="button" class="theme-btn theme-btn-rojo active" data-theme-value="rojo" title="Tema rojo (predeterminado)" aria-label="Tema rojo (predeterminado)" aria-pressed="true"></button>
+            </div>
+            <a href="/" class="btn btn-secondary" style="font-size:0.85rem; padding:0.4rem 0.8rem; height:auto; margin-left:0.75rem;">← Volver al Portal</a>
         </div>
     </header>
 
@@ -128,8 +139,8 @@
         
         <!-- PANTALLA DE ACCESO -->
         <div class="login-box" id="admin-login-view">
-            <h3 style="margin-bottom:0.5rem; color:#0f172a;">🔐 Acceso Administrativo</h3>
-            <p style="font-size:0.88rem; color:#64748b; margin-bottom:1.25rem;">
+            <h3 style="margin-bottom:0.5rem; color:#1a1a1a;">🔐 Acceso Administrativo</h3>
+            <p style="font-size:0.88rem; color:#6b6b6b; margin-bottom:1.25rem;">
                 Ingrese la clave secreta institucional para consultar y descargar los aspirantes registrados.
             </p>
             <input type="password" id="admin-key-input" class="form-control" placeholder="Clave de Administrador" style="margin-bottom:1rem; text-align:center;">
@@ -143,8 +154,8 @@
         <div class="admin-card" id="admin-dashboard-view" style="display:none;">
             <div class="admin-header">
                 <div>
-                    <h2 style="font-size:1.4rem; color:#0f172a; margin:0;">Centro de Descarga y Control de Aspirantes</h2>
-                    <p style="font-size:0.85rem; color:#64748b; margin-top:0.2rem;">Portal Oficial IUAC — Convocatoria 2026-2027</p>
+                    <h2 style="font-size:1.4rem; color:#1a1a1a; margin:0;">Centro de Descarga y Control de Aspirantes</h2>
+                    <p style="font-size:0.85rem; color:#6b6b6b; margin-top:0.2rem;">Portal Oficial IUAC — Convocatoria 2026-2027</p>
                 </div>
                 <button type="button" class="btn btn-secondary" style="font-size:0.8rem;" onclick="cerrarSesionAdmin()">Cerrar Sesión</button>
             </div>
@@ -155,18 +166,18 @@
                     <div class="stat-label">Aspirantes Registrados</div>
                 </div>
                 <div class="stat-box">
-                    <div class="stat-number" style="color:#16a34a;" id="carreras-activas">5</div>
+                    <div class="stat-number" style="color:var(--t-btn-1);" id="carreras-activas">5</div>
                     <div class="stat-label">Especialidades Activas</div>
                 </div>
             </div>
 
-            <h3 style="font-size:1.05rem; color:#0f172a; margin-bottom:0.5rem;">📥 Descargar y Vaciar Información Capturada (Excel, CSV, SQL):</h3>
-            <p style="font-size:0.86rem; color:#64748b;">
+            <h3 style="font-size:1.05rem; color:#1a1a1a; margin-bottom:0.5rem;">📥 Descargar y Vaciar Información Capturada (Excel, CSV, SQL):</h3>
+            <p style="font-size:0.86rem; color:#6b6b6b;">
                 Descargue la información de todos los aspirantes capturados en el hosting para abrirla en Excel, CSV o vaciarla directamente hacia su base de datos real <strong>bd_aspirantes (academico.estudiantes)</strong>:
             </p>
 
             <div class="export-actions">
-                <a href="#" id="btn-export-excel" class="btn-export btn-csv" style="background:#15803d;">
+                <a href="#" id="btn-export-excel" class="btn-export btn-csv" style="background:var(--t-btn-2);">
                     📗 Descargar Excel (.XLS)
                 </a>
                 <a href="#" id="btn-export-csv" class="btn-export btn-csv">
@@ -181,7 +192,7 @@
             </div>
 
             <div style="margin-top:2.5rem;">
-                <h3 style="font-size:1rem; color:#0f172a; margin-bottom:0.5rem;">🕒 Últimos Registros Capturados:</h3>
+                <h3 style="font-size:1rem; color:#1a1a1a; margin-bottom:0.5rem;">🕒 Últimos Registros Capturados:</h3>
                 <div style="overflow-x:auto;">
                     <table class="recent-table">
                         <thead>
@@ -203,6 +214,7 @@
 
     </div>
 
+    <script src="js/theme_switcher.js?v=1.0"></script>
     <script>
         let currentAdminKey = localStorage.getItem('iuac_admin_key') || '';
 
@@ -247,13 +259,13 @@
                             <tr>
                                 <td><strong>V-${u.cedula}</strong></td>
                                 <td>${u.nombre}</td>
-                                <td><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">${u.carrera}</span></td>
-                                <td>${u.posee_foto === 'SI' ? '<span style="color:#16a34a; font-weight:700;">✓ Guardada</span>' : '<span style="color:#94a3b8;">Sin foto</span>'}</td>
+                                <td><span style="background:var(--t-pane-2); color:var(--t-dark); padding:2px 6px; border-radius:4px; font-weight:700;">${u.carrera}</span></td>
+                                <td>${u.posee_foto === 'SI' ? '<span style="color:#16a34a; font-weight:700;">✓ Guardada</span>' : '<span style="color:#9a9a9a;">Sin foto</span>'}</td>
                                 <td>${u.fecha}</td>
                             </tr>
                         `).join('');
                     } else {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b;">No hay registros aún.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#6b6b6b;">No hay registros aún.</td></tr>';
                     }
                 } else {
                     errDiv.textContent = data.error || 'Clave incorrecta.';
