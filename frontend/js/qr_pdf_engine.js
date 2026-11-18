@@ -220,7 +220,7 @@ function generarMatrizQR(texto) {
     return modules;
 }
 
-function dibujarQREnCanvas(canvas, texto, pixelSize = 180) {
+function dibujarQREnCanvas(canvas, texto, pixelSize = 180, conLogo = false, callback = null) {
     if (!canvas) return null;
     const matrix = generarMatrizQR(texto);
     const N = matrix.length;
@@ -245,6 +245,46 @@ function dibujarQREnCanvas(canvas, texto, pixelSize = 180) {
             }
         }
     }
+
+    if (conLogo) {
+        const logoSize = Math.round(pixelSize * 0.22);
+        const cx = pixelSize / 2;
+        const cy = pixelSize / 2;
+        const radius = Math.round((logoSize / 2) + 4);
+
+        const pintarLogo = (img) => {
+            try {
+                ctx.save();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                ctx.drawImage(img, cx - (logoSize / 2), cy - (logoSize / 2), logoSize, logoSize);
+                ctx.restore();
+            } catch (err) {
+                console.warn('No se pudo superponer el logo en el QR:', err);
+            }
+            if (typeof callback === 'function') callback(canvas);
+        };
+
+        const imgLogo = new Image();
+        imgLogo.crossOrigin = 'anonymous';
+        imgLogo.onload = () => { pintarLogo(imgLogo); };
+        imgLogo.onerror = () => {
+            if (typeof callback === 'function') callback(canvas);
+        };
+        imgLogo.src = 'img/logo_iuac.png';
+        if (imgLogo.complete && imgLogo.naturalWidth > 0) {
+            pintarLogo(imgLogo);
+        }
+    } else {
+        if (typeof callback === 'function') callback(canvas);
+    }
+
     return canvas;
 }
 
@@ -454,7 +494,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     // Actualizar también el QR en el DOM (#planilla-qr-canvas)
     const domQrCanvas = document.getElementById('planilla-qr-canvas');
     if (domQrCanvas) {
-        dibujarQREnCanvas(domQrCanvas, qrPayload, 140);
+        dibujarQREnCanvas(domQrCanvas, qrPayload, 140, true);
     }
 
     // Lienzo de alta definición proporción Carta exacta (1224 x 1584 px = 2x de 612x792 pt)
@@ -896,7 +936,206 @@ async function verificarHuellaTitularMovil(cedulaStr) {
     }
 }
 
+// ══════════════════════════════════════════════════════════════════════════════
+// 6. IMPRESIÓN Y DESCARGA DE CÉDULA EN CÓDIGO QR CON LOGO CENTRAL IUAC
+// ══════════════════════════════════════════════════════════════════════════════
+function imprimirTarjetaQRCedula(datos) {
+    const reg = datos || window.ultimoRegistroAspirante || {};
+    const cedula = reg.ced_alum || (document.getElementById('voucher-cedula') ? document.getElementById('voucher-cedula').textContent.replace(/[^\d]/g, '') : '');
+    const tipoCed = reg.tipo_cedula || 'V';
+    const nombre = (reg.nom_alum && reg.ape_alum) ? `${reg.nom_alum} ${reg.ape_alum}` : (document.getElementById('voucher-nombre') ? document.getElementById('voucher-nombre').textContent : 'Aspirante IUAC');
+    const carreraCod = reg.carrera || '';
+    const carreraNom = (window.MAPA_CARRERAS && window.MAPA_CARRERAS[carreraCod]) || (document.getElementById('voucher-carrera') ? document.getElementById('voucher-carrera').textContent : carreraCod);
+    const folio = reg.folio || (document.getElementById('voucher-folio') ? document.getElementById('voucher-folio').textContent : `IUAC-2026-${cedula}`);
+    const fecha = reg.fecha_registro || new Date().toLocaleDateString('es-VE');
+
+    // Actualizar datos de la tarjeta / carnet en el modal
+    const elCi = document.getElementById('carnet-ci');
+    if (elCi) elCi.textContent = `${tipoCed}-${cedula}`;
+    const elNom = document.getElementById('carnet-nombre');
+    if (elNom) elNom.textContent = nombre;
+    const elCar = document.getElementById('carnet-carrera');
+    if (elCar) elCar.textContent = carreraNom;
+    const elFol = document.getElementById('carnet-folio');
+    if (elFol) elFol.textContent = folio;
+    const elFec = document.getElementById('carnet-fecha');
+    if (elFec) elFec.textContent = `${reg.est_alum || 'Aragua'} • ${fecha}`;
+
+    // Payload de verificación oficial para la cédula QR
+    const qrTexto = `IUAC-OFICIAL|CI:${tipoCed}-${cedula}|FOLIO:${folio}|ASPIRANTE:${nombre}|CARRERA:${carreraNom}|ESTADO:${reg.est_alum || 'VE'}`;
+
+    const canvas = document.getElementById('carnet-qr-canvas');
+    if (canvas) {
+        dibujarQREnCanvas(canvas, qrTexto, 220, true);
+    }
+
+    const modal = document.getElementById('modal-carnet-qr');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function imprimirCarnetQROficial() {
+    const canvas = document.getElementById('carnet-qr-canvas');
+    const qrDataUrl = canvas ? canvas.toDataURL('image/png') : '';
+    const ci = document.getElementById('carnet-ci')?.textContent || '';
+    const nombre = document.getElementById('carnet-nombre')?.textContent || '';
+    const carrera = document.getElementById('carnet-carrera')?.textContent || '';
+    const folio = document.getElementById('carnet-folio')?.textContent || '';
+    const fecha = document.getElementById('carnet-fecha')?.textContent || '';
+
+    const ventana = window.open('', '_blank', 'width=520,height=680');
+    if (!ventana) {
+        alert('Por favor permita ventanas emergentes para imprimir la cédula QR.');
+        return;
+    }
+
+    ventana.document.write(`
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cédula QR de Preinscripción IUAC - ${ci}</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            color: #0f172a;
+        }
+        .carnet-box {
+            width: 360px;
+            border: 2.5px solid #0f172a;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        .header-sub {
+            font-size: 7.5pt;
+            font-weight: bold;
+            color: #475569;
+            text-transform: uppercase;
+            line-height: 1.25;
+        }
+        .header-main {
+            font-size: 10pt;
+            font-weight: 900;
+            color: #0f172a;
+            margin-top: 4px;
+        }
+        .badge {
+            display: inline-block;
+            background: #b91c1c;
+            color: #ffffff;
+            font-size: 8pt;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+        .qr-wrap {
+            margin: 12px auto;
+            width: 200px;
+            height: 200px;
+        }
+        .qr-wrap img {
+            width: 200px;
+            height: 200px;
+            border: 2px solid #0f172a;
+            border-radius: 8px;
+            display: block;
+        }
+        .table-data {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 8.5pt;
+            line-height: 1.45;
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        .row span { color: #64748b; font-weight: bold; }
+        .row strong { color: #0f172a; text-align: right; }
+        .footer-note {
+            font-size: 7.2pt;
+            color: #64748b;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="carnet-box">
+        <div class="header-sub">
+            República Bolivariana de Venezuela<br>
+            Ministerio del Poder Popular para el Transporte
+        </div>
+        <div class="header-main">INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL</div>
+        <div class="badge">CÉDULA QR DE PREINSCRIPCIÓN OFICIAL</div>
+
+        <div class="qr-wrap">
+            <img src="${qrDataUrl}" alt="Cédula QR IUAC">
+        </div>
+
+        <div class="table-data">
+            <div class="row"><span>CÉDULA:</span><strong>${ci}</strong></div>
+            <div class="row"><span>ASPIRANTE:</span><strong>${nombre}</strong></div>
+            <div class="row"><span>CARRERA:</span><strong style="color:#b91c1c;">${carrera}</strong></div>
+            <div class="row"><span>FOLIO:</span><strong>${folio}</strong></div>
+            <div class="row"><span>EMISIÓN:</span><span>${fecha}</span></div>
+        </div>
+
+        <div class="footer-note">
+            Presente este código QR al momento de consignar sus documentos ante el IUAC para su verificación inmediata.
+        </div>
+
+        <div class="no-print" style="margin-top:14px;">
+            <button onclick="window.print()" style="background:#b91c1c; color:#fff; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                🖨️ Imprimir Ahora
+            </button>
+        </div>
+    </div>
+    <script>
+        setTimeout(() => { window.print(); }, 400);
+    </script>
+</body>
+</html>
+    `);
+    ventana.document.close();
+}
+
+function descargarCarnetQRPNG() {
+    const canvas = document.getElementById('carnet-qr-canvas');
+    if (!canvas) return;
+    const ci = document.getElementById('carnet-ci')?.textContent?.replace(/[^\w]/g, '_') || 'IUAC';
+    const link = document.createElement('a');
+    link.download = `Cedula_QR_IUAC_${ci}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
 window.generarMatrizQR = generarMatrizQR;
 window.dibujarQREnCanvas = dibujarQREnCanvas;
 window.descargarPlanillaPDFOficial = descargarPlanillaPDFOficial;
 window.verificarHuellaTitularMovil = verificarHuellaTitularMovil;
+window.imprimirTarjetaQRCedula = imprimirTarjetaQRCedula;
+window.imprimirCarnetQROficial = imprimirCarnetQROficial;
+window.descargarCarnetQRPNG = descargarCarnetQRPNG;

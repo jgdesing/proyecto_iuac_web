@@ -20,6 +20,8 @@ const MAPA_CARRERAS = {
 let capturedPhotoBase64 = null;
 let capturedRepresDocBase64 = null;
 let capturedRepresDocExt = 'jpg';
+let capturedAspiranteCedulaBase64 = null;
+let capturedAspiranteCedulaExt = 'jpg';
 let ultimoRegistroAspirante = {};
 window.MAPA_CARRERAS = MAPA_CARRERAS;
 window.ultimoRegistroAspirante = ultimoRegistroAspirante;
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initRecuperarPlanillaModal();
     initStepper();
     initPhotoCapture();
+    initAspiranteCedulaDocCapture();
     initRepresentanteDocCapture();
     initGeoSelectors();
     initRealtimeValidations();
@@ -114,7 +117,7 @@ async function iniciarStreamEnModalCamara() {
         });
         videoEl.srcObject = streamCamaraActiva;
         videoEl.style.transform = (modoLenteCamara === 'user') ? 'scaleX(-1)' : 'none';
-        await videoEl.play().catch(() => {});
+        await videoEl.play().catch(() => { });
         return true;
     } catch (err) {
         // Reintentar con cualquier cámara disponible (ej. webcam USB de PC de escritorio)
@@ -122,7 +125,7 @@ async function iniciarStreamEnModalCamara() {
             streamCamaraActiva = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
             videoEl.srcObject = streamCamaraActiva;
             videoEl.style.transform = 'scaleX(-1)';
-            await videoEl.play().catch(() => {});
+            await videoEl.play().catch(() => { });
             return true;
         } catch (err2) {
             if (errCam) {
@@ -303,7 +306,7 @@ function initPhotoCapture() {
                     statusFotoPrincipal.textContent = `✓ Guardada en ${data.archivo || ('/fotos_aspirantes/' + nombreEsperado)}`;
                     statusFotoPrincipal.style.display = 'block';
                 }
-            } catch (_) {}
+            } catch (_) { }
         } else if (statusFotoPrincipal) {
             statusFotoPrincipal.textContent = `✓ Fotografía lista (/fotos_aspirantes/${nombreEsperado})`;
             statusFotoPrincipal.style.display = 'block';
@@ -397,10 +400,112 @@ function initPhotoCapture() {
     }
 }
 
+// ── CAPTURA Y SUBIDA DE CÉDULA DEL ASPIRANTE (OBLIGATORIA PARA TODOS) ───────────
+function initAspiranteCedulaDocCapture() {
+    const inputDoc = document.getElementById('input-file-cedula-aspirante');
+    const btnEscanearDoc = document.getElementById('btn-escanear-cedula-aspirante');
+    const btnQuitarDoc = document.getElementById('btn-quitar-cedula-aspirante');
+    const previewBox = document.getElementById('preview-cedula-aspirante-box');
+    const previewImg = document.getElementById('preview-cedula-aspirante-img');
+    const previewPdf = document.getElementById('preview-cedula-aspirante-pdf');
+    const statusDoc = document.getElementById('status-cedula-aspirante');
+    const errDoc = document.getElementById('err-cedula-aspirante-doc');
+
+    const aplicarDocAspirante = (base64Data, ext = 'jpg') => {
+        capturedAspiranteCedulaBase64 = base64Data;
+        capturedAspiranteCedulaExt = ext;
+        window.capturedAspiranteCedulaBase64 = capturedAspiranteCedulaBase64;
+        window.capturedAspiranteCedulaExt = capturedAspiranteCedulaExt;
+
+        if (previewBox) previewBox.style.display = 'block';
+        if (ext === 'pdf') {
+            if (previewImg) previewImg.style.display = 'none';
+            if (previewPdf) previewPdf.style.display = 'flex';
+        } else {
+            if (previewPdf) previewPdf.style.display = 'none';
+            if (previewImg) {
+                previewImg.src = base64Data;
+                previewImg.style.display = 'block';
+            }
+        }
+        if (btnQuitarDoc) btnQuitarDoc.style.display = 'inline-block';
+        if (statusDoc) {
+            statusDoc.textContent = '✓ Documento de identidad del aspirante cargado correctamente.';
+            statusDoc.style.display = 'block';
+        }
+        if (errDoc) {
+            errDoc.textContent = '';
+            errDoc.classList.remove('visible');
+        }
+    };
+
+    if (inputDoc) {
+        inputDoc.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+
+            const name = file.name.toLowerCase();
+            const esPdf = file.type === 'application/pdf' || name.endsWith('.pdf');
+            const esImg = file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(name);
+
+            if (!esPdf && !esImg) {
+                if (errDoc) {
+                    errDoc.textContent = 'Formato no permitido. Solo se admiten archivos .JPG, .PNG o .PDF.';
+                    errDoc.classList.add('visible');
+                }
+                inputDoc.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                if (errDoc) {
+                    errDoc.textContent = 'El documento excede el tamaño máximo permitido de 5 MB.';
+                    errDoc.classList.add('visible');
+                }
+                inputDoc.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const ext = esPdf ? 'pdf' : (name.endsWith('.png') ? 'png' : 'jpg');
+                aplicarDocAspirante(evt.target.result, ext);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (btnEscanearDoc) {
+        btnEscanearDoc.addEventListener('click', () => {
+            abrirVisorCamaraDispositivo((b64) => {
+                aplicarDocAspirante(b64, 'jpg');
+            });
+        });
+    }
+
+    if (btnQuitarDoc) {
+        btnQuitarDoc.addEventListener('click', () => {
+            if (inputDoc) inputDoc.value = '';
+            capturedAspiranteCedulaBase64 = null;
+            window.capturedAspiranteCedulaBase64 = null;
+            if (previewImg) {
+                previewImg.src = '';
+                previewImg.style.display = 'none';
+            }
+            if (previewPdf) previewPdf.style.display = 'none';
+            if (previewBox) previewBox.style.display = 'none';
+            btnQuitarDoc.style.display = 'none';
+            if (statusDoc) statusDoc.style.display = 'none';
+            if (errDoc) errDoc.classList.remove('visible');
+        });
+    }
+}
+
 // ── CAPTURA Y SUBIDA DE CÉDULA DEL REPRESENTANTE (PARA MENORES DE EDAD) ─────
 function initRepresentanteDocCapture() {
     const inputDoc = document.getElementById('input-file-repres-cedula');
     const btnEscanearDoc = document.getElementById('btn-escanear-repres-cedula');
+    const btnQuitarDoc = document.getElementById('btn-quitar-repres-cedula');
     const previewBox = document.getElementById('preview-repres-cedula-box');
     const previewImg = document.getElementById('preview-repres-cedula-img');
     const previewPdf = document.getElementById('preview-repres-cedula-pdf');
@@ -424,6 +529,7 @@ function initRepresentanteDocCapture() {
                 previewImg.style.display = 'block';
             }
         }
+        if (btnQuitarDoc) btnQuitarDoc.style.display = 'inline-block';
         if (statusDoc) {
             statusDoc.textContent = '✓ Documento de identidad del representante cargado correctamente';
             statusDoc.style.display = 'block';
@@ -475,6 +581,23 @@ function initRepresentanteDocCapture() {
             abrirVisorCamaraDispositivo((b64) => {
                 aplicarDocRepresentante(b64, 'jpg');
             });
+        });
+    }
+
+    if (btnQuitarDoc) {
+        btnQuitarDoc.addEventListener('click', () => {
+            if (inputDoc) inputDoc.value = '';
+            capturedRepresDocBase64 = null;
+            window.capturedRepresDocBase64 = null;
+            if (previewImg) {
+                previewImg.src = '';
+                previewImg.style.display = 'none';
+            }
+            if (previewPdf) previewPdf.style.display = 'none';
+            if (previewBox) previewBox.style.display = 'none';
+            btnQuitarDoc.style.display = 'none';
+            if (statusDoc) statusDoc.style.display = 'none';
+            if (errDoc) errDoc.classList.remove('visible');
         });
     }
 }
@@ -595,10 +718,40 @@ function goToStep(step) {
 function initGeoSelectors() {
     const estadoSelect = document.getElementById('asp-est_alum');
     const ciudadSelect = document.getElementById('asp-ciu_alum');
+    const lugarNacSelect = document.getElementById('asp-lugar_nac_alum');
+
+    const estados = Object.keys(window.VENEZUELA_GEO || {}).sort();
+
+    // 4.1 Poblar Combobox de Lugar de Nacimiento (24 Entidades + Dep. Federales + Exterior)
+    if (lugarNacSelect) {
+        lugarNacSelect.innerHTML = '<option value="">Seleccione un Estado...</option>';
+        estados.forEach(est => {
+            const opt = document.createElement('option');
+            opt.value = est;
+            opt.textContent = est;
+            lugarNacSelect.appendChild(opt);
+        });
+        const optDep = document.createElement('option');
+        optDep.value = 'Dependencias Federales';
+        optDep.textContent = 'Dependencias Federales';
+        lugarNacSelect.appendChild(optDep);
+
+        const optExt = document.createElement('option');
+        optExt.value = 'En el Exterior';
+        optExt.textContent = 'En el Exterior';
+        lugarNacSelect.appendChild(optExt);
+
+        lugarNacSelect.addEventListener('change', () => {
+            if (lugarNacSelect.value) {
+                setFieldValid(lugarNacSelect, 'err-lugar_nac');
+            } else {
+                setFieldInvalid(lugarNacSelect, 'err-lugar_nac', 'Lugar de nacimiento obligatorio.');
+            }
+        });
+    }
 
     if (!estadoSelect || !ciudadSelect) return;
 
-    const estados = Object.keys(window.VENEZUELA_GEO || {}).sort();
     estados.forEach(est => {
         const opt = document.createElement('option');
         opt.value = est;
@@ -1113,8 +1266,8 @@ function initRealtimeValidations() {
         nombresInput.addEventListener('input', (e) => {
             // Evitar espacios al inicio, caracteres raros y dobles espacios consecutivos
             e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
-                                          .replace(/^\s+/, '')
-                                          .replace(/\s{2,}/g, ' ');
+                .replace(/^\s+/, '')
+                .replace(/\s{2,}/g, ' ');
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(nombresInput, 'err-nombres', 'El campo Nombres es obligatorio.');
@@ -1139,8 +1292,8 @@ function initRealtimeValidations() {
     if (apellidosInput) {
         apellidosInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
-                                          .replace(/^\s+/, '')
-                                          .replace(/\s{2,}/g, ' ');
+                .replace(/^\s+/, '')
+                .replace(/\s{2,}/g, ' ');
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(apellidosInput, 'err-apellidos', 'El campo Apellidos es obligatorio.');
@@ -1197,12 +1350,9 @@ function initRealtimeValidations() {
         });
     }
 
-    // 5. Lugar de Nacimiento (sin espacios iniciales ni finales)
+    // 5. Lugar de Nacimiento (Combobox de Estados)
     if (lugarNacInput) {
-        lugarNacInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
-                                          .replace(/^\s+/, '')
-                                          .replace(/\s{2,}/g, ' ');
+        lugarNacInput.addEventListener('change', (e) => {
             const val = e.target.value.trim();
             if (!val) {
                 setFieldInvalid(lugarNacInput, 'err-lugar_nac', 'El lugar de nacimiento es obligatorio.');
@@ -1210,11 +1360,6 @@ function initRealtimeValidations() {
                 setFieldValid(lugarNacInput, 'err-lugar_nac');
             }
         });
-        const limpiarLugarNac = (e) => {
-            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
-        };
-        lugarNacInput.addEventListener('blur', limpiarLugarNac);
-        lugarNacInput.addEventListener('change', limpiarLugarNac);
     }
 
     // 6. Teléfono Celular con máscara (0412-1234567)
@@ -1451,6 +1596,18 @@ function validateCurrentStep(step) {
             if (!primerErrorElement) primerErrorElement = document.getElementById('btn-subir-foto') || cedula;
         }
 
+        // Validación de Documento de Identidad del Aspirante (100% Obligatorio para todos)
+        if (!capturedAspiranteCedulaBase64) {
+            const errCedDoc = document.getElementById('err-cedula-aspirante-doc');
+            if (errCedDoc) {
+                errCedDoc.textContent = 'Es obligatorio adjuntar o escanear la fotografía/documento de su cédula de identidad.';
+                errCedDoc.classList.add('visible');
+            }
+            if (!primerErrorElement) {
+                primerErrorElement = document.getElementById('btn-subir-cedula-aspirante') || document.getElementById('seccion-cedula-aspirante');
+            }
+        }
+
         // Si es menor de 18 años, validar fotocopia de la cédula del representante
         const edadInput = document.getElementById('asp-edad_alum');
         const edadVal = parseInt(edadInput?.value || '99', 10);
@@ -1498,10 +1655,16 @@ function validateCurrentStep(step) {
             setFieldInvalid(telemov, 'err-telemov', 'Teléfono celular venezolano obligatorio (11 dígitos).');
             if (!primerErrorElement) primerErrorElement = telemov;
         }
-        const habDigits = telehab.value.replace(/\D/g, '');
-        if (!telehab.value || habDigits.length < 10 || habDigits.length > 11) {
-            setFieldInvalid(telehab, 'err-telehab', 'Teléfono de habitación o secundario obligatorio (10 u 11 dígitos).');
-            if (!primerErrorElement) primerErrorElement = telehab;
+        if (telehab.value && telehab.value.trim().length > 0) {
+            const habDigits = telehab.value.replace(/\D/g, '');
+            if (habDigits.length < 10 || habDigits.length > 11) {
+                setFieldInvalid(telehab, 'err-telehab', 'Teléfono no válido (debe contener 10 u 11 dígitos).');
+                if (!primerErrorElement) primerErrorElement = telehab;
+            } else {
+                setFieldValid(telehab, 'err-telehab');
+            }
+        } else {
+            setFieldValid(telehab, 'err-telehab');
         }
         if (!correo.value || !REGEX_EMAIL.test(correo.value)) {
             setFieldInvalid(correo, 'err-correo', 'Correo electrónico no válido.');
@@ -1602,7 +1765,9 @@ function initFormSubmit() {
             tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || 'Público',
             observaciones: obsEl?.value || 'Ninguna',
             foto_ext: capturedPhotoExt || 'jpg',
-            foto_base64: capturedPhotoBase64 || null
+            foto_base64: capturedPhotoBase64 || null,
+            cedula_doc_base64: capturedAspiranteCedulaBase64 || null,
+            cedula_doc_ext: capturedAspiranteCedulaExt || 'jpg'
         };
 
         // Si es menor de 18 años, incluir recaudos obligatorios del representante legal
@@ -1618,10 +1783,12 @@ function initFormSubmit() {
         ultimoRegistroAspirante = {
             ...payload,
             foto_base64: capturedPhotoBase64,
+            cedula_doc_base64: capturedAspiranteCedulaBase64,
             repres_doc_base64: capturedRepresDocBase64
         };
         window.ultimoRegistroAspirante = ultimoRegistroAspirante;
         window.capturedPhotoBase64 = capturedPhotoBase64;
+        window.capturedAspiranteCedulaBase64 = capturedAspiranteCedulaBase64;
 
         btnSubmit.disabled = true;
         if (spinner) spinner.style.display = 'inline-block';
@@ -1689,7 +1856,7 @@ function mostrarModalExito(data) {
     // 1.1 Poblar Acuse de Recibo y Notificación SMS Instantáneo
     const smsData = data.sms_notificacion || {};
     window.ultimoSmsData = smsData;
-    const acuseCode = smsData.acuse_recibo || `ACK-IUAC-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.random().toString(16).slice(2,8).toUpperCase()}`;
+    const acuseCode = smsData.acuse_recibo || `ACK-IUAC-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
     const telNotificado = smsData.telefono || ultimoRegistroAspirante.telemov_alum || '--';
     ultimoRegistroAspirante.acuse_recibo = acuseCode;
     ultimoRegistroAspirante.folio = data.folio || ultimoRegistroAspirante.folio;
@@ -1712,7 +1879,7 @@ function mostrarModalExito(data) {
     if (btnSmsMovil) {
         const esMovil = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
         if (smsData.sms_uri || esMovil) {
-            btnSmsMovil.href = smsData.sms_uri || `sms:${telNotificado.replace(/[^\d+]/g,'')}?body=${encodeURIComponent(elSmsPreview?.textContent || '')}`;
+            btnSmsMovil.href = smsData.sms_uri || `sms:${telNotificado.replace(/[^\d+]/g, '')}?body=${encodeURIComponent(elSmsPreview?.textContent || '')}`;
             btnSmsMovil.style.display = 'inline-flex';
         } else {
             btnSmsMovil.style.display = 'none';

@@ -18,6 +18,26 @@ CEDULAS_REPRES_FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__fil
 os.makedirs(CEDULAS_REPRES_DIR, exist_ok=True)
 os.makedirs(CEDULAS_REPRES_FRONTEND_DIR, exist_ok=True)
 
+# Directorio oficial para alojar las fotocopias / escaneos de cédula del ASPIRANTE (/cedulas_aspirantes)
+CEDULAS_ALUM_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cedulas_aspirantes'))
+CEDULAS_ALUM_FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'cedulas_aspirantes'))
+os.makedirs(CEDULAS_ALUM_DIR, exist_ok=True)
+os.makedirs(CEDULAS_ALUM_FRONTEND_DIR, exist_ok=True)
+
+MAX_CEDULA_ALUM_BYTES = 5 * 1024 * 1024  # 5 MB
+
+def detectar_tipo_documento(doc_bytes):
+    """Identifica el tipo real del archivo por su firma binaria (magic bytes)."""
+    if not doc_bytes:
+        return None
+    if doc_bytes[:3] == b'\xff\xd8\xff':
+        return 'jpg'
+    if doc_bytes[:8] == b'\x89PNG\r\n\x1a\n':
+        return 'png'
+    if doc_bytes[:5] == b'%PDF-':
+        return 'pdf'
+    return None
+
 def _normalizar_token_nombre(texto, fallback):
     """Extrae la primera palabra sin acentos ni caracteres especiales en minúscula."""
     if not texto or not str(texto).strip():
@@ -153,6 +173,50 @@ def guardar_cedula_representante(doc_base64, cedula_aspirante, nom_repres='', ex
         logger.warning(f"No se pudo guardar cédula del representante para aspirante {cedula_aspirante}: {e}")
         return None, None
 
+def guardar_cedula_aspirante(doc_base64, cedula_aspirante):
+    """
+    Guarda la fotocopia / escaneo de la cédula del aspirante en /cedulas_aspirantes/
+    con nombre cedula_alum_<cedula>.<jpg|png|pdf>. Valida tamaño (máx 5 MB) y firma binaria.
+    Retorna (filename, error).
+    """
+    if not doc_base64 or not isinstance(doc_base64, str):
+        return None, "No se recibió el documento de cédula del aspirante."
+    try:
+        encoded = doc_base64.split(',', 1)[1] if ',' in doc_base64 else doc_base64
+        encoded = re.sub(r'\s+', '', encoded)
+        encoded += '=' * (-len(encoded) % 4)
+        doc_bytes = base64.b64decode(encoded)
+    except Exception:
+        return None, "El archivo de la cédula del aspirante está dañado o no es válido."
+
+    if len(doc_bytes) > MAX_CEDULA_ALUM_BYTES:
+        return None, "La cédula del aspirante excede el tamaño máximo permitido de 5 MB."
+    ext_final = detectar_tipo_documento(doc_bytes)
+    if not ext_final:
+        return None, "Formato de cédula no permitido. Solo se admiten archivos .JPG, .PNG o .PDF."
+
+    ced_digits = re.sub(r'\D', '', str(cedula_aspirante)) or str(cedula_aspirante)
+    filename = f"cedula_alum_{ced_digits}.{ext_final}"
+    guardado = False
+    for target_dir in (CEDULAS_ALUM_DIR, CEDULAS_ALUM_FRONTEND_DIR):
+        try:
+            os.makedirs(target_dir, exist_ok=True)
+            for prev in glob.glob(os.path.join(target_dir, f"cedula_alum_{ced_digits}.*")):
+                try:
+                    if os.path.basename(prev) != filename:
+                        os.remove(prev)
+                except Exception:
+                    pass
+            with open(os.path.join(target_dir, filename), 'wb') as f:
+                f.write(doc_bytes)
+            guardado = True
+        except Exception:
+            pass
+    if not guardado:
+        return None, "No se pudo almacenar la cédula del aspirante en el servidor."
+    logger.info(f"Cédula del aspirante guardada en /cedulas_aspirantes/{filename} ({len(doc_bytes)} bytes)")
+    return filename, None
+
 def asegurar_columnas_representante(cur, conn):
     """Garantiza que las columnas para aspirantes menores de edad existan en academico.estudiantes."""
     sentencias = [
@@ -160,7 +224,9 @@ def asegurar_columnas_representante(cur, conn):
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS ced_repres VARCHAR(20);",
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS nom_repres VARCHAR(150);",
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS parentesco_repres VARCHAR(50);",
-        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS telemov_repres VARCHAR(50);"
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS telemov_repres VARCHAR(50);",
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula TEXT;",
+        "ALTER TABLE academico.estudiantes ALTER COLUMN fotocopia_cedula TYPE TEXT;"
     ]
     for s in sentencias:
         try:
@@ -213,7 +279,8 @@ def obtener_aspirante_por_cedula(cedula):
                 telemov_alum, telehabi_alum, correo_alum,
                 niv_acad_alum, inst_grad_alum, ano_grad_alum, tipo_colegio,
                 carrera, created_at,
-                fotocopia_cedula_repres, ced_repres, nom_repres, parentesco_repres, telemov_repres
+                fotocopia_cedula_repres, ced_repres, nom_repres, parentesco_repres, telemov_repres,
+                fotocopia_cedula
             FROM academico.estudiantes
             WHERE ced_alum = %s
             LIMIT 1;
@@ -286,6 +353,13 @@ def obtener_aspirante_por_cedula(cedula):
             data['enlace_cedula_repres'] = f"/cedulas_representantes/{nombre_repres_doc}"
         else:
             data['enlace_cedula_repres'] = None
+
+        # Enlace a la cédula del propio aspirante si existe
+        ced_alum_doc = data.get('fotocopia_cedula')
+        if ced_alum_doc and isinstance(ced_alum_doc, str) and ced_alum_doc.strip():
+            data['enlace_cedula_aspirante'] = f"/cedulas_aspirantes/{os.path.basename(ced_alum_doc.strip())}"
+        else:
+            data['enlace_cedula_aspirante'] = None
 
         return data, None
     except Exception as e:
@@ -433,6 +507,13 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
 
         ruta_ced_repres = f"/cedulas_representantes/{repres_doc_filename}" if repres_doc_filename else None
 
+        # Cédula del aspirante (obligatoria para menores y mayores de edad)
+        ced_alum_filename, err_ced_doc = guardar_cedula_aspirante(data.get('cedula_doc_base64'), str(ced_int))
+        if err_ced_doc:
+            release_db(conn, cur, commit=False)
+            return False, err_ced_doc
+        ruta_ced_alum = f"/cedulas_aspirantes/{ced_alum_filename}"
+
         # 3. Columnas exactas que existen en academico.estudiantes
         columnas = [
             'ced_alum', 'tipo_cedula', 'nom_alum', 'ape_alum', 'fec_nac_alum', 'edad_alum',
@@ -442,7 +523,8 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             'niv_acad_alum', 'inst_grad_alum', 'ubica_inst_muni_alum', 'ano_grad_alum', 'tipo_colegio',
             'carrera', 'modalidad_ing', 'condicion_resi', 'turno_class',
             'canal_inscripcion', 'status_alum', 'observaciones', 'is_active', 'creado_por', 'actualizado_por',
-            'fotocopia_cedula_repres', 'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres'
+            'fotocopia_cedula_repres', 'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
+            'fotocopia_cedula'
         ]
 
         obs_texto = str(data.get('observaciones') or 'Ninguna').strip()
@@ -488,7 +570,8 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             data.get('ced_repres'),
             data.get('nom_repres'),
             data.get('parentesco_repres'),
-            data.get('telemov_repres')
+            data.get('telemov_repres'),
+            ruta_ced_alum
         ]
 
         # Sanitización universal de última milla: limpiar espacios residuales o múltiples de cualquier cadena

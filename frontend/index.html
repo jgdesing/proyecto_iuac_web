@@ -18,7 +18,7 @@
     <script>
         (function () { try { var t = localStorage.getItem('iuac_tema_color'); if (t === 'azul' || t === 'ocre') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
     </script>
-    <link rel="stylesheet" href="css/landing.css?v=7.0">
+    <link rel="stylesheet" href="css/landing.css?v=8.0">
 </head>
 
 <body>
@@ -80,6 +80,77 @@
                 <button type="button" class="btn btn-primary" id="btn-comenzar-registro">
                     Comenzar Preinscripción →
                 </button>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -183,6 +254,77 @@
         </div>
     </div>
 
+    
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── MODAL DE BÚSQUEDA DIRECTA Y RECUPERACIÓN DE PLANILLA PDF ── -->
     <div class="modal-carreras-overlay" id="modal-recuperar-planilla">
         <div class="modal-carreras-card" style="max-width:480px;">
@@ -246,6 +388,77 @@
         </div>
     </div>
 
+    
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── MODAL DE CÁMARA EN VIVO (PARA LAPTOP, PC DE ESCRITORIO Y MÓVIL) ── -->
     <div class="modal-carreras-overlay" id="modal-camara-vivo">
         <div class="modal-carreras-card" style="max-width:460px;">
@@ -280,6 +493,77 @@
                     </button>
                 </div>
                 <div class="field-error-msg" id="err-camara-vivo" style="margin-top:0.6rem; text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -482,8 +766,9 @@
                             <div class="col-4 lockable-field">
                                 <div class="form-group">
                                     <label>Lugar de Nacimiento <span class="req">*</span></label>
-                                    <input type="text" class="form-control" id="asp-lugar_nac_alum"
-                                        placeholder="Ciudad o Población" required>
+                                    <select class="form-control" id="asp-lugar_nac_alum" required>
+                                        <option value="">Seleccione un Estado...</option>
+                                    </select>
                                     <div class="field-error-msg" id="err-lugar_nac"></div>
                                 </div>
                             </div>
@@ -494,6 +779,54 @@
                                     <label>Nacionalidad</label>
                                     <input type="text" class="form-control" id="asp-nacionalidad_alum"
                                         value="VENEZOLANA" readonly style="background:#f1f5f9;">
+                                </div>
+                            </div>
+
+                            <!-- DOCUMENTO DE IDENTIDAD DEL ASPIRANTE (OBLIGATORIO PARA TODOS: MENOR O MAYOR DE EDAD) -->
+                            <div class="col-12 lockable-field" id="seccion-cedula-aspirante">
+                                <div class="repres-card-unificada" style="margin-top:0.25rem;">
+                                    <div class="repres-header-unificado">
+                                        <h4 class="repres-title-unificado">
+                                            🪪 Documento de Identidad del Aspirante (Cédula Laminada o Pasaporte) <span class="req">*</span>
+                                        </h4>
+                                        <div class="repres-desc-unificado">
+                                            <span class="repres-icon-unificado">📄</span>
+                                            <p>
+                                                Requisito obligatorio para todos los aspirantes (mayores o menores de edad). Suba una fotografía nítida, escaneo o documento PDF de su cédula de identidad.
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="repres-upload-unificado">
+                                        <div class="repres-upload-title">
+                                            Fotocopia / Escaneo de Cédula de Identidad <span class="req">*</span>
+                                        </div>
+                                        <div class="repres-upload-subtitle">
+                                            Formatos permitidos: <strong>.JPG, .PNG o .PDF</strong> (Máx. <strong>5 MB</strong>)
+                                        </div>
+
+                                        <div id="preview-cedula-aspirante-box" class="repres-preview-box" style="display:none;">
+                                            <img id="preview-cedula-aspirante-img" alt="Cédula Aspirante" style="width:100%; height:100%; object-fit:cover; display:none;">
+                                            <div id="preview-cedula-aspirante-pdf" style="display:none; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:0.75rem; color:#9a3412; font-weight:800;">
+                                                <span style="font-size:1.8rem;">📄</span>
+                                                <span id="preview-cedula-aspirante-pdf-name">Documento PDF Cargado</span>
+                                            </div>
+                                        </div>
+
+                                        <input type="file" id="input-file-cedula-aspirante" class="file-input-hidden" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf">
+                                        <div class="photo-buttons-dual repres-buttons-layout">
+                                            <label for="input-file-cedula-aspirante" class="btn-photo-action btn-repres-subir" id="btn-subir-cedula-aspirante">
+                                                📁 Subir Cédula (.JPG / .PNG / .PDF)
+                                            </label>
+                                            <button type="button" class="btn-photo-action btn-repres-escanear btn-camera-live" id="btn-escanear-cedula-aspirante">
+                                                📷 Escanear con Cámara
+                                            </button>
+                                        </div>
+                                        <button type="button" class="btn-photo-remove" id="btn-quitar-cedula-aspirante" style="display:none; margin-top:0.4rem;">
+                                            ✕ Quitar Cédula
+                                        </button>
+                                        <div id="status-cedula-aspirante" class="repres-status-msg" style="display:none;"></div>
+                                        <div class="field-error-msg" id="err-cedula-aspirante-doc"></div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -551,6 +884,9 @@
                                                 📷 Escanear con Cámara
                                             </button>
                                         </div>
+                                        <button type="button" class="btn-photo-remove" id="btn-quitar-repres-cedula" style="display:none; margin-top:0.4rem;">
+                                            ✕ Quitar Cédula
+                                        </button>
                                         <div id="status-repres-cedula" class="repres-status-msg" style="display:none;">
                                         </div>
                                         <div class="field-error-msg" id="err-repres-cedula-doc"></div>
@@ -613,10 +949,9 @@
                             </div>
                             <div class="col-6 lockable-field">
                                 <div class="form-group">
-                                    <label>Teléfono Habitación / Secundario <span class="req">*</span></label>
+                                    <label>Teléfono Habitación / Móvil (Opcional)</label>
                                     <input type="tel" class="form-control" id="asp-telehabi_alum"
-                                        placeholder="Ej: 0243-2345678 o 0414-0000000" maxlength="12" inputmode="tel"
-                                        required>
+                                        placeholder="Ej: 0243-2345678 o 0414-0000000" maxlength="12" inputmode="tel">
                                     <div class="field-error-msg" id="err-telehab"></div>
                                 </div>
                             </div>
@@ -647,7 +982,7 @@
                                         ✈ Carrera / Especialidad de Postulación <span class="req">*</span>
                                     </label>
                                     <select class="form-control" id="asp-carrera" required
-                                        style="font-size:1rem; font-weight:700; height:48px;">
+                                        style="font-size:1rem; font-weight:700; height:55px;">
                                         <option value="">-- Seleccione una Carrera de la Oferta Académica --</option>
                                         <option value="CTA">CTA - Control de Tránsito Aéreo</option>
                                         <option value="ICA">ICA - Información y Comunicaciones Aeronáuticas</option>
@@ -788,9 +1123,9 @@
                         IUAC: Su preinscripción ha sido registrada exitosamente. Conserve su número de folio y este
                         mensaje como acuse oficial.
                     </div>
-                    <a href="#" id="btn-abrir-sms-movil" class="btn-sms-native" style="display:none;" target="_blank">
-                        📲 Abrir Recordatorio en Mensajes SMS
-                    </a>
+                    <button type="button" id="btn-imprimir-qr-cedula" class="btn-sms-native" style="cursor:pointer; background:var(--t-primary); color:#ffffff; border:none; padding:12px 18px; border-radius:8px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:10px; font-size:0.95rem; box-shadow:0 2px 8px rgba(0,0,0,0.15);" onclick="window.imprimirTarjetaQRCedula && window.imprimirTarjetaQRCedula(window.ultimoRegistroAspirante)">
+                        🖨️ Imprimir Cédula en Código QR (con Logo Institucional IUAC)
+                    </button>
                 </div>
             </div>
 
@@ -882,6 +1217,146 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
                 </div>
             </div>
         </div>
@@ -1037,6 +1512,77 @@
         </div>
     </div>
 
+    
+
+    <!-- ── MODAL DE CÉDULA / CARNET QR CON LOGO IUAC (PUNTO 6) ── -->
+    <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
+        <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">
+            <div id="carnet-printable-area" style="background:#ffffff; border:2.5px solid #0f172a; border-radius:12px; padding:1.2rem 1rem; box-shadow:0 4px 14px rgba(0,0,0,0.08); text-align:center;">
+                <!-- Encabezado Institucional -->
+                <div style="border-bottom:2px solid #0f172a; padding-bottom:0.5rem; margin-bottom:0.75rem;">
+                    <div style="font-size:0.68rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:0.5px; line-height:1.2;">
+                        República Bolivariana de Venezuela<br>
+                        Ministerio del Poder Popular para el Transporte
+                    </div>
+                    <div style="font-size:0.92rem; font-weight:900; color:#0f172a; margin-top:2px;">
+                        INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL
+                    </div>
+                    <div style="display:inline-block; background:var(--t-primary, #b91c1c); color:#ffffff; font-size:0.72rem; font-weight:800; padding:2px 8px; border-radius:4px; margin-top:3px; letter-spacing:0.5px;">
+                        CÉDULA QR DE PREINSCRIPCIÓN OFICIAL
+                    </div>
+                </div>
+
+                <!-- Canvas del Código QR con Logo en el Centro -->
+                <div style="display:flex; justify-content:center; align-items:center; margin:0.5rem 0;">
+                    <canvas id="carnet-qr-canvas" width="220" height="220" style="width:200px; height:200px; border:2px solid #0f172a; border-radius:8px; background:#fff;"></canvas>
+                </div>
+
+                <!-- Datos del Aspirante -->
+                <div style="margin-top:0.5rem; text-align:left; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.82rem; line-height:1.45;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CÉDULA:</span>
+                        <strong id="carnet-ci" style="color:#0f172a; font-size:0.9rem;">V-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">ASPIRANTE:</span>
+                        <strong id="carnet-nombre" style="color:#0f172a; text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">CARRERA:</span>
+                        <strong id="carnet-carrera" style="color:var(--t-primary, #b91c1c); text-align:right;">--</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                        <span style="color:#64748b; font-weight:700;">FOLIO:</span>
+                        <strong id="carnet-folio" class="font-mono" style="color:#0f172a;">IUAC-2026-00000000</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:#64748b; font-weight:700;">ESTADO / FECHA:</span>
+                        <span id="carnet-fecha" style="color:#334155; font-size:0.75rem;">--</span>
+                    </div>
+                </div>
+
+                <div style="margin-top:0.4rem; font-size:0.68rem; color:#64748b; font-style:italic;">
+                    Presente este código QR al momento de consignar sus documentos ante el IUAC para validación inmediata.
+                </div>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+                <button type="button" class="btn btn-primary" style="width:100%; padding:10px; font-weight:700; font-size:0.92rem;" onclick="window.imprimirCarnetQROficial && window.imprimirCarnetQROficial()">
+                    🖨️ Mandar a Imprimir Cédula QR
+                </button>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="window.descargarCarnetQRPNG && window.descargarCarnetQRPNG()">
+                        💾 Descargar PNG
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="flex:1; padding:8px; font-size:0.84rem;" onclick="document.getElementById('modal-carnet-qr').style.display='none'">
+                        ✕ Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ── FOOTER INSTITUCIONAL (CINTILLO INFERIOR, PUNTO 8) ── -->
     <footer class="footer">
         <p>© 2026 Instituto Universitario de Aeronáutica Civil (IUAC) - República Bolivariana de Venezuela.</p>
@@ -1047,9 +1593,9 @@
     <!-- Scripts de Carga Ultra Rápida -->
     <script src="js/theme_switcher.js?v=1.0"></script>
     <script src="js/geo_data.js?v=2.2"></script>
-    <script src="js/qr_pdf_engine.js?v=2.3"></script>
+    <script src="js/qr_pdf_engine.js?v=3.0"></script>
     <script src="js/react_ui_enhancer.js?v=1.7"></script>
-    <script src="js/app.js?v=3.8"></script>
+    <script src="js/app.js?v=4.0"></script>
 </body>
 
 </html>

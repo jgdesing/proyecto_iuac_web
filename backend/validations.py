@@ -179,7 +179,7 @@ def validate_aspirante_payload(data):
     cleaned['sex_alum'] = sex
     cleaned['est_civil_alum'] = limpiar_texto_estricto(data.get('est_civil_alum', 'Soltero/a'))[:50]
 
-    # 5. Teléfonos (Ambos obligatorios)
+    # 5. Teléfonos (Móvil obligatorio, habitación/secundario opcional)
     tel_mov_raw = data.get('telemov_alum')
     ok_mov, tel_mov, err_mov = validar_telefono_venezolano(tel_mov_raw, 'móvil')
     if not ok_mov:
@@ -188,16 +188,17 @@ def validate_aspirante_payload(data):
 
     tel_hab_raw = data.get('telehabi_alum')
     if not tel_hab_raw or not str(tel_hab_raw).strip():
-        return False, None, "El teléfono de habitación o secundario es obligatorio."
-    ok_hab, tel_hab, err_hab = validar_telefono_venezolano(tel_hab_raw, 'habitación')
-    if not ok_hab:
-        # Si introdujo un celular como secundario, validar como móvil
-        ok_hab_mov, tel_hab_mov, err_hab_mov = validar_telefono_venezolano(tel_hab_raw, 'móvil')
-        if not ok_hab_mov:
-            return False, None, err_hab
-        cleaned['telehabi_alum'] = tel_hab_mov
+        cleaned['telehabi_alum'] = None
     else:
-        cleaned['telehabi_alum'] = tel_hab
+        ok_hab, tel_hab, err_hab = validar_telefono_venezolano(tel_hab_raw, 'habitación')
+        if not ok_hab:
+            # Si introdujo un celular como secundario, validar como móvil
+            ok_hab_mov, tel_hab_mov, err_hab_mov = validar_telefono_venezolano(tel_hab_raw, 'móvil')
+            if not ok_hab_mov:
+                return False, None, err_hab
+            cleaned['telehabi_alum'] = tel_hab_mov
+        else:
+            cleaned['telehabi_alum'] = tel_hab
 
     # 6. Correo Electrónico
     correo = limpiar_texto_estricto(data.get('correo_alum', '')).lower().replace(' ', '')
@@ -252,6 +253,14 @@ def validate_aspirante_payload(data):
     cleaned['foto_base64'] = foto_raw
     foto_ext_raw = str(data.get('foto_ext') or 'jpg').strip().lower().lstrip('.')
     cleaned['foto_ext'] = 'png' if foto_ext_raw == 'png' else 'jpg'
+
+    # 10.1 Fotocopia o Escaneo de Cédula del Aspirante (100% Obligatoria para menores y mayores de edad)
+    ced_doc_raw = data.get('cedula_doc_base64')
+    if not ced_doc_raw:
+        return False, None, "Debe subir o escanear la fotografía o fotocopia de la cédula de identidad del aspirante."
+    cleaned['cedula_doc_base64'] = ced_doc_raw
+    ced_doc_ext_raw = str(data.get('cedula_doc_ext') or 'jpg').strip().lower().lstrip('.')
+    cleaned['cedula_doc_ext'] = 'png' if ced_doc_ext_raw == 'png' else ('pdf' if ced_doc_ext_raw == 'pdf' else 'jpg')
 
     # 11. Datos y Fotocopia de Cédula del Representante (Obligatorio si es menor de 18 años)
     # Por requerimiento oficial, el único recaudo obligatorio del representante es su fotocopia/escaneo de cédula

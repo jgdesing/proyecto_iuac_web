@@ -31,6 +31,8 @@ DESCARGAS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'd
 DESCARGAS_FRONTEND_DIR = os.path.join(FRONTEND_DIR, 'descargas')
 REPRESENTANTES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cedulas_representantes'))
 REPRESENTANTES_FRONTEND_DIR = os.path.join(FRONTEND_DIR, 'cedulas_representantes')
+CEDULAS_ALUM_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cedulas_aspirantes'))
+CEDULAS_ALUM_FRONTEND_DIR = os.path.join(FRONTEND_DIR, 'cedulas_aspirantes')
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(FRONTEND_DIR, 'fotos_aspirantes'), exist_ok=True)
@@ -38,6 +40,8 @@ os.makedirs(DESCARGAS_DIR, exist_ok=True)
 os.makedirs(DESCARGAS_FRONTEND_DIR, exist_ok=True)
 os.makedirs(REPRESENTANTES_DIR, exist_ok=True)
 os.makedirs(REPRESENTANTES_FRONTEND_DIR, exist_ok=True)
+os.makedirs(CEDULAS_ALUM_DIR, exist_ok=True)
+os.makedirs(CEDULAS_ALUM_FRONTEND_DIR, exist_ok=True)
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 app.config.from_object(Config)
@@ -65,6 +69,15 @@ def serve_foto(filename):
 @app.route('/cedulas_representantes/<path:filename>', methods=['GET'])
 def serve_cedula_repres(filename):
     target_dir = REPRESENTANTES_DIR if os.path.exists(os.path.join(REPRESENTANTES_DIR, filename)) else REPRESENTANTES_FRONTEND_DIR
+    resp = send_from_directory(target_dir, filename)
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
+
+# Servir fotocopias y escaneos de cédula del aspirante (menores o mayores de edad)
+@app.route('/cedulas_aspirantes/<path:filename>', methods=['GET'])
+def serve_cedula_aspirante(filename):
+    target_dir = CEDULAS_ALUM_DIR if os.path.exists(os.path.join(CEDULAS_ALUM_DIR, filename)) else CEDULAS_ALUM_FRONTEND_DIR
     resp = send_from_directory(target_dir, filename)
     resp.headers['Access-Control-Allow-Origin'] = '*'
     resp.headers['Cache-Control'] = 'public, max-age=3600'

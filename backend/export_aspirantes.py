@@ -161,6 +161,11 @@ def obtener_aspirantes_web(solo_pendientes=False, fecha_desde=None):
                 subcarpetas=['fotos_aspirantes', 'frontend/fotos_aspirantes'],
                 prefijo=f"foto_{ced}"
             )
+            fila_dict['fotocopia_cedula'] = resolver_archivo_a_base64(
+                fila_dict.get('fotocopia_cedula'),
+                subcarpetas=['cedulas_aspirantes', 'frontend/cedulas_aspirantes'],
+                prefijo=f"cedula_alum_{ced}"
+            )
             fila_dict['fotocopia_cedula_repres'] = resolver_archivo_a_base64(
                 fila_dict.get('fotocopia_cedula_repres'),
                 subcarpetas=['cedulas_representantes', 'frontend/cedulas_representantes'],
@@ -168,6 +173,7 @@ def obtener_aspirantes_web(solo_pendientes=False, fecha_desde=None):
             )
 
             fila_dict['posee_foto'] = 'SI' if (fila_dict.get('foto_alum') and len(str(fila_dict.get('foto_alum'))) > 10) else 'NO'
+            fila_dict['posee_cedula_aspirante'] = 'SI' if (fila_dict.get('fotocopia_cedula') and len(str(fila_dict.get('fotocopia_cedula'))) > 10) else 'NO'
             fila_dict['posee_cedula_repres'] = 'SI' if (fila_dict.get('fotocopia_cedula_repres') and len(str(fila_dict.get('fotocopia_cedula_repres'))) > 10) else 'NO'
             registros.append(fila_dict)
 
@@ -199,7 +205,8 @@ def generar_contenido_sql(registros):
     out.write("-- 1. Garantizar columnas requeridas en bd_aspirantes (Fotografías y Representantes)\n")
     out.write("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS tipo_cedula VARCHAR(10) DEFAULT 'V';\n")
-    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula VARCHAR(255);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula TEXT;\n")
+    out.write("ALTER TABLE academico.estudiantes ALTER COLUMN fotocopia_cedula TYPE TEXT;\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula_repres TEXT;\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS ced_repres VARCHAR(20);\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS nom_repres VARCHAR(150);\n")
@@ -225,6 +232,9 @@ def generar_contenido_sql(registros):
             elif isinstance(val, (int, float)):
                 vals.append(str(val))
             else:
+                if col in ('foto_alum', 'fotocopia_cedula', 'fotocopia_cedula_repres'):
+                    # Limpiar estrictamente cualquier espacio o salto de línea que corrompa el padding Base64
+                    val = re.sub(r'[\r\n\s]+', '', str(val).strip())
                 clean_str = str(val).replace("'", "''")
                 vals.append(f"'{clean_str}'")
 
@@ -302,7 +312,7 @@ def generar_contenido_csv(registros):
         'pais_alum', 'est_alum', 'ciu_alum', 'direc_alum',
         'telemov_alum', 'telehabi_alum', 'correo_alum',
         'carrera', 'niv_acad_alum', 'inst_grad_alum', 'ano_grad_alum', 'tipo_colegio',
-        'posee_foto', 'posee_cedula_repres',
+        'posee_foto', 'posee_cedula_aspirante', 'posee_cedula_repres',
         'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
         'acuse_recibo_sms', 'folio_sms', 'status_alum', 'observaciones', 'created_at'
     ]
@@ -350,6 +360,7 @@ def generar_contenido_excel(registros):
         ('ano_grad_alum', 'AÑO GRADUACIÓN'),
         ('tipo_colegio', 'TIPO COLEGIO'),
         ('posee_foto', 'FOTO EN BD'),
+        ('posee_cedula_aspirante', 'CÉDULA ASPIRANTE'),
         ('posee_cedula_repres', 'CÉDULA REPRES.'),
         ('nom_repres', 'NOMBRE REPRESENTANTE'),
         ('ced_repres', 'C.I. REPRESENTANTE'),
