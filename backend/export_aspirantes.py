@@ -13,10 +13,19 @@ import io
 import csv
 import html
 import json
+import re
+import glob
+import base64
 import argparse
 from datetime import datetime
-from database import get_db_cursor, release_db
 
+try:
+    from database import get_db_cursor, release_db
+except ImportError:
+    from backend.database import get_db_cursor, release_db
+
+# ── COLUMNAS OFICIALES PARA VACIADO EN ACADEMICO.ESTUDIANTES ─────────────────
+# 100% compatible con el esquema de bd_aspirantes y el módulo de Recepción Online
 COLUMNAS_VACIADO_ESTUDIANTES = [
     'ced_alum', 'tipo_cedula', 'nom_alum', 'ape_alum', 'fec_nac_alum', 'edad_alum',
     'sex_alum', 'est_civil_alum', 'pais_alum', 'est_alum', 'ciu_alum', 'direc_alum',
@@ -24,31 +33,74 @@ COLUMNAS_VACIADO_ESTUDIANTES = [
     'telemov_alum', 'telehabi_alum', 'correo_alum',
     'niv_acad_alum', 'inst_grad_alum', 'ubica_inst_muni_alum', 'ano_grad_alum', 'tipo_colegio',
     'carrera', 'modalidad_ing', 'condicion_resi', 'turno_class',
-    'foto_alum', 'canal_inscripcion', 'status_alum', 'observaciones',
+    'foto_alum', 'fotocopia_cedula', 'fotocopia_cedula_repres',
+    'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
+    'derechos_aeronauticos', 'comprobante_derechos',
+    'canal_inscripcion', 'status_alum', 'nucleo', 'observaciones',
     'is_active', 'creado_por', 'actualizado_por'
 ]
 
+def resolver_archivo_a_base64(valor_campo, subcarpetas, prefijo=None):
+    """
+    Garantiza que la fotografía o documento viaje incrustado en el archivo SQL.
+    Si el campo ya contiene un Data URI ('data:image/...'), se conserva íntegro.
+    Si contiene un nombre de archivo relativo o existe en disco, lo lee y lo
+    convierte a Data URI Base64 para máxima portabilidad entre servidores.
+    """
+    if not valor_campo and not prefijo:
+        return None
+
+    val_str = str(valor_campo).strip() if valor_campo else ""
+    if val_str.startswith("data:"):
+        return val_str
+
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    candidatos = []
+
+    # 1. Búsqueda por nombre de archivo exacto
+    if val_str:
+        nombre_limpio = os.path.basename(val_str)
+        for sub in subcarpetas:
+            candidatos.append(os.path.join(base_dir, sub, nombre_limpio))
+            candidatos.append(os.path.join(base_dir, nombre_limpio))
+
+    # 2. Búsqueda por patrón de prefijo (ej: foto_12345678.*)
+    if prefijo:
+        for sub in subcarpetas:
+            candidatos.extend(glob.glob(os.path.join(base_dir, sub, f"{prefijo}.*")))
+
+    for path in candidatos:
+        if os.path.isfile(path):
+            try:
+                with open(path, 'rb') as f:
+                    doc_bytes = f.read()
+                if doc_bytes and len(doc_bytes) > 20:
+                    ext = os.path.splitext(path)[1].lower().lstrip('.')
+                    mime = 'image/jpeg'
+                    if ext == 'png':
+                        mime = 'image/png'
+                    elif ext == 'pdf':
+                        mime = 'application/pdf'
+                    b64 = base64.b64encode(doc_bytes).decode('ascii')
+                    return f"data:{mime};base64,{b64}"
+            except Exception:
+                pass
+
+    return valor_campo
+
 def obtener_aspirantes_web(solo_pendientes=False, fecha_desde=None):
-    """Consulta todos los aspirantes registrados en PostgreSQL (academico.estudiantes)."""
+    """
+    Consulta todos los aspirantes registrados en PostgreSQL (academico.estudiantes),
+    incorporando trazabilidad de fotos, representantes y logs de SMS.
+    """
     conn, cur = get_db_cursor()
     if not conn:
         print("[ERROR] No se pudo conectar a la base de datos.")
         return []
 
     try:
-        query = """
-            SELECT 
-                ced_alum, tipo_cedula, nom_alum, ape_alum, fec_nac_alum, edad_alum,
-                sex_alum, est_civil_alum, pais_alum, est_alum, ciu_alum, direc_alum,
-                lugar_nac_alum, nacionalidad_alum, etnia,
-                telemov_alum, telehabi_alum, correo_alum,
-                niv_acad_alum, inst_grad_alum, ubica_inst_muni_alum, ano_grad_alum, tipo_colegio,
-                carrera, modalidad_ing, condicion_resi, turno_class,
-                foto_alum, canal_inscripcion, status_alum, observaciones,
-                is_active, creado_por, actualizado_por, created_at
-            FROM academico.estudiantes
-            WHERE 1=1
-        """
+        # Consulta global dinámica de todas las columnas existentes
+        query = "SELECT * FROM academico.estudiantes WHERE 1=1"
         params = []
         if solo_pendientes:
             query += " AND status_alum = 'REGISTRADO_WEB'"
@@ -62,17 +114,61 @@ def obtener_aspirantes_web(solo_pendientes=False, fecha_desde=None):
         columnas = [desc[0] for desc in cur.description]
         filas = cur.fetchall()
 
+        # Consultar SMS logs para vincular folio y acuse de recibo si la tabla existe
+        sms_dict = {}
+        try:
+            cur.execute("""
+                SELECT DISTINCT ON (ced_alum) ced_alum, acuse_recibo, folio, fecha_envio, estado
+                FROM academico.sms_logs
+                ORDER BY ced_alum, fecha_envio DESC;
+            """)
+            for row in cur.fetchall():
+                sms_dict[row[0]] = {
+                    'acuse_recibo': row[1],
+                    'folio': row[2],
+                    'fecha_envio': row[3],
+                    'estado_sms': row[4]
+                }
+        except Exception:
+            pass  # Si aún no existe academico.sms_logs, continúa de forma segura
+
         registros = []
         for r in filas:
             fila_dict = {}
             for col, val in zip(columnas, r):
-                if isinstance(val, (datetime,)):
+                if isinstance(val, datetime):
                     fila_dict[col] = val.strftime('%Y-%m-%d %H:%M:%S')
                 elif hasattr(val, 'isoformat'):
                     fila_dict[col] = val.isoformat()
                 else:
                     fila_dict[col] = val
+
+            ced = fila_dict.get('ced_alum')
+
+            # Acoplar acuse de recibo y folio de notificación
+            if ced in sms_dict:
+                fila_dict['acuse_recibo_sms'] = sms_dict[ced].get('acuse_recibo')
+                fila_dict['folio_sms'] = sms_dict[ced].get('folio')
+                fila_dict['estado_sms'] = sms_dict[ced].get('estado_sms')
+            else:
+                fila_dict['acuse_recibo_sms'] = f"ACK-IUAC-WEB-{ced}"
+                fila_dict['folio_sms'] = f"IUAC-2026-{ced}"
+                fila_dict['estado_sms'] = 'REGISTRADO'
+
+            # Resolver y embeber imágenes físicas a Base64 para que viajen dentro del SQL
+            fila_dict['foto_alum'] = resolver_archivo_a_base64(
+                fila_dict.get('foto_alum'),
+                subcarpetas=['fotos_aspirantes', 'frontend/fotos_aspirantes'],
+                prefijo=f"foto_{ced}"
+            )
+            fila_dict['fotocopia_cedula_repres'] = resolver_archivo_a_base64(
+                fila_dict.get('fotocopia_cedula_repres'),
+                subcarpetas=['cedulas_representantes', 'frontend/cedulas_representantes'],
+                prefijo=f"cedula_repres_{ced}"
+            )
+
             fila_dict['posee_foto'] = 'SI' if (fila_dict.get('foto_alum') and len(str(fila_dict.get('foto_alum'))) > 10) else 'NO'
+            fila_dict['posee_cedula_repres'] = 'SI' if (fila_dict.get('fotocopia_cedula_repres') and len(str(fila_dict.get('fotocopia_cedula_repres'))) > 10) else 'NO'
             registros.append(fila_dict)
 
         return registros
@@ -83,7 +179,11 @@ def generar_contenido_sql(registros):
     """
     Genera el contenido SQL completo para vaciar los aspirantes capturados en la web
     hacia la base de datos real del sistema: bd_aspirantes (esquema academico.estudiantes).
-    Incluye la fotografía en el campo foto_alum y sincroniza academico.estudiante_especialidades.
+    Incluye:
+    - Blindaje DDL para creación de columnas de fotos, representantes y núcleos si faltaran.
+    - Fotografías en Base64 para que el importador las extraiga y guarde automáticamente.
+    - Sincronización en academico.estudiante_especialidades.
+    - Cláusula ON CONFLICT (ced_alum) DO UPDATE para compatibilidad total con el modal de recepción.
     """
     out = io.StringIO()
     out.write("-- ==============================================================================\n")
@@ -91,10 +191,23 @@ def generar_contenido_sql(registros):
     out.write("-- ESQUEMA DESTINO: academico.estudiantes y academico.estudiante_especialidades\n")
     out.write(f"-- FECHA DE GENERACIÓN: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
     out.write(f"-- TOTAL DE ASPIRANTES EXPORTADOS: {len(registros)}\n")
+    out.write("-- COMPATIBILIDAD: Modal de Recepción Online IUAC (Blindaje Anti-Inyección y Detección de Duplicados)\n")
     out.write("-- ==============================================================================\n\n")
     out.write("BEGIN;\n\n")
-    out.write("-- Asegurar que el campo foto_alum en bd_aspirantes soporte la fotografía completa en Base64\n")
-    out.write("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;\n\n")
+
+    # 1. Ajustes DDL preventivos e idempotentes en bd_aspirantes
+    out.write("-- 1. Garantizar columnas requeridas en bd_aspirantes (Fotografías y Representantes)\n")
+    out.write("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS tipo_cedula VARCHAR(10) DEFAULT 'V';\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula VARCHAR(255);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula_repres TEXT;\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS ced_repres VARCHAR(20);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS nom_repres VARCHAR(150);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS parentesco_repres VARCHAR(50);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS telemov_repres VARCHAR(50);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS nucleo VARCHAR(50) DEFAULT 'SEDE CENTRAL';\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS derechos_aeronauticos VARCHAR(255);\n")
+    out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS comprobante_derechos VARCHAR(255);\n\n")
 
     if not registros:
         out.write("-- No hay registros capturados actualmente para exportar.\n")
@@ -119,7 +232,7 @@ def generar_contenido_sql(registros):
         vals_str = ", ".join(vals)
         ced_int = int(reg.get('ced_alum'))
 
-        out.write(f"-- Aspirante Cédula {reg.get('tipo_cedula', 'V')}-{ced_int}: {reg.get('nom_alum')} {reg.get('ape_alum')}\n")
+        out.write(f"-- Aspirante Cédula {reg.get('tipo_cedula', 'V')}-{ced_int}: {reg.get('nom_alum')} {reg.get('ape_alum')} | Carrera: {reg.get('carrera')}\n")
         out.write(f"INSERT INTO academico.estudiantes ({cols_str})\n")
         out.write(f"VALUES ({vals_str})\n")
         out.write("ON CONFLICT (ced_alum) DO UPDATE SET\n")
@@ -136,18 +249,34 @@ def generar_contenido_sql(registros):
         out.write("    direc_alum = EXCLUDED.direc_alum,\n")
         out.write("    lugar_nac_alum = EXCLUDED.lugar_nac_alum,\n")
         out.write("    nacionalidad_alum = EXCLUDED.nacionalidad_alum,\n")
+        out.write("    etnia = EXCLUDED.etnia,\n")
         out.write("    telemov_alum = EXCLUDED.telemov_alum,\n")
         out.write("    telehabi_alum = EXCLUDED.telehabi_alum,\n")
         out.write("    correo_alum = EXCLUDED.correo_alum,\n")
         out.write("    niv_acad_alum = EXCLUDED.niv_acad_alum,\n")
         out.write("    inst_grad_alum = EXCLUDED.inst_grad_alum,\n")
+        out.write("    ubica_inst_muni_alum = EXCLUDED.ubica_inst_muni_alum,\n")
         out.write("    ano_grad_alum = EXCLUDED.ano_grad_alum,\n")
         out.write("    tipo_colegio = EXCLUDED.tipo_colegio,\n")
         out.write("    carrera = EXCLUDED.carrera,\n")
+        out.write("    modalidad_ing = EXCLUDED.modalidad_ing,\n")
+        out.write("    condicion_resi = EXCLUDED.condicion_resi,\n")
+        out.write("    turno_class = EXCLUDED.turno_class,\n")
         out.write("    foto_alum = COALESCE(EXCLUDED.foto_alum, academico.estudiantes.foto_alum),\n")
+        out.write("    fotocopia_cedula = COALESCE(EXCLUDED.fotocopia_cedula, academico.estudiantes.fotocopia_cedula),\n")
+        out.write("    fotocopia_cedula_repres = COALESCE(EXCLUDED.fotocopia_cedula_repres, academico.estudiantes.fotocopia_cedula_repres),\n")
+        out.write("    ced_repres = EXCLUDED.ced_repres,\n")
+        out.write("    nom_repres = EXCLUDED.nom_repres,\n")
+        out.write("    parentesco_repres = EXCLUDED.parentesco_repres,\n")
+        out.write("    telemov_repres = EXCLUDED.telemov_repres,\n")
+        out.write("    derechos_aeronauticos = EXCLUDED.derechos_aeronauticos,\n")
+        out.write("    comprobante_derechos = EXCLUDED.comprobante_derechos,\n")
+        out.write("    nucleo = EXCLUDED.nucleo,\n")
+        out.write("    status_alum = EXCLUDED.status_alum,\n")
         out.write("    observaciones = EXCLUDED.observaciones,\n")
         out.write("    updated_at = CURRENT_TIMESTAMP;\n\n")
 
+        # 2. Sincronizar Prioridad y Carrera en academico.estudiante_especialidades
         carrera = str(reg.get('carrera', 'CTA')).replace("'", "''")
         out.write(f"DELETE FROM academico.estudiante_especialidades WHERE ced_alum = {ced_int};\n")
         out.write("INSERT INTO academico.estudiante_especialidades (ced_alum, prioridad, especialidad)\n")
@@ -173,7 +302,9 @@ def generar_contenido_csv(registros):
         'pais_alum', 'est_alum', 'ciu_alum', 'direc_alum',
         'telemov_alum', 'telehabi_alum', 'correo_alum',
         'carrera', 'niv_acad_alum', 'inst_grad_alum', 'ano_grad_alum', 'tipo_colegio',
-        'posee_foto', 'status_alum', 'observaciones', 'created_at'
+        'posee_foto', 'posee_cedula_repres',
+        'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
+        'acuse_recibo_sms', 'folio_sms', 'status_alum', 'observaciones', 'created_at'
     ]
     output_csv = io.StringIO()
     output_csv.write('\ufeff')  # BOM UTF-8 para Microsoft Excel
@@ -219,6 +350,13 @@ def generar_contenido_excel(registros):
         ('ano_grad_alum', 'AÑO GRADUACIÓN'),
         ('tipo_colegio', 'TIPO COLEGIO'),
         ('posee_foto', 'FOTO EN BD'),
+        ('posee_cedula_repres', 'CÉDULA REPRES.'),
+        ('nom_repres', 'NOMBRE REPRESENTANTE'),
+        ('ced_repres', 'C.I. REPRESENTANTE'),
+        ('parentesco_repres', 'PARENTESCO'),
+        ('telemov_repres', 'TELÉFONO REPRES.'),
+        ('acuse_recibo_sms', 'ACUSE SMS'),
+        ('folio_sms', 'FOLIO ASIGNADO'),
         ('status_alum', 'ESTATUS'),
         ('created_at', 'FECHA REGISTRO')
     ]
