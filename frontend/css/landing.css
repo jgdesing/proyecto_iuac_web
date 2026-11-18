@@ -4,35 +4,35 @@
    ============================================================================== */
 
 :root {
-    --primary: #427ab4;
-    /* Azul más oscuro y saturado de la paleta */
-    --primary-light: #4f79a5;
-    /* Azul pizarra medio */
-    --accent: #356292;
-    /* Azul corporativo */
-    --accent-hover: #294c72;
-    --accent-indigo: #1c2b3c;
-    /* Azul noche / contraste profundo para cintillo y footer */
-    --gold: #427ab4;
-    --gold-hover: #356292;
-    --title-highlight: #dbeafe;
-    /* Azul hielo luminoso para títulos */
-    --title-section: #1c2b3c;
-    /* Azul noche para títulos de sección */
+    --primary: #8c7676;
+    /* Tono taupe cálido / rosa pizarra de la paleta */
+    --primary-light: #a89494;
+    /* Taupe medio suave de la paleta */
+    --accent: #725e5e;
+    /* Taupe profundo / contraste elegante */
+    --accent-hover: #5d4b4b;
+    --accent-indigo: #212121;
+    /* Carbón cálido profundo para cintillo y footer */
+    --gold: #8c7676;
+    --gold-hover: #725e5e;
+    --title-highlight: #f5eded;
+    /* Alabastro luminoso de la paleta */
+    --title-section: #212121;
+    /* Carbón cálido para títulos de sección */
     --success: #10b981;
     --danger: #ef4444;
     --warning: #f59e0b;
-    --bg-page: #edf2f7;
-    /* Fondo exterior de la página (gris suave / hielo) */
-    --bg-card: linear-gradient(165deg, #718ea9 0%, #6885a4 50%, #587593 100%);
-    /* Fondo azul pizarra exacto #6885a4 de la paleta */
-    --text-main: #1e293b;
-    --text-muted: #475569;
-    --border: #94a8be;
-    --border-focus: #427ab4;
-    --shadow-sm: 0 2px 6px rgba(28, 43, 60, 0.08);
-    --shadow-md: 0 8px 24px rgba(28, 43, 60, 0.14);
-    --shadow-lg: 0 18px 46px rgba(28, 43, 60, 0.22);
+    --bg-page: #efe8e8;
+    /* Fondo exterior de la página (perla cálido suave de la paleta) */
+    --bg-card: linear-gradient(165deg, #d8cccc 0%, #cbbebe 50%, #b8a6a6 100%);
+    /* Fondo taupe cálido exacto #cbbebe de la paleta */
+    --text-main: #211c1c;
+    --text-muted: #5a4e4e;
+    --border: #ac9898;
+    --border-focus: #8c7676;
+    --shadow-sm: 0 2px 6px rgba(33, 33, 33, 0.08);
+    --shadow-md: 0 8px 24px rgba(33, 33, 33, 0.14);
+    --shadow-lg: 0 18px 46px rgba(33, 33, 33, 0.22);
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 22px;
@@ -47,7 +47,7 @@
 }
 
 body {
-    background: #edf2f7;
+    background: #efe8e8;
     background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.5;
@@ -56,16 +56,16 @@ body {
     flex-direction: column;
 }
 
-/* ── BARRA SUPERIOR INSTITUCIONAL (CINTILLO CON CONTRASTE AZUL NOCHE) ────── */
+/* ── BARRA SUPERIOR INSTITUCIONAL (CINTILLO SUPERIOR CONTRASTE CÁLIDO) ────── */
 .navbar {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
+    background: linear-gradient(135deg, #212121 0%, #2b2525 50%, #383030 100%);
     color: #ffffff;
     padding: 0;
-    box-shadow: 0 4px 20px rgba(28, 43, 60, 0.5);
-    border-bottom: 3px solid #427ab4;
+    box-shadow: 0 4px 20px rgba(33, 33, 33, 0.5);
+    border-bottom: 3px solid #8c7676;
 }
 
 /* Sin imagen de fondo en navbar */
@@ -124,7 +124,7 @@ body {
 
 .nav-brand-text span {
     font-size: 0.76rem;
-    color: #93c5fd;
+    color: #efe8e8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     display: block;
@@ -178,8 +178,8 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(66, 122, 180, 0.35);
-    border: 1.5px solid #a8c5e5;
+    background: rgba(140, 118, 118, 0.35);
+    border: 1.5px solid #efe8e8;
     color: #ffffff;
     font-size: 0.82rem;
     font-weight: 800;
@@ -189,7 +189,7 @@ body {
     margin-bottom: 1rem;
     letter-spacing: 0.6px;
     backdrop-filter: blur(6px);
-    box-shadow: 0 0 20px rgba(66, 122, 180, 0.45);
+    box-shadow: 0 0 20px rgba(140, 118, 118, 0.45);
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
@@ -220,15 +220,15 @@ body {
     margin-top: 1.5rem;
 }
 
-/* ── BOTÓN INTERACTIVO "5 CARRERAS OFICIALES" CON EL AZUL MÁS OSCURO DE LA PALETA ── */
+/* ── BOTÓN INTERACTIVO "5 CARRERAS OFICIALES" (TONO TAUPE DE LA PALETA) ── */
 .btn-carreras-hero {
     position: relative;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%);
-    border: 2px solid #a8c5e5;
+    background: linear-gradient(135deg, #a89494 0%, #8c7676 50%, #725e5e 100%);
+    border: 2px solid #efe8e8;
     color: #ffffff;
     padding: 0.78rem 1.55rem;
     border-radius: 30px;
@@ -236,49 +236,49 @@ body {
     font-weight: 800;
     cursor: pointer;
     backdrop-filter: blur(8px);
-    box-shadow: 0 4px 18px rgba(66, 122, 180, 0.45);
+    box-shadow: 0 4px 18px rgba(114, 94, 94, 0.45);
     transition: var(--transition);
     animation: btnPulseGlow 3.2s infinite ease-in-out;
 }
 
 .btn-carreras-hero:hover {
-    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 100%);
+    background: linear-gradient(135deg, #bca8a8 0%, #8c7676 100%);
     color: #ffffff;
     border-color: #ffffff;
-    box-shadow: 0 8px 24px rgba(66, 122, 180, 0.65);
+    box-shadow: 0 8px 24px rgba(114, 94, 94, 0.65);
     transform: translateY(-3px) scale(1.03);
 }
 
-/* ── BOTÓN DE BÚSQUEDA Y DESCARGA DIRECTA DE PLANILLA PDF (AZUL CONTRASTE) ── */
+/* ── BOTÓN DE BÚSQUEDA Y DESCARGA DIRECTA DE PLANILLA PDF (CONTRASTE CÁLIDO) ── */
 .btn-buscar-planilla-hero {
     position: relative;
     overflow: hidden;
     display: inline-flex;
     align-items: center;
     gap: 0.6rem;
-    background: linear-gradient(135deg, #283e56 0%, #1c2b3c 100%);
-    border: 2px solid #6885a4;
+    background: linear-gradient(135deg, #383030 0%, #212121 100%);
+    border: 2px solid #8c7676;
     color: #ffffff;
     padding: 0.78rem 1.5rem;
     border-radius: 30px;
     font-size: 0.92rem;
     font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 4px 18px rgba(28, 43, 60, 0.45);
+    box-shadow: 0 4px 18px rgba(33, 33, 33, 0.45);
     transition: var(--transition);
 }
 
 .btn-buscar-planilla-hero:hover {
-    background: linear-gradient(135deg, #365373 0%, #283e56 100%);
-    border-color: #a8c5e5;
+    background: linear-gradient(135deg, #483e3e 0%, #312b2b 100%);
+    border-color: #efe8e8;
     color: #ffffff;
-    box-shadow: 0 8px 24px rgba(66, 122, 180, 0.55);
+    box-shadow: 0 8px 24px rgba(140, 118, 118, 0.55);
     transform: translateY(-3px) scale(1.03);
 }
 
 .btn-carreras-badge {
     background: #ffffff;
-    color: #2e5682;
+    color: #5d4b4b;
     width: 26px;
     height: 26px;
     border-radius: 50%;
@@ -291,21 +291,21 @@ body {
 }
 
 .btn-carreras-hero:hover .btn-carreras-badge {
-    background: #dbeafe;
-    color: #1c2b3c;
+    background: #f5eded;
+    color: #212121;
 }
 
 .badge-acreditacion {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: #dbeafe;
+    color: #f5eded;
     font-size: 0.88rem;
     font-weight: 700;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* ── CONTENEDOR PRINCIPAL Y FORM CARD (CON FONDO TENUE ELEGANTE) ──────────── */
+/* ── CONTENEDOR PRINCIPAL Y FORM CARD (FONDO TAUPE EXACTO #cbbebe DE LA PALETA) ──── */
 .main-wrapper {
     max-width: 860px;
     margin: -2.8rem auto 3rem;
@@ -316,22 +316,22 @@ body {
 }
 
 .form-card {
-    background: linear-gradient(165deg, #718ea9 0%, #6885a4 50%, #587593 100%);
+    background: linear-gradient(165deg, #d8cccc 0%, #cbbebe 50%, #b8a6a6 100%);
     border-radius: var(--radius-lg);
-    box-shadow: 0 20px 48px rgba(28, 43, 60, 0.25), 0 0 0 1px rgba(66, 122, 180, 0.2);
-    border: 1.5px solid #4a6783;
+    box-shadow: 0 20px 48px rgba(33, 33, 33, 0.25), 0 0 0 1px rgba(140, 118, 118, 0.2);
+    border: 1.5px solid #ac9898;
     overflow: hidden;
     backdrop-filter: blur(10px);
 }
 
-/* ── STEPPER (CINTILLO DE PASOS CON CONTRASTE AZUL NOCHE) ────────────────── */
+/* ── STEPPER (CINTILLO DE PASOS CON CONTRASTE CÁLIDO) ────────────────── */
 .stepper-header {
-    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 100%);
+    background: linear-gradient(90deg, #212121 0%, #2e2828 100%);
     padding: 1.2rem 1.5rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1.5px solid #365373;
+    border-bottom: 1.5px solid #4a3e3e;
     gap: 0.5rem;
 }
 
@@ -351,15 +351,15 @@ body {
     transform: translateY(-50%);
     width: 25%;
     height: 2px;
-    background: #365373;
+    background: #4a3e3e;
 }
 
 .step-circle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #283e56;
-    color: #cbd5e1;
+    background: #383030;
+    color: #efe8e8;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -376,7 +376,7 @@ body {
 .step-title span:first-child {
     font-size: 0.72rem;
     font-weight: 700;
-    color: #94a8be;
+    color: #ac9898;
     text-transform: uppercase;
 }
 
@@ -387,14 +387,14 @@ body {
 }
 
 .step-node.active .step-circle {
-    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 100%);
+    background: linear-gradient(135deg, #a89494 0%, #8c7676 100%);
     color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(66, 122, 180, 0.35), 0 4px 12px rgba(46, 86, 130, 0.45);
+    box-shadow: 0 0 0 4px rgba(140, 118, 118, 0.35), 0 4px 12px rgba(93, 75, 75, 0.45);
     transform: scale(1.06);
 }
 
 .step-node.completed .step-circle {
-    background: linear-gradient(135deg, #356292 0%, #244870 100%);
+    background: linear-gradient(135deg, #725e5e 0%, #5d4b4b 100%);
     color: #ffffff;
 }
 
@@ -402,21 +402,21 @@ body {
     content: "✓";
 }
 
-/* ── FORMULARIO Y CAMPOS (CON FONDO AZUL PIZARRA #6885a4 DE LA PALETA) ──── */
+/* ── FORMULARIO Y CAMPOS (FONDO CÁLIDO TAUPE DE LA PALETA) ──── */
 .form-body {
     padding: 2.2rem;
-    background: radial-gradient(circle at top right, rgba(66, 122, 180, 0.15), transparent 55%),
-                radial-gradient(circle at bottom left, rgba(28, 43, 60, 0.25), transparent 55%);
+    background: radial-gradient(circle at top right, rgba(140, 118, 118, 0.18), transparent 55%),
+                radial-gradient(circle at bottom left, rgba(33, 33, 33, 0.22), transparent 55%);
 }
 
 .step-pane {
     display: none;
     animation: fadeIn 0.3s ease-in-out;
-    background: #f1f5f9;
-    border: 1.5px solid #cbd5e1;
+    background: #f5eded;
+    border: 1.5px solid #cbbebe;
     border-radius: var(--radius-md);
     padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(28, 43, 60, 0.08);
+    box-shadow: 0 4px 16px rgba(33, 33, 33, 0.08);
 }
 
 .step-pane.active {
@@ -438,7 +438,7 @@ body {
 .section-title {
     font-size: 1.35rem;
     font-weight: 900;
-    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 60%, #427ab4 100%);
+    background: linear-gradient(90deg, #212121 0%, #383030 60%, #8c7676 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -447,7 +447,7 @@ body {
     align-items: center;
     gap: 0.55rem;
     padding-left: 0.7rem;
-    border-left: 4px solid #427ab4;
+    border-left: 4px solid #8c7676;
 }
 
 .section-subtitle {
@@ -506,7 +506,7 @@ body {
     font-size: 1rem;
     color: var(--text-main);
     background-color: #ffffff;
-    border: 2px solid #bba18a;
+    border: 2px solid #ac9898;
     border-radius: var(--radius-sm);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
     transition: var(--transition);
@@ -536,7 +536,7 @@ textarea.form-control {
 .form-control:focus {
     border-color: var(--border-focus);
     background-color: #ffffff;
-    box-shadow: 0 0 0 3.5px rgba(66, 122, 180, 0.22), inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 0 0 3.5px rgba(140, 118, 118, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .form-control.is-invalid {
@@ -698,10 +698,10 @@ textarea.form-control {
 /* ── ANIMACIONES Y EFECTOS NOTABLES EN LOS BOTONES DEL FORMULARIO ─────────── */
 @keyframes btnPulseGlow {
     0%, 100% {
-        box-shadow: 0 5px 16px rgba(66, 122, 180, 0.38), 0 0 0 0 rgba(79, 121, 165, 0.4);
+        box-shadow: 0 5px 16px rgba(140, 118, 118, 0.4), 0 0 0 0 rgba(168, 148, 148, 0.4);
     }
     50% {
-        box-shadow: 0 8px 24px rgba(46, 86, 130, 0.5), 0 0 0 5px rgba(79, 121, 165, 0);
+        box-shadow: 0 8px 24px rgba(114, 94, 94, 0.55), 0 0 0 5px rgba(168, 148, 148, 0);
     }
 }
 
@@ -714,11 +714,11 @@ textarea.form-control {
     }
 }
 
-/* ── FOOTER DEL FORMULARIO Y BOTONES (CON CONTRASTE AZUL NOCHE) ──────────── */
+/* ── FOOTER DEL FORMULARIO Y BOTONES (CONTRASTE CÁLIDO) ──────────── */
 .form-footer {
-    background: linear-gradient(90deg, #1c2b3c 0%, #283e56 100%);
+    background: linear-gradient(90deg, #212121 0%, #2e2828 100%);
     padding: 1.25rem 2.2rem;
-    border-top: 1.5px solid #365373;
+    border-top: 1.5px solid #4a3e3e;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -762,32 +762,32 @@ textarea.form-control {
 }
 
 .btn-secondary {
-    background: #ffffff;
-    color: #1e293b;
-    border: 1.5px solid #94a8be;
-    box-shadow: 0 3px 10px rgba(28, 43, 60, 0.08);
+    background: #f5eded;
+    color: #212121;
+    border: 1.5px solid #ac9898;
+    box-shadow: 0 3px 10px rgba(33, 33, 33, 0.08);
 }
 
 .btn-secondary:hover {
-    background: #e2e8f0;
-    color: #1c2b3c;
-    border-color: #427ab4;
+    background: #efe8e8;
+    color: #212121;
+    border-color: #8c7676;
     transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 6px 16px rgba(66, 122, 180, 0.2);
+    box-shadow: 0 6px 16px rgba(140, 118, 118, 0.25);
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%);
+    background: linear-gradient(135deg, #a89494 0%, #8c7676 50%, #725e5e 100%);
     color: #ffffff;
-    border: 1px solid #a8c5e5;
-    box-shadow: 0 4px 15px rgba(66, 122, 180, 0.4);
+    border: 1px solid #efe8e8;
+    box-shadow: 0 4px 15px rgba(114, 94, 94, 0.4);
     animation: btnPulseGlow 3.2s infinite ease-in-out;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 50%, #356294 100%);
+    background: linear-gradient(135deg, #bca8a8 0%, #8c7676 50%, #725e5e 100%);
     transform: translateY(-3px) scale(1.025);
-    box-shadow: 0 10px 24px rgba(66, 122, 180, 0.55);
+    box-shadow: 0 10px 24px rgba(114, 94, 94, 0.55);
 }
 
 .btn-primary:active,
@@ -798,17 +798,17 @@ textarea.form-control {
 }
 
 .btn-submit {
-    background: linear-gradient(135deg, #427ab4 0%, #2e5682 50%, #1c3b5e 100%);
+    background: linear-gradient(135deg, #8c7676 0%, #725e5e 50%, #5d4b4b 100%);
     color: #ffffff;
-    border: 1.5px solid #a8c5e5;
-    box-shadow: 0 4px 18px rgba(46, 86, 130, 0.45);
+    border: 1.5px solid #efe8e8;
+    box-shadow: 0 4px 18px rgba(93, 75, 75, 0.45);
     animation: btnPulseGlow 2.8s infinite ease-in-out;
 }
 
 .btn-submit:hover {
-    background: linear-gradient(135deg, #4f79a5 0%, #356294 50%, #244870 100%);
+    background: linear-gradient(135deg, #9c8686 0%, #7e6969 50%, #5d4b4b 100%);
     transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 12px 28px rgba(46, 86, 130, 0.6);
+    box-shadow: 0 12px 28px rgba(93, 75, 75, 0.6);
 }
 
 /* Efecto Ripple (Onda al hacer clic generada por React/JS) */
@@ -857,7 +857,7 @@ textarea.form-control {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(10, 25, 47, 0.82);
+    background: rgba(33, 27, 27, 0.82);
     backdrop-filter: blur(5px);
     display: none;
     align-items: center;
@@ -885,28 +885,28 @@ textarea.form-control {
 }
 
 .info-popup-header {
-    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
+    background: linear-gradient(135deg, #212121 0%, #2b2525 50%, #383030 100%);
     color: #ffffff;
     padding: 0.85rem 1.25rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #427ab4;
+    border-bottom: 2px solid #8c7676;
     flex-shrink: 0;
 }
 
 .info-popup-title {
     font-size: 0.98rem;
     font-weight: 800;
-    color: #dbeafe;
+    color: #f5eded;
     display: flex;
     align-items: center;
     gap: 0.4rem;
 }
 
 .info-popup-close-btn {
-    background: rgba(66, 122, 180, 0.28);
-    border: 1px solid #a8c5e5;
+    background: rgba(140, 118, 118, 0.28);
+    border: 1px solid #efe8e8;
     color: #ffffff;
     font-size: 0.95rem;
     font-weight: 700;
@@ -917,13 +917,13 @@ textarea.form-control {
 }
 
 .info-popup-close-btn:hover {
-    background: rgba(66, 122, 180, 0.55);
+    background: rgba(140, 118, 118, 0.55);
     color: #ffffff;
     transform: scale(1.05);
 }
 
 .info-popup-banner {
-    background: linear-gradient(135deg, #283e56 0%, #427ab4 100%);
+    background: linear-gradient(135deg, #383030 0%, #8c7676 100%);
     color: #ffffff;
     padding: 1.15rem 1.25rem;
     text-align: center;
@@ -933,8 +933,8 @@ textarea.form-control {
 
 .info-popup-badge-proceso {
     display: inline-block;
-    background: #dbeafe;
-    color: #1c2b3c;
+    background: #f5eded;
+    color: #212121;
     font-weight: 900;
     font-size: 0.75rem;
     padding: 0.22rem 0.8rem;
@@ -997,7 +997,7 @@ textarea.form-control {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(10, 25, 47, 0.85);
+    background: rgba(33, 27, 27, 0.85);
     backdrop-filter: blur(6px);
     display: none;
     align-items: center;
@@ -1018,18 +1018,18 @@ textarea.form-control {
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
-    border-top: 6px solid #427ab4;
+    border-top: 6px solid #8c7676;
     animation: scaleUp 0.25s ease-out;
 }
 
 .modal-carreras-header {
-    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 50%, #365373 100%);
+    background: linear-gradient(135deg, #212121 0%, #2b2525 50%, #383030 100%);
     color: #ffffff;
     padding: 1.25rem 1.75rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid #427ab4;
+    border-bottom: 2px solid #8c7676;
 }
 
 .modal-carreras-header h3 {
@@ -1058,15 +1058,15 @@ textarea.form-control {
 }
 
 .carrera-card-item:hover {
-    border-color: #427ab4;
-    background: #f8fafc;
-    box-shadow: 0 8px 22px rgba(66, 122, 180, 0.2);
+    border-color: #8c7676;
+    background: #f5eded;
+    box-shadow: 0 8px 22px rgba(140, 118, 118, 0.2);
     transform: translateY(-4px);
 }
 
 .carrera-card-code {
     display: inline-block;
-    background: linear-gradient(135deg, #283e56 0%, #427ab4 100%);
+    background: linear-gradient(135deg, #383030 0%, #8c7676 100%);
     color: #ffffff;
     font-size: 0.82rem;
     font-weight: 900;
@@ -1096,7 +1096,7 @@ textarea.form-control {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(10, 25, 47, 0.85);
+    background: rgba(33, 27, 27, 0.85);
     backdrop-filter: blur(5px);
     display: none;
     align-items: center;
@@ -1161,8 +1161,8 @@ textarea.form-control {
 }
 
 .voucher-folio {
-    background: linear-gradient(135deg, #1e1b4b 0%, #0f766e 100%);
-    color: #99f6e4;
+    background: linear-gradient(135deg, #212121 0%, #5d4b4b 100%);
+    color: #f5eded;
     font-size: 1.15rem;
     font-weight: 800;
     text-align: center;
@@ -1275,7 +1275,7 @@ textarea.form-control {
 
 .sms-acuse-val.font-mono {
     font-family: monospace;
-    color: #0369a1;
+    color: #5d4b4b;
 }
 
 .sms-acuse-msg {
@@ -1295,7 +1295,7 @@ textarea.form-control {
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    background: #0284c7;
+    background: #725e5e;
     color: #ffffff !important;
     text-decoration: none;
     font-size: 0.84rem;
@@ -1307,7 +1307,7 @@ textarea.form-control {
 }
 
 .btn-sms-native:hover {
-    background: #0369a1;
+    background: #5d4b4b;
     text-decoration: none;
 }
 
@@ -1326,8 +1326,8 @@ textarea.form-control {
 
 /* ── CAPTURA DE FOTOGRAFÍA DESDE EL MÓVIL ─────────────────────────────────── */
 .photo-capture-card {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border: 2px dashed #427ab4;
+    background: linear-gradient(135deg, #f5eded 0%, #efe8e8 100%);
+    border: 2px dashed #8c7676;
     border-radius: var(--radius-md);
     padding: 1.15rem;
     text-align: center;
@@ -1341,9 +1341,9 @@ textarea.form-control {
 }
 
 .photo-capture-card:hover {
-    border-color: #283e56;
-    background: linear-gradient(135deg, #ffffff 0%, #edf2f7 100%);
-    box-shadow: 0 6px 18px rgba(66, 122, 180, 0.25);
+    border-color: #5d4b4b;
+    background: #ffffff;
+    box-shadow: 0 6px 18px rgba(140, 118, 118, 0.25);
 }
 
 .photo-preview-box {
@@ -1390,20 +1390,20 @@ textarea.form-control {
 }
 
 .btn-camera-live {
-    background: linear-gradient(135deg, #283e56 0%, #1c2b3c 100%) !important;
-    border: 1.5px solid #6885a4 !important;
+    background: linear-gradient(135deg, #383030 0%, #212121 100%) !important;
+    border: 1.5px solid #8c7676 !important;
 }
 
 .btn-camera-live:hover {
-    background: linear-gradient(135deg, #365373 0%, #283e56 100%) !important;
+    background: linear-gradient(135deg, #483e3e 0%, #2e2828 100%) !important;
 }
 
 .btn-photo-action {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%);
-    border: 1.5px solid #a8c5e5;
-    box-shadow: 0 4px 14px rgba(66, 122, 180, 0.4);
+    background: linear-gradient(135deg, #a89494 0%, #8c7676 50%, #725e5e 100%);
+    border: 1.5px solid #efe8e8;
+    box-shadow: 0 4px 14px rgba(114, 94, 94, 0.4);
     text-decoration: none;
     user-select: none;
     color: #ffffff;
@@ -1420,9 +1420,9 @@ textarea.form-control {
 }
 
 .btn-photo-action:hover {
-    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 100%);
+    background: linear-gradient(135deg, #bca8a8 0%, #8c7676 100%);
     transform: translateY(-2px) scale(1.03);
-    box-shadow: 0 8px 20px rgba(66, 122, 180, 0.55);
+    box-shadow: 0 8px 20px rgba(114, 94, 94, 0.55);
     color: #ffffff;
 }
 
@@ -1443,20 +1443,20 @@ textarea.form-control {
 
 /* ── TARJETA UNIFICADA DE CÉDULA DEL REPRESENTANTE (MENORES DE EDAD) ──────── */
 .repres-card-unificada {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border: 2px dashed #427ab4;
+    background: linear-gradient(135deg, #f5eded 0%, #efe8e8 100%);
+    border: 2px dashed #8c7676;
     border-radius: 14px;
     padding: 1.4rem 1.6rem;
     margin: 0.85rem 0 0.5rem;
-    box-shadow: 0 4px 16px rgba(66, 122, 180, 0.15);
+    box-shadow: 0 4px 16px rgba(140, 118, 118, 0.15);
     box-sizing: border-box;
     width: 100%;
     transition: var(--transition);
 }
 
 .repres-card-unificada:hover {
-    border-color: #283e56;
-    box-shadow: 0 6px 20px rgba(40, 62, 86, 0.22);
+    border-color: #5d4b4b;
+    box-shadow: 0 6px 20px rgba(93, 75, 75, 0.22);
 }
 
 /* Encabezado informativo (Imagen Anexa 1) */
@@ -1468,7 +1468,7 @@ textarea.form-control {
 .repres-title-unificado {
     margin: 0 0 0.45rem;
     font-size: 1.05rem;
-    color: #1c2b3c;
+    color: #212121;
     font-weight: 900;
     letter-spacing: 0.2px;
     line-height: 1.35;
@@ -1499,7 +1499,7 @@ textarea.form-control {
 /* Sub-contenedor de carga y escaneo (Imagen Anexa 2 - Unido en el mismo bloque) */
 .repres-upload-unificado {
     background: #ffffff;
-    border: 1.5px dashed #427ab4;
+    border: 1.5px dashed #8c7676;
     border-radius: 12px;
     padding: 1.25rem 1.2rem;
     max-width: 520px;
@@ -1513,7 +1513,7 @@ textarea.form-control {
 .repres-upload-title {
     font-size: 0.95rem;
     font-weight: 800;
-    color: #1c2b3c;
+    color: #212121;
     margin-bottom: 0.35rem;
     line-height: 1.3;
 }
@@ -1529,7 +1529,7 @@ textarea.form-control {
     width: 170px;
     height: 110px;
     border-radius: 8px;
-    border: 2px solid #427ab4;
+    border: 2px solid #8c7676;
     overflow: hidden;
     background: #f8fafc;
     margin: 0 auto 0.85rem;
@@ -1546,8 +1546,8 @@ textarea.form-control {
 }
 
 .btn-repres-subir {
-    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 50%, #2e5682 100%) !important;
-    border: 1.5px solid #a8c5e5 !important;
+    background: linear-gradient(135deg, #a89494 0%, #8c7676 50%, #725e5e 100%) !important;
+    border: 1.5px solid #efe8e8 !important;
     font-size: 0.84rem !important;
     padding: 0.55rem 1.05rem !important;
     min-height: 42px;
@@ -1555,13 +1555,13 @@ textarea.form-control {
 }
 
 .btn-repres-subir:hover {
-    background: linear-gradient(135deg, #5b8ec2 0%, #427ab4 100%) !important;
-    box-shadow: 0 5px 16px rgba(66, 122, 180, 0.5) !important;
+    background: linear-gradient(135deg, #bca8a8 0%, #8c7676 100%) !important;
+    box-shadow: 0 5px 16px rgba(140, 118, 118, 0.5) !important;
 }
 
 .btn-repres-escanear {
-    background: linear-gradient(135deg, #283e56 0%, #1c2b3c 100%) !important;
-    border: 1.5px solid #6885a4 !important;
+    background: linear-gradient(135deg, #383030 0%, #212121 100%) !important;
+    border: 1.5px solid #8c7676 !important;
     font-size: 0.84rem !important;
     padding: 0.55rem 1.05rem !important;
     min-height: 42px;
@@ -1569,8 +1569,8 @@ textarea.form-control {
 }
 
 .btn-repres-escanear:hover {
-    background: linear-gradient(135deg, #365373 0%, #283e56 100%) !important;
-    box-shadow: 0 5px 16px rgba(28, 43, 60, 0.5) !important;
+    background: linear-gradient(135deg, #483e3e 0%, #2e2828 100%) !important;
+    box-shadow: 0 5px 16px rgba(33, 33, 33, 0.5) !important;
 }
 
 .repres-status-msg {
@@ -1581,16 +1581,16 @@ textarea.form-control {
     text-align: center;
 }
 
-/* ── FOOTER INSTITUCIONAL (CINTILLO INFERIOR CON CONTRASTE AZUL NOCHE) ───── */
+/* ── FOOTER INSTITUCIONAL (CINTILLO INFERIOR CON CONTRASTE CÁLIDO) ───── */
 .footer {
-    background: linear-gradient(135deg, #152230 0%, #1c2b3c 50%, #283e56 100%);
-    color: #cbd5e1;
+    background: linear-gradient(135deg, #1b1717 0%, #212121 50%, #2b2525 100%);
+    color: #efe8e8;
     padding: 2.2rem 1.5rem;
     margin-top: auto;
     text-align: center;
     font-size: 0.88rem;
-    border-top: 3px solid #427ab4;
-    box-shadow: 0 -4px 20px rgba(21, 34, 48, 0.4);
+    border-top: 3px solid #8c7676;
+    box-shadow: 0 -4px 20px rgba(27, 23, 23, 0.4);
 }
 
 /* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
@@ -1964,18 +1964,18 @@ textarea.form-control {
     border-radius: 12px;
     overflow: hidden;
     background: #ffffff;
-    box-shadow: 0 4px 14px rgba(28, 43, 60, 0.08);
+    box-shadow: 0 4px 14px rgba(33, 33, 33, 0.08);
     transition: all 0.3s ease;
 }
 
 .accordion-descargas-wrapper:hover {
-    border-color: #427ab4;
-    box-shadow: 0 6px 20px rgba(66, 122, 180, 0.18);
+    border-color: #8c7676;
+    box-shadow: 0 6px 20px rgba(140, 118, 118, 0.18);
 }
 
 .btn-accordion-toggle {
     width: 100%;
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, #f5eded 0%, #efe8e8 100%);
     border: none;
     outline: none;
     padding: 0.9rem 1.15rem;
@@ -1986,19 +1986,19 @@ textarea.form-control {
     font-family: inherit;
     font-size: 0.92rem;
     font-weight: 800;
-    color: #1c2b3c;
+    color: #212121;
     transition: background 0.25s ease, color 0.25s ease;
 }
 
 .btn-accordion-toggle:hover {
-    background: linear-gradient(135deg, #eef3f8 0%, #dbe5f0 100%);
-    color: #427ab4;
+    background: linear-gradient(135deg, #efe8e8 0%, #d8cccc 100%);
+    color: #8c7676;
 }
 
 .btn-accordion-toggle.active {
-    background: linear-gradient(135deg, #1c2b3c 0%, #283e56 100%);
+    background: linear-gradient(135deg, #212121 0%, #312b2b 100%);
     color: #ffffff;
-    border-bottom: 2px solid #427ab4;
+    border-bottom: 2px solid #8c7676;
 }
 
 .accordion-toggle-title {
@@ -2010,12 +2010,12 @@ textarea.form-control {
 .accordion-toggle-icon {
     font-size: 0.85rem;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: #427ab4;
+    color: #8c7676;
 }
 
 .btn-accordion-toggle.active .accordion-toggle-icon {
     transform: rotate(180deg);
-    color: #dbeafe;
+    color: #f5eded;
 }
 
 .accordion-descargas-content {
@@ -2044,9 +2044,9 @@ textarea.form-control {
 }
 
 .descarga-item-card:hover {
-    border-color: #427ab4;
+    border-color: #8c7676;
     background: #ffffff;
-    box-shadow: 0 4px 12px rgba(66, 122, 180, 0.16);
+    box-shadow: 0 4px 12px rgba(140, 118, 118, 0.16);
     transform: translateY(-2px);
 }
 
@@ -2069,7 +2069,7 @@ textarea.form-control {
 .descarga-item-name {
     font-size: 0.88rem;
     font-weight: 800;
-    color: #1c2b3c;
+    color: #212121;
     margin-bottom: 0.2rem;
 }
 
@@ -2082,7 +2082,7 @@ textarea.form-control {
 
 .descarga-item-meta {
     font-size: 0.7rem;
-    color: #2e5682;
+    color: #5d4b4b;
     font-weight: 700;
     letter-spacing: 0.2px;
 }
@@ -2108,27 +2108,27 @@ textarea.form-control {
 }
 
 .btn-descarga-ver {
-    background: #eef3f8;
-    color: #1c2b3c;
-    border: 1px solid #b4c5d6;
+    background: #f5eded;
+    color: #212121;
+    border: 1px solid #cbbebe;
 }
 
 .btn-descarga-ver:hover {
-    background: #dbe5f0;
+    background: #efe8e8;
     color: #0f172a;
-    border-color: #427ab4;
+    border-color: #8c7676;
 }
 
 .btn-descarga-bajar {
-    background: linear-gradient(135deg, #4f79a5 0%, #427ab4 100%);
+    background: linear-gradient(135deg, #a89494 0%, #8c7676 100%);
     color: #ffffff;
-    border: 1px solid #427ab4;
-    box-shadow: 0 2px 6px rgba(66, 122, 180, 0.3);
+    border: 1px solid #8c7676;
+    box-shadow: 0 2px 6px rgba(140, 118, 118, 0.3);
 }
 
 .btn-descarga-bajar:hover {
-    background: linear-gradient(135deg, #5b8ec2 0%, #356294 100%);
+    background: linear-gradient(135deg, #bca8a8 0%, #725e5e 100%);
     color: #ffffff;
-    box-shadow: 0 4px 10px rgba(66, 122, 180, 0.45);
+    box-shadow: 0 4px 10px rgba(140, 118, 118, 0.45);
     transform: translateY(-1px);
 }
