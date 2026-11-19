@@ -92,18 +92,6 @@
                                 transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
                             "></div>
                         </div>
-                        <span style="
-                            padding: 0.2rem 0.65rem;
-                            border-radius: 14px;
-                            font-weight: 800;
-                            font-size: 0.75rem;
-                            background: ${tieneFoto ? 'rgba(16, 185, 129, 0.35)' : 'rgba(255, 255, 255, 0.16)'};
-                            border: 1px solid ${tieneFoto ? '#34d399' : 'rgba(255, 255, 255, 0.35)'};
-                            color: ${tieneFoto ? '#a7f3d0' : '#d6d6d6'};
-                            white-space: nowrap;
-                        " title="${tieneFoto ? 'Destino: ' + nombreArchivoFoto : 'Suba su fotografía tipo carnet'}">
-                            ${tieneFoto ? '📷 Foto Lista' : '📷 Foto Opcional'}
-                        </span>
                     </div>
                 </div>
             `;

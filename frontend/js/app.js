@@ -710,6 +710,11 @@ function goToStep(step) {
     if (btnNext) btnNext.style.display = currentStep === totalSteps ? 'none' : 'inline-flex';
     if (btnSubmit) btnSubmit.style.display = currentStep === totalSteps ? 'inline-flex' : 'none';
 
+    // Evaluar y resaltar en verde los campos válidos del paso activo
+    if (typeof evaluarCamposPasoActual === 'function') {
+        evaluarCamposPasoActual(step);
+    }
+
     const card = document.querySelector('.form-card');
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -1184,10 +1189,18 @@ function setFieldValid(input, errId) {
     if (!input) return;
     input.classList.remove('is-invalid');
     input.classList.add('is-valid');
-    const errBox = document.getElementById(errId);
-    if (errBox) {
-        errBox.textContent = '';
-        errBox.classList.remove('visible');
+    input.classList.remove('field-error-highlight');
+    if (errId) {
+        const errBox = document.getElementById(errId);
+        if (errBox) {
+            errBox.textContent = '';
+            errBox.classList.remove('visible');
+        }
+    }
+    // Si no quedan campos con is-invalid en el paso activo, ocultar alerta
+    const activePane = document.querySelector('.step-pane.active');
+    if (activePane && !activePane.querySelector('.is-invalid')) {
+        limpiarAvisoErrorPaso();
     }
 }
 
@@ -1195,10 +1208,12 @@ function setFieldInvalid(input, errId, message) {
     if (!input) return;
     input.classList.remove('is-valid');
     input.classList.add('is-invalid');
-    const errBox = document.getElementById(errId);
-    if (errBox) {
-        errBox.textContent = message;
-        errBox.classList.add('visible');
+    if (errId) {
+        const errBox = document.getElementById(errId);
+        if (errBox) {
+            errBox.textContent = message;
+            errBox.classList.add('visible');
+        }
     }
 }
 
@@ -1206,8 +1221,58 @@ function mostrarAvisoScroll(elementId) {
     const el = document.getElementById(elementId);
     if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        if (el.focus) el.focus();
+        if (el.focus && typeof el.focus === 'function') el.focus();
     }
+}
+
+function mostrarErrorDePaso(el, stepNum, stepName, fieldLabel, message) {
+    if (!el) return;
+
+    // 1. Navegar a la pestaña/paso donde ocurre el error si no estamos en ella
+    if (currentStep !== stepNum) {
+        goToStep(stepNum);
+    }
+
+    // 2. Marcar visualmente la pestaña en el Stepper con indicador de error
+    document.querySelectorAll('.step-node').forEach(node => {
+        const s = parseInt(node.getAttribute('data-step'), 10);
+        if (s === stepNum) {
+            node.classList.add('has-error');
+        } else {
+            node.classList.remove('has-error');
+        }
+    });
+
+    // 3. Activar y actualizar el banner informativo de error por paso
+    const alertBox = document.getElementById('step-error-alert');
+    const alertTitle = document.getElementById('step-error-alert-title');
+    const alertText = document.getElementById('step-error-alert-text');
+    if (alertBox && alertTitle && alertText) {
+        alertTitle.innerHTML = `⚠️ Error en <strong>${stepName}</strong>`;
+        alertText.innerHTML = `Por favor complete o corrija el campo <strong>"${fieldLabel}"</strong>: ${message}`;
+        alertBox.style.display = 'flex';
+    }
+
+    // 4. Desplazar la pantalla suavemente y centrar el campo con error
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('field-error-highlight');
+    setTimeout(() => {
+        el.classList.remove('field-error-highlight');
+    }, 3000);
+
+    setTimeout(() => {
+        if (el.focus && typeof el.focus === 'function') {
+            try { el.focus(); } catch (err) {}
+        }
+    }, 250);
+}
+
+function limpiarAvisoErrorPaso() {
+    const alertBox = document.getElementById('step-error-alert');
+    if (alertBox) alertBox.style.display = 'none';
+    document.querySelectorAll('.step-node').forEach(node => {
+        node.classList.remove('has-error');
+    });
 }
 
 // ── 7. VALIDACIONES EN TIEMPO REAL PARA TODOS LOS CAMPOS ─────────────────────
@@ -1218,12 +1283,311 @@ const REGEX_LETRAS_Y_ESPACIOS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\.]+$/;
 const REGEX_EMAIL = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const PREFIJOS_MOVILES = ['0412', '0414', '0424', '0416', '0426'];
 
+function evaluarCampoEnTiempoReal(el, forzarError = false) {
+    if (!el || !el.id) return true;
+    const id = el.id;
+
+    if (id === 'asp-ced_alum') {
+        const val = el.value.trim();
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-cedula', 'El número de cédula es obligatorio.');
+            return false;
+        }
+        if (val.length < 8) {
+            if (forzarError || val.length > 0) setFieldInvalid(el, 'err-cedula', 'La cédula debe contener exactamente 8 dígitos (solo números).');
+            return false;
+        }
+        if (cedulaDisponible) {
+            setFieldValid(el, 'err-cedula');
+            return true;
+        }
+        return false;
+    }
+
+    if (id === 'asp-tipo_cedula') {
+        if (el.value) { setFieldValid(el); return true; }
+        return false;
+    }
+
+    if (id === 'asp-nom_alum') {
+        el.value = el.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+            .replace(/^\s+/, '')
+            .replace(/\s{2,}/g, ' ');
+        const val = el.value.trim();
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-nombres', 'El campo Nombres es obligatorio.');
+            return false;
+        }
+        if (val.length < 2) {
+            if (forzarError) setFieldInvalid(el, 'err-nombres', 'Mínimo 2 letras.');
+            return false;
+        }
+        if (!REGEX_LETRAS_Y_ESPACIOS.test(val)) {
+            setFieldInvalid(el, 'err-nombres', 'Solo se permiten letras y espacios.');
+            return false;
+        }
+        setFieldValid(el, 'err-nombres');
+        return true;
+    }
+
+    if (id === 'asp-ape_alum') {
+        el.value = el.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+            .replace(/^\s+/, '')
+            .replace(/\s{2,}/g, ' ');
+        const val = el.value.trim();
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-apellidos', 'El campo Apellidos es obligatorio.');
+            return false;
+        }
+        if (val.length < 2) {
+            if (forzarError) setFieldInvalid(el, 'err-apellidos', 'Mínimo 2 letras.');
+            return false;
+        }
+        if (!REGEX_LETRAS_Y_ESPACIOS.test(val)) {
+            setFieldInvalid(el, 'err-apellidos', 'Solo se permiten letras y espacios.');
+            return false;
+        }
+        setFieldValid(el, 'err-apellidos');
+        return true;
+    }
+
+    if (id === 'asp-fec_nac_alum') {
+        const val = el.value;
+        const edadInput = document.getElementById('asp-edad_alum');
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-fec_nac', 'La fecha de nacimiento es obligatoria.');
+            if (edadInput) { edadInput.value = ''; edadInput.classList.remove('is-valid'); }
+            return false;
+        }
+        const res = validarEdadReglamentariaIUAC(val);
+        if (edadInput && res.edadActual !== null) {
+            edadInput.value = res.edadActual;
+        }
+        const seccionMenor = document.getElementById('seccion-representante-menor');
+        if (seccionMenor) {
+            seccionMenor.style.display = (res.edadActual !== null && res.edadActual < 18) ? 'block' : 'none';
+        }
+        if (!res.valido) {
+            setFieldInvalid(el, 'err-fec_nac', res.error);
+            if (edadInput) edadInput.classList.remove('is-valid');
+            bloquearFormularioPorEdad(res.error);
+            return false;
+        }
+        setFieldValid(el, 'err-fec_nac');
+        if (edadInput) setFieldValid(edadInput);
+        desbloquearFormularioPorEdad();
+        return true;
+    }
+
+    if (id === 'asp-edad_alum') {
+        const val = parseInt(el.value || '0', 10);
+        if (val >= 15 && val <= 40) {
+            setFieldValid(el);
+            return true;
+        }
+        return false;
+    }
+
+    if (id === 'asp-sex_alum') {
+        if (el.value === 'M' || el.value === 'F') {
+            setFieldValid(el, 'err-sexo');
+            return true;
+        }
+        if (forzarError) setFieldInvalid(el, 'err-sexo', 'Seleccione un género.');
+        return false;
+    }
+
+    if (id === 'asp-est_civil_alum') {
+        if (el.value) {
+            setFieldValid(el, 'err-est_civil');
+            return true;
+        }
+        if (forzarError) setFieldInvalid(el, 'err-est_civil', 'Seleccione su estado civil.');
+        return false;
+    }
+
+    if (id === 'asp-lugar_nac_alum') {
+        const val = el.value.trim();
+        if (val) {
+            setFieldValid(el, 'err-lugar_nac');
+            return true;
+        }
+        if (forzarError) setFieldInvalid(el, 'err-lugar_nac', 'El lugar de nacimiento es obligatorio.');
+        return false;
+    }
+
+    if (id === 'asp-nacionalidad_alum') {
+        if (el.value && el.value.trim()) {
+            setFieldValid(el);
+            return true;
+        }
+        return false;
+    }
+
+    if (id === 'asp-pais_alum') {
+        if (el.value && el.value.trim()) {
+            setFieldValid(el);
+            return true;
+        }
+        return false;
+    }
+
+    if (id === 'asp-est_alum') {
+        if (el.value) {
+            setFieldValid(el, 'err-estado');
+            return true;
+        }
+        if (forzarError) setFieldInvalid(el, 'err-estado', 'Seleccione un Estado.');
+        return false;
+    }
+
+    if (id === 'asp-ciu_alum') {
+        if (el.value) {
+            setFieldValid(el, 'err-ciudad');
+            return true;
+        }
+        if (forzarError) setFieldInvalid(el, 'err-ciudad', 'Seleccione una Ciudad.');
+        return false;
+    }
+
+    if (id === 'asp-direc_alum') {
+        el.value = el.value.replace(/^\s+/, '').replace(/[ 	]{2,}/g, ' ');
+        const val = el.value.trim();
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-direccion', 'La dirección de habitación es obligatoria.');
+            return false;
+        }
+        if (val.length < 8) {
+            if (forzarError) setFieldInvalid(el, 'err-direccion', 'Por favor detalle su dirección completa (mínimo 8 caracteres).');
+            return false;
+        }
+        setFieldValid(el, 'err-direccion');
+        return true;
+    }
+
+    if (id === 'asp-telemov_alum') {
+        const digits = el.value.replace(/\D/g, '');
+        if (!digits) {
+            if (forzarError) setFieldInvalid(el, 'err-telemov', 'El teléfono celular es obligatorio.');
+            return false;
+        }
+        if (digits.length !== 11) {
+            if (forzarError) setFieldInvalid(el, 'err-telemov', 'Debe contener 11 dígitos (ej: 0412-1234567).');
+            return false;
+        }
+        const prefix = digits.slice(0, 4);
+        if (!PREFIJOS_MOVILES.includes(prefix)) {
+            setFieldInvalid(el, 'err-telemov', `Prefijo '${prefix}' no válido. Use 0412, 0414, 0424, 0416 o 0426.`);
+            return false;
+        }
+        setFieldValid(el, 'err-telemov');
+        return true;
+    }
+
+    if (id === 'asp-telehabi_alum') {
+        const val = el.value.trim();
+        if (!val) {
+            setFieldValid(el, 'err-telehab');
+            return true;
+        }
+        const digits = val.replace(/\D/g, '');
+        if (digits.length < 10 || digits.length > 11) {
+            if (forzarError) setFieldInvalid(el, 'err-telehab', 'Teléfono no válido (debe contener 10 u 11 dígitos).');
+            return false;
+        }
+        setFieldValid(el, 'err-telehab');
+        return true;
+    }
+
+    if (id === 'asp-correo_alum') {
+        el.value = el.value.replace(/\s+/g, '').toLowerCase();
+        const val = el.value.trim();
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-correo', 'El correo electrónico es obligatorio.');
+            return false;
+        }
+        if (!REGEX_EMAIL.test(val)) {
+            if (forzarError) setFieldInvalid(el, 'err-correo', 'Formato de correo no válido (ej: aspirante@correo.com).');
+            return false;
+        }
+        setFieldValid(el, 'err-correo');
+        return true;
+    }
+
+    if (id === 'asp-carrera') {
+        if (el.value) {
+            setFieldValid(el, 'err-carrera');
+            return true;
+        }
+        if (forzarError) setFieldInvalid(el, 'err-carrera', 'Debe seleccionar una carrera de postulación.');
+        return false;
+    }
+
+    if (id === 'asp-niv_acad_alum') {
+        if (el.value) { setFieldValid(el); return true; }
+        return false;
+    }
+
+    if (id === 'asp-ano_grad_alum') {
+        const val = parseInt(el.value || '0', 10);
+        const maxYear = new Date().getFullYear() + 1;
+        if (!val || val < 1990 || val > maxYear) {
+            if (forzarError) setFieldInvalid(el, 'err-ano_grad', `Año válido entre 1990 y ${maxYear}.`);
+            return false;
+        }
+        setFieldValid(el, 'err-ano_grad');
+        return true;
+    }
+
+    if (id === 'asp-inst_grad_alum') {
+        el.value = el.value.replace(/^\s+/, '').replace(/\s{2,}/g, ' ');
+        const val = el.value.trim();
+        if (!val) {
+            if (forzarError) setFieldInvalid(el, 'err-inst_grad', 'Indique la institución de egreso.');
+            return false;
+        }
+        setFieldValid(el, 'err-inst_grad');
+        return true;
+    }
+
+    if (id === 'asp-tipo_colegio') {
+        if (el.value) { setFieldValid(el); return true; }
+        return false;
+    }
+
+    if (id === 'asp-observaciones') {
+        el.value = el.value.replace(/^\s+/, '').replace(/[ 	]{2,}/g, ' ');
+        const val = el.value.trim();
+        if (!val || val.length < 2) {
+            if (forzarError) setFieldInvalid(el, 'err-observaciones', 'Observaciones obligatorias (escriba "Ninguna" si no posee observaciones adicionales).');
+            return false;
+        }
+        setFieldValid(el, 'err-observaciones');
+        return true;
+    }
+
+    return true;
+}
+
+function evaluarCamposPasoActual(step) {
+    const pane = document.getElementById(`step-pane-${step}`);
+    if (!pane) return;
+    const inputs = pane.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        if (input.value && String(input.value).trim().length > 0) {
+            evaluarCampoEnTiempoReal(input, false);
+        }
+    });
+}
+
 function initRealtimeValidations() {
     const cedulaInput = document.getElementById('asp-ced_alum');
     const nombresInput = document.getElementById('asp-nom_alum');
     const apellidosInput = document.getElementById('asp-ape_alum');
     const fecNacInput = document.getElementById('asp-fec_nac_alum');
     const lugarNacInput = document.getElementById('asp-lugar_nac_alum');
+    const sexInput = document.getElementById('asp-sex_alum');
+    const estCivilInput = document.getElementById('asp-est_civil_alum');
     const telemovInput = document.getElementById('asp-telemov_alum');
     const telehabInput = document.getElementById('asp-telehabi_alum');
     const correoInput = document.getElementById('asp-correo_alum');
@@ -1231,6 +1595,12 @@ function initRealtimeValidations() {
     const carreraSelect = document.getElementById('asp-carrera');
     const anoGradInput = document.getElementById('asp-ano_grad_alum');
     const instGradInput = document.getElementById('asp-inst_grad_alum');
+    const tipoCedulaSelect = document.getElementById('asp-tipo_cedula');
+    const nacInput = document.getElementById('asp-nacionalidad_alum');
+    const paisInput = document.getElementById('asp-pais_alum');
+    const nivAcadSelect = document.getElementById('asp-niv_acad_alum');
+    const tipoColegioSelect = document.getElementById('asp-tipo_colegio');
+    const obsInput = document.getElementById('asp-observaciones');
 
     // 1. Cédula
     if (cedulaInput) {
@@ -1256,113 +1626,59 @@ function initRealtimeValidations() {
                 checkCedulaTimeout = setTimeout(() => verificarCedulaRemota(val), 350);
             }
         });
-        const limpiarCedula = (e) => { e.target.value = e.target.value.trim(); };
-        cedulaInput.addEventListener('blur', limpiarCedula);
-        cedulaInput.addEventListener('change', limpiarCedula);
+        cedulaInput.addEventListener('blur', (e) => {
+            e.target.value = e.target.value.trim();
+            evaluarCampoEnTiempoReal(cedulaInput, false);
+        });
     }
 
-    // 2. Nombres (Solo caracteres alfabéticos y espacios; sin espacios iniciales, dobles o finales)
+    // 2. Nombres
     if (nombresInput) {
-        nombresInput.addEventListener('input', (e) => {
-            // Evitar espacios al inicio, caracteres raros y dobles espacios consecutivos
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
-                .replace(/^\s+/, '')
-                .replace(/\s{2,}/g, ' ');
-            const val = e.target.value.trim();
-            if (!val) {
-                setFieldInvalid(nombresInput, 'err-nombres', 'El campo Nombres es obligatorio.');
-            } else if (val.length < 2) {
-                setFieldInvalid(nombresInput, 'err-nombres', 'Mínimo 2 letras.');
-            } else if (!REGEX_LETRAS_Y_ESPACIOS.test(val)) {
-                setFieldInvalid(nombresInput, 'err-nombres', 'Solo se permiten letras y espacios.');
-            } else {
-                setFieldValid(nombresInput, 'err-nombres');
-            }
+        nombresInput.addEventListener('input', () => {
+            evaluarCampoEnTiempoReal(nombresInput, false);
         });
-
-        // Al salir del campo o cambiar foco: eliminar automáticamente el espacio final agregado por teclados móviles
-        const limpiarEspaciosNombres = (e) => {
-            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
-        };
-        nombresInput.addEventListener('blur', limpiarEspaciosNombres);
-        nombresInput.addEventListener('change', limpiarEspaciosNombres);
+        nombresInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(nombresInput, false);
+        });
     }
 
-    // 3. Apellidos (Solo caracteres alfabéticos y espacios; sin espacios iniciales, dobles o finales)
+    // 3. Apellidos
     if (apellidosInput) {
-        apellidosInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
-                .replace(/^\s+/, '')
-                .replace(/\s{2,}/g, ' ');
-            const val = e.target.value.trim();
-            if (!val) {
-                setFieldInvalid(apellidosInput, 'err-apellidos', 'El campo Apellidos es obligatorio.');
-            } else if (val.length < 2) {
-                setFieldInvalid(apellidosInput, 'err-apellidos', 'Mínimo 2 letras.');
-            } else if (!REGEX_LETRAS_Y_ESPACIOS.test(val)) {
-                setFieldInvalid(apellidosInput, 'err-apellidos', 'Solo se permiten letras y espacios.');
-            } else {
-                setFieldValid(apellidosInput, 'err-apellidos');
-            }
+        apellidosInput.addEventListener('input', () => {
+            evaluarCampoEnTiempoReal(apellidosInput, false);
         });
-
-        const limpiarEspaciosApellidos = (e) => {
-            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
-        };
-        apellidosInput.addEventListener('blur', limpiarEspaciosApellidos);
-        apellidosInput.addEventListener('change', limpiarEspaciosApellidos);
+        apellidosInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(apellidosInput, false);
+        });
     }
 
-    // 4. Fecha de Nacimiento y Bloqueo Reglamentario de Edad (Puntos 1 y 2)
+    // 4. Fecha de Nacimiento y Bloqueo Reglamentario de Edad
     if (fecNacInput) {
         fecNacInput.addEventListener('change', () => {
-            const fechaVal = fecNacInput.value;
-            const edadInput = document.getElementById('asp-edad_alum');
-            const resValidacion = validarEdadReglamentariaIUAC(fechaVal);
-
-            if (!fechaVal) {
-                setFieldInvalid(fecNacInput, 'err-fec_nac', 'La fecha de nacimiento es obligatoria.');
-                if (edadInput) edadInput.value = '';
-                desbloquearFormularioPorEdad();
-                return;
-            }
-
-            if (edadInput && resValidacion.edadActual !== null) {
-                edadInput.value = resValidacion.edadActual;
-            }
-
-            const seccionMenor = document.getElementById('seccion-representante-menor');
-            if (seccionMenor) {
-                if (resValidacion.edadActual !== null && resValidacion.edadActual < 18) {
-                    seccionMenor.style.display = 'block';
-                } else {
-                    seccionMenor.style.display = 'none';
-                }
-            }
-
-            if (!resValidacion.valido) {
-                setFieldInvalid(fecNacInput, 'err-fec_nac', resValidacion.error);
-                bloquearFormularioPorEdad(resValidacion.error);
-            } else {
-                setFieldValid(fecNacInput, 'err-fec_nac');
-                desbloquearFormularioPorEdad();
-            }
+            evaluarCampoEnTiempoReal(fecNacInput, false);
+        });
+        fecNacInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(fecNacInput, false);
         });
     }
 
-    // 5. Lugar de Nacimiento (Combobox de Estados)
+    // 5. Selectores de Género y Estado Civil
+    if (sexInput) {
+        sexInput.addEventListener('change', () => evaluarCampoEnTiempoReal(sexInput, false));
+        sexInput.addEventListener('blur', () => evaluarCampoEnTiempoReal(sexInput, false));
+    }
+    if (estCivilInput) {
+        estCivilInput.addEventListener('change', () => evaluarCampoEnTiempoReal(estCivilInput, false));
+        estCivilInput.addEventListener('blur', () => evaluarCampoEnTiempoReal(estCivilInput, false));
+    }
+
+    // 6. Lugar de Nacimiento
     if (lugarNacInput) {
-        lugarNacInput.addEventListener('change', (e) => {
-            const val = e.target.value.trim();
-            if (!val) {
-                setFieldInvalid(lugarNacInput, 'err-lugar_nac', 'El lugar de nacimiento es obligatorio.');
-            } else {
-                setFieldValid(lugarNacInput, 'err-lugar_nac');
-            }
-        });
+        lugarNacInput.addEventListener('change', () => evaluarCampoEnTiempoReal(lugarNacInput, false));
+        lugarNacInput.addEventListener('blur', () => evaluarCampoEnTiempoReal(lugarNacInput, false));
     }
 
-    // 6. Teléfono Celular con máscara (0412-1234567)
+    // 7. Teléfono Celular
     if (telemovInput) {
         telemovInput.addEventListener('input', (e) => {
             let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
@@ -1371,27 +1687,15 @@ function initRealtimeValidations() {
             } else {
                 e.target.value = digits;
             }
-
-            const raw = digits;
-            if (!raw) {
-                setFieldInvalid(telemovInput, 'err-telemov', 'El teléfono celular es obligatorio.');
-            } else if (raw.length < 11) {
-                setFieldInvalid(telemovInput, 'err-telemov', 'Debe tener 11 dígitos (ej: 0412-1234567).');
-            } else {
-                const prefix = raw.slice(0, 4);
-                if (!PREFIJOS_MOVILES.includes(prefix)) {
-                    setFieldInvalid(telemovInput, 'err-telemov', `Prefijo '${prefix}' no válido. Use 0412, 0414, 0424, 0416 o 0426.`);
-                } else {
-                    setFieldValid(telemovInput, 'err-telemov');
-                }
-            }
+            evaluarCampoEnTiempoReal(telemovInput, false);
         });
-        const limpiarTelemov = (e) => { e.target.value = e.target.value.trim(); };
-        telemovInput.addEventListener('blur', limpiarTelemov);
-        telemovInput.addEventListener('change', limpiarTelemov);
+        telemovInput.addEventListener('blur', () => {
+            telemovInput.value = telemovInput.value.trim();
+            evaluarCampoEnTiempoReal(telemovInput, false);
+        });
     }
 
-    // 7. Teléfono Habitación (opcional pero validado si se escribe)
+    // 8. Teléfono Habitación (Opcional)
     if (telehabInput) {
         telehabInput.addEventListener('input', (e) => {
             let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
@@ -1400,103 +1704,76 @@ function initRealtimeValidations() {
             } else {
                 e.target.value = digits;
             }
-
-            if (digits.length > 0 && digits.length < 11) {
-                setFieldInvalid(telehabInput, 'err-telehab', 'Debe contener 11 dígitos (ej: 0243-1234567).');
-            } else {
-                setFieldValid(telehabInput, 'err-telehab');
-            }
+            evaluarCampoEnTiempoReal(telehabInput, false);
         });
-        const limpiarTelehab = (e) => { e.target.value = e.target.value.trim(); };
-        telehabInput.addEventListener('blur', limpiarTelehab);
-        telehabInput.addEventListener('change', limpiarTelehab);
+        telehabInput.addEventListener('blur', () => {
+            telehabInput.value = telehabInput.value.trim();
+            evaluarCampoEnTiempoReal(telehabInput, false);
+        });
     }
 
-    // 8. Correo Electrónico (elimina automáticamente cualquier espacio)
+    // 9. Correo Electrónico
     if (correoInput) {
-        correoInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\s+/g, '').toLowerCase();
-            const val = e.target.value.trim();
-            if (!val) {
-                setFieldInvalid(correoInput, 'err-correo', 'El correo electrónico es obligatorio.');
-            } else if (!REGEX_EMAIL.test(val)) {
-                setFieldInvalid(correoInput, 'err-correo', 'Formato de correo no válido (ej: aspirante@correo.com).');
-            } else {
-                setFieldValid(correoInput, 'err-correo');
-            }
+        correoInput.addEventListener('input', () => {
+            evaluarCampoEnTiempoReal(correoInput, false);
         });
-        const limpiarCorreo = (e) => {
-            e.target.value = e.target.value.trim().toLowerCase().replace(/\s+/g, '');
-        };
-        correoInput.addEventListener('blur', limpiarCorreo);
-        correoInput.addEventListener('change', limpiarCorreo);
+        correoInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(correoInput, false);
+        });
     }
 
-    // 9. Dirección
+    // 10. Dirección
     if (direcInput) {
-        direcInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/^\s+/, '').replace(/[ \t]{2,}/g, ' ');
-            const val = e.target.value.trim();
-            if (!val) {
-                setFieldInvalid(direcInput, 'err-direccion', 'La dirección de habitación es obligatoria.');
-            } else if (val.length < 8) {
-                setFieldInvalid(direcInput, 'err-direccion', 'Por favor detalle su dirección completa (mínimo 8 caracteres).');
-            } else {
-                setFieldValid(direcInput, 'err-direccion');
-            }
+        direcInput.addEventListener('input', () => {
+            evaluarCampoEnTiempoReal(direcInput, false);
         });
-        const limpiarDirec = (e) => {
-            e.target.value = e.target.value.trim().replace(/[ \t]{2,}/g, ' ');
-        };
-        direcInput.addEventListener('blur', limpiarDirec);
-        direcInput.addEventListener('change', limpiarDirec);
+        direcInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(direcInput, false);
+        });
     }
 
-    // 10. Carrera
+    // 11. Carrera
     if (carreraSelect) {
-        carreraSelect.addEventListener('change', () => {
-            if (!carreraSelect.value) {
-                setFieldInvalid(carreraSelect, 'err-carrera', 'Debe seleccionar una carrera de postulación.');
-            } else {
-                setFieldValid(carreraSelect, 'err-carrera');
-            }
-        });
+        carreraSelect.addEventListener('change', () => evaluarCampoEnTiempoReal(carreraSelect, false));
+        carreraSelect.addEventListener('blur', () => evaluarCampoEnTiempoReal(carreraSelect, false));
     }
 
-    // 11. Año de Graduación
+    // 12. Año de Graduación
     if (anoGradInput) {
-        anoGradInput.addEventListener('input', () => {
-            anoGradInput.value = anoGradInput.value.replace(/\D/g, '').slice(0, 4);
-            const val = parseInt(anoGradInput.value, 10);
-            const currentYear = new Date().getFullYear();
-            if (!val || val < 1990 || val > (currentYear + 1)) {
-                setFieldInvalid(anoGradInput, 'err-ano_grad', `Año válido entre 1990 y ${currentYear + 1}.`);
-            } else {
-                setFieldValid(anoGradInput, 'err-ano_grad');
-            }
+        anoGradInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+            evaluarCampoEnTiempoReal(anoGradInput, false);
         });
-        const limpiarAnoGrad = (e) => { e.target.value = e.target.value.trim(); };
-        anoGradInput.addEventListener('blur', limpiarAnoGrad);
-        anoGradInput.addEventListener('change', limpiarAnoGrad);
+        anoGradInput.addEventListener('blur', () => {
+            anoGradInput.value = anoGradInput.value.trim();
+            evaluarCampoEnTiempoReal(anoGradInput, false);
+        });
     }
 
-    // 12. Plantel de Egreso
+    // 13. Plantel de Egreso
     if (instGradInput) {
-        instGradInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/^\s+/, '').replace(/\s{2,}/g, ' ');
-            const val = instGradInput.value.trim();
-            if (!val) {
-                setFieldInvalid(instGradInput, 'err-inst_grad', 'Indique la institución de egreso.');
-            } else {
-                setFieldValid(instGradInput, 'err-inst_grad');
-            }
+        instGradInput.addEventListener('input', () => {
+            evaluarCampoEnTiempoReal(instGradInput, false);
         });
-        const limpiarInstGrad = (e) => {
-            e.target.value = e.target.value.trim().replace(/\s{2,}/g, ' ');
-        };
-        instGradInput.addEventListener('blur', limpiarInstGrad);
-        instGradInput.addEventListener('change', limpiarInstGrad);
+        instGradInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(instGradInput, false);
+        });
     }
+
+    // 14. Observaciones
+    if (obsInput) {
+        obsInput.addEventListener('input', () => {
+            evaluarCampoEnTiempoReal(obsInput, false);
+        });
+        obsInput.addEventListener('blur', () => {
+            evaluarCampoEnTiempoReal(obsInput, false);
+        });
+    }
+
+    // 15. Pre-evaluar campos iniciales con valor por defecto
+    setTimeout(() => {
+        evaluarCamposPasoActual(1);
+    }, 200);
 }
 
 async function verificarCedulaRemota(cedula) {
@@ -1537,94 +1814,136 @@ async function verificarCedulaRemota(cedula) {
     }
 }
 
-// ── 8. VALIDACIÓN POR PASOS SIN USAR ALERT() (PUNTO 7) ────────────────────────
+// ── 8. VALIDACIÓN POR PASOS CON UBICACIÓN EXACTA DE ERRORES ──────────────────
 function validateCurrentStep(step) {
-    let primerErrorElement = null;
+    limpiarAvisoErrorPaso();
 
     if (step === 1) {
         const cedula = document.getElementById('asp-ced_alum');
         const nombres = document.getElementById('asp-nom_alum');
         const apellidos = document.getElementById('asp-ape_alum');
         const fecNac = document.getElementById('asp-fec_nac_alum');
+        const edadInput = document.getElementById('asp-edad_alum');
+        const sexInput = document.getElementById('asp-sex_alum');
+        const estCivilInput = document.getElementById('asp-est_civil_alum');
         const lugarNac = document.getElementById('asp-lugar_nac_alum');
+        const nacInput = document.getElementById('asp-nacionalidad_alum');
 
-        // Limpieza automática de espacios residuales al presionar Siguiente
-        if (cedula) cedula.value = cedula.value.trim();
-        if (nombres) nombres.value = nombres.value.trim().replace(/\s{2,}/g, ' ');
-        if (apellidos) apellidos.value = apellidos.value.trim().replace(/\s{2,}/g, ' ');
-        if (lugarNac) lugarNac.value = lugarNac.value.trim().replace(/\s{2,}/g, ' ');
-
-        if (!cedula.value || !/^\d{8}$/.test(cedula.value.trim())) {
-            setFieldInvalid(cedula, 'err-cedula', 'Cédula obligatoria de exactamente 8 dígitos numéricos (solo dígitos).');
-            if (!primerErrorElement) primerErrorElement = cedula;
+        // Cédula
+        const valCed = (cedula?.value || '').trim();
+        if (!valCed || valCed.length !== 8 || !/^\d{8}$/.test(valCed)) {
+            setFieldInvalid(cedula, 'err-cedula', 'Cédula obligatoria de exactamente 8 dígitos numéricos.');
+            mostrarErrorDePaso(cedula, 1, 'Paso 1: Datos Personales e Identificación', 'Cédula de Identidad', 'La cédula debe contener exactamente 8 dígitos numéricos.');
+            return false;
         }
 
-        if (!nombres.value || !REGEX_LETRAS_Y_ESPACIOS.test(nombres.value)) {
-            setFieldInvalid(nombres, 'err-nombres', 'Nombres obligatorios (solo letras y espacios).');
-            if (!primerErrorElement) primerErrorElement = nombres;
+        // Nombres
+        const valNom = (nombres?.value || '').trim().replace(/\s{2,}/g, ' ');
+        if (nombres) nombres.value = valNom;
+        if (!valNom || valNom.length < 2 || !REGEX_LETRAS_Y_ESPACIOS.test(valNom)) {
+            setFieldInvalid(nombres, 'err-nombres', 'Nombres obligatorios (solo letras y espacios, mín. 2 caracteres).');
+            mostrarErrorDePaso(nombres, 1, 'Paso 1: Datos Personales e Identificación', 'Nombres Completos', 'Ingrese sus nombres completos sin números ni caracteres especiales.');
+            return false;
+        }
+        setFieldValid(nombres, 'err-nombres');
+
+        // Apellidos
+        const valApe = (apellidos?.value || '').trim().replace(/\s{2,}/g, ' ');
+        if (apellidos) apellidos.value = valApe;
+        if (!valApe || valApe.length < 2 || !REGEX_LETRAS_Y_ESPACIOS.test(valApe)) {
+            setFieldInvalid(apellidos, 'err-apellidos', 'Apellidos obligatorios (solo letras y espacios, mín. 2 caracteres).');
+            mostrarErrorDePaso(apellidos, 1, 'Paso 1: Datos Personales e Identificación', 'Apellidos Completos', 'Ingrese sus apellidos completos sin números ni caracteres especiales.');
+            return false;
+        }
+        setFieldValid(apellidos, 'err-apellidos');
+
+        // Fecha de Nacimiento y Validación de Edad
+        if (!fecNac || !fecNac.value) {
+            setFieldInvalid(fecNac, 'err-fec_nac', 'La fecha de nacimiento es obligatoria.');
+            mostrarErrorDePaso(fecNac, 1, 'Paso 1: Datos Personales e Identificación', 'Fecha de Nacimiento', 'Debe indicar su fecha de nacimiento.');
+            return false;
+        }
+        const checkEdad = validarEdadReglamentariaIUAC(fecNac.value);
+        if (!checkEdad.valido) {
+            setFieldInvalid(fecNac, 'err-fec_nac', checkEdad.error);
+            bloquearFormularioPorEdad(checkEdad.error);
+            mostrarErrorDePaso(fecNac, 1, 'Paso 1: Datos Personales e Identificación', 'Fecha de Nacimiento', checkEdad.error);
+            return false;
+        }
+        setFieldValid(fecNac, 'err-fec_nac');
+        if (edadInput) {
+            edadInput.value = checkEdad.edadActual;
+            setFieldValid(edadInput);
         }
 
-        if (!apellidos.value || !REGEX_LETRAS_Y_ESPACIOS.test(apellidos.value)) {
-            setFieldInvalid(apellidos, 'err-apellidos', 'Apellidos obligatorios (solo letras y espacios).');
-            if (!primerErrorElement) primerErrorElement = apellidos;
+        // Género
+        if (!sexInput || !sexInput.value) {
+            setFieldInvalid(sexInput, 'err-sexo', 'Seleccione un género.');
+            mostrarErrorDePaso(sexInput, 1, 'Paso 1: Datos Personales e Identificación', 'Género', 'Debe seleccionar un género.');
+            return false;
         }
+        setFieldValid(sexInput, 'err-sexo');
 
-        if (!fecNac.value) {
-            setFieldInvalid(fecNac, 'err-fec_nac', 'Fecha de nacimiento obligatoria.');
-            if (!primerErrorElement) primerErrorElement = fecNac;
-        } else {
-            const checkEdad = validarEdadReglamentariaIUAC(fecNac.value);
-            if (!checkEdad.valido) {
-                setFieldInvalid(fecNac, 'err-fec_nac', checkEdad.error);
-                bloquearFormularioPorEdad(checkEdad.error);
-                if (!primerErrorElement) primerErrorElement = fecNac;
-            }
+        // Estado Civil
+        if (!estCivilInput || !estCivilInput.value) {
+            setFieldInvalid(estCivilInput, 'err-est_civil', 'Seleccione su estado civil.');
+            mostrarErrorDePaso(estCivilInput, 1, 'Paso 1: Datos Personales e Identificación', 'Estado Civil', 'Debe seleccionar su estado civil.');
+            return false;
         }
+        setFieldValid(estCivilInput, 'err-est_civil');
 
-        if (!lugarNac.value) {
+        // Lugar de Nacimiento
+        const valLugar = (lugarNac?.value || '').trim();
+        if (!valLugar) {
             setFieldInvalid(lugarNac, 'err-lugar_nac', 'Lugar de nacimiento obligatorio.');
-            if (!primerErrorElement) primerErrorElement = lugarNac;
+            mostrarErrorDePaso(lugarNac, 1, 'Paso 1: Datos Personales e Identificación', 'Lugar de Nacimiento', 'Debe seleccionar un Estado de la República o "En el Exterior".');
+            return false;
         }
+        setFieldValid(lugarNac, 'err-lugar_nac');
 
-        // Validación de Fotografía Carnet (100% Obligatoria)
+        if (nacInput) setFieldValid(nacInput);
+
+        // Fotografía Carnet (100% Obligatoria)
         if (!capturedPhotoBase64) {
             const errFoto = document.getElementById('err-foto');
             if (errFoto) {
                 errFoto.textContent = 'La fotografía tipo carnet es obligatoria. Por favor suba un archivo o active su cámara.';
                 errFoto.classList.add('visible');
             }
-            if (!primerErrorElement) primerErrorElement = document.getElementById('btn-subir-foto') || cedula;
+            const btnFoto = document.getElementById('btn-subir-foto') || document.querySelector('.photo-capture-card');
+            mostrarErrorDePaso(btnFoto, 1, 'Paso 1: Datos Personales e Identificación', 'Fotografía Carnet', 'Debe subir un archivo o capturar su fotografía tipo carnet.');
+            return false;
         }
 
-        // Validación de Documento de Identidad del Aspirante (100% Obligatorio para todos)
+        // Documento de Identidad del Aspirante (100% Obligatorio para todos)
         if (!capturedAspiranteCedulaBase64) {
             const errCedDoc = document.getElementById('err-cedula-aspirante-doc');
             if (errCedDoc) {
                 errCedDoc.textContent = 'Es obligatorio adjuntar o escanear la fotografía/documento de su cédula de identidad.';
                 errCedDoc.classList.add('visible');
             }
-            if (!primerErrorElement) {
-                primerErrorElement = document.getElementById('btn-subir-cedula-aspirante') || document.getElementById('seccion-cedula-aspirante');
-            }
+            const btnCedDoc = document.getElementById('btn-subir-cedula-aspirante') || document.getElementById('seccion-cedula-aspirante');
+            mostrarErrorDePaso(btnCedDoc, 1, 'Paso 1: Datos Personales e Identificación', 'Documento de Identidad (Cédula)', 'Es obligatorio adjuntar o escanear su cédula de identidad (.JPG, .PNG o .PDF).');
+            return false;
         }
 
-        // Si es menor de 18 años, validar fotocopia de la cédula del representante
-        const edadInput = document.getElementById('asp-edad_alum');
+        // Menor de 18 años: Representante legal
         const edadVal = parseInt(edadInput?.value || '99', 10);
         if (edadVal < 18) {
-            const errDoc = document.getElementById('err-repres-cedula-doc');
             if (!capturedRepresDocBase64) {
+                const errDoc = document.getElementById('err-repres-cedula-doc');
                 if (errDoc) {
-                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar o escanear la fotocopia de la cédula de su representante legal.';
+                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar o escanear la cédula de su representante legal.';
                     errDoc.classList.add('visible');
                 }
-                if (!primerErrorElement) {
-                    primerErrorElement = document.getElementById('btn-subir-repres-cedula') || document.getElementById('seccion-representante-menor');
-                }
+                const btnRep = document.getElementById('btn-subir-repres-cedula') || document.getElementById('seccion-representante-menor');
+                mostrarErrorDePaso(btnRep, 1, 'Paso 1: Datos Personales e Identificación', 'Cédula del Representante Legal', 'Por ser menor de edad, debe adjuntar la cédula de su representante legal.');
+                return false;
             }
         }
 
     } else if (step === 2) {
+        const paisInput = document.getElementById('asp-pais_alum');
         const estado = document.getElementById('asp-est_alum');
         const ciudad = document.getElementById('asp-ciu_alum');
         const direccion = document.getElementById('asp-direc_alum');
@@ -1632,51 +1951,109 @@ function validateCurrentStep(step) {
         const telehab = document.getElementById('asp-telehabi_alum');
         const correo = document.getElementById('asp-correo_alum');
 
-        // Limpieza automática de espacios residuales en el Paso 2
-        if (direccion) direccion.value = direccion.value.trim().replace(/[ \t]{2,}/g, ' ');
-        if (telemov) telemov.value = telemov.value.trim();
-        if (telehab) telehab.value = telehab.value.trim();
-        if (correo) correo.value = correo.value.trim().toLowerCase().replace(/\s+/g, '');
+        if (paisInput) setFieldValid(paisInput);
 
-        if (!estado.value) {
+        if (!estado || !estado.value) {
             setFieldInvalid(estado, 'err-estado', 'Seleccione un Estado.');
-            if (!primerErrorElement) primerErrorElement = estado;
+            mostrarErrorDePaso(estado, 2, 'Paso 2: Residencia y Canales de Contacto', 'Estado de Residencia', 'Seleccione el Estado donde reside.');
+            return false;
         }
-        if (!ciudad.value) {
+        setFieldValid(estado, 'err-estado');
+
+        if (!ciudad || !ciudad.value) {
             setFieldInvalid(ciudad, 'err-ciudad', 'Seleccione una Ciudad.');
-            if (!primerErrorElement) primerErrorElement = ciudad;
+            mostrarErrorDePaso(ciudad, 2, 'Paso 2: Residencia y Canales de Contacto', 'Ciudad de Residencia', 'Seleccione la Ciudad donde reside.');
+            return false;
         }
-        if (!direccion.value || direccion.value.length < 8) {
+        setFieldValid(ciudad, 'err-ciudad');
+
+        const valDirec = (direccion?.value || '').trim().replace(/[ 	]{2,}/g, ' ');
+        if (direccion) direccion.value = valDirec;
+        if (!valDirec || valDirec.length < 8) {
             setFieldInvalid(direccion, 'err-direccion', 'Detalle su dirección completa (mínimo 8 caracteres).');
-            if (!primerErrorElement) primerErrorElement = direccion;
+            mostrarErrorDePaso(direccion, 2, 'Paso 2: Residencia y Canales de Contacto', 'Dirección de Habitación', 'Detalle su dirección completa de residencia (mínimo 8 caracteres).');
+            return false;
         }
-        const movDigits = telemov.value.replace(/\D/g, '');
+        setFieldValid(direccion, 'err-direccion');
+
+        const movDigits = (telemov?.value || '').replace(/\D/g, '');
         if (movDigits.length !== 11 || !PREFIJOS_MOVILES.includes(movDigits.slice(0, 4))) {
             setFieldInvalid(telemov, 'err-telemov', 'Teléfono celular venezolano obligatorio (11 dígitos).');
-            if (!primerErrorElement) primerErrorElement = telemov;
+            mostrarErrorDePaso(telemov, 2, 'Paso 2: Residencia y Canales de Contacto', 'Teléfono Celular', 'Ingrese su número celular venezolano con formato válido (0412, 0414, 0424, 0416 o 0426).');
+            return false;
         }
-        if (telehab.value && telehab.value.trim().length > 0) {
+        setFieldValid(telemov, 'err-telemov');
+
+        // Teléfono habitación / secundario (Opcional)
+        if (telehab && telehab.value && telehab.value.trim().length > 0) {
             const habDigits = telehab.value.replace(/\D/g, '');
             if (habDigits.length < 10 || habDigits.length > 11) {
                 setFieldInvalid(telehab, 'err-telehab', 'Teléfono no válido (debe contener 10 u 11 dígitos).');
-                if (!primerErrorElement) primerErrorElement = telehab;
-            } else {
-                setFieldValid(telehab, 'err-telehab');
+                mostrarErrorDePaso(telehab, 2, 'Paso 2: Residencia y Canales de Contacto', 'Teléfono Habitación / Secundario', 'Debe contener 10 u 11 dígitos.');
+                return false;
             }
-        } else {
+            setFieldValid(telehab, 'err-telehab');
+        } else if (telehab) {
             setFieldValid(telehab, 'err-telehab');
         }
-        if (!correo.value || !REGEX_EMAIL.test(correo.value)) {
+
+        const valCorreo = (correo?.value || '').trim().toLowerCase().replace(/\s+/g, '');
+        if (correo) correo.value = valCorreo;
+        if (!valCorreo || !REGEX_EMAIL.test(valCorreo)) {
             setFieldInvalid(correo, 'err-correo', 'Correo electrónico no válido.');
-            if (!primerErrorElement) primerErrorElement = correo;
+            mostrarErrorDePaso(correo, 2, 'Paso 2: Residencia y Canales de Contacto', 'Correo Electrónico', 'Ingrese un correo electrónico válido (ejemplo: aspirante@correo.com).');
+            return false;
         }
+        setFieldValid(correo, 'err-correo');
+
+    } else if (step === 3) {
+        const carrera = document.getElementById('asp-carrera');
+        const nivAcadSelect = document.getElementById('asp-niv_acad_alum');
+        const anoGrad = document.getElementById('asp-ano_grad_alum');
+        const instGrad = document.getElementById('asp-inst_grad_alum');
+        const tipoColegioSelect = document.getElementById('asp-tipo_colegio');
+        const obsEl = document.getElementById('asp-observaciones');
+
+        if (!carrera || !carrera.value) {
+            setFieldInvalid(carrera, 'err-carrera', 'Debe seleccionar una carrera de postulación.');
+            mostrarErrorDePaso(carrera, 3, 'Paso 3: Academia y Carrera de Postulación', 'Carrera de Postulación', 'Debe seleccionar la carrera o PNF a la que desea postularse.');
+            return false;
+        }
+        setFieldValid(carrera, 'err-carrera');
+
+        if (nivAcadSelect) setFieldValid(nivAcadSelect);
+
+        const valAno = parseInt(anoGrad?.value || '0', 10);
+        const maxYear = new Date().getFullYear() + 1;
+        if (!valAno || valAno < 1990 || valAno > maxYear) {
+            setFieldInvalid(anoGrad, 'err-ano_grad', `Año válido entre 1990 y ${maxYear}.`);
+            mostrarErrorDePaso(anoGrad, 3, 'Paso 3: Academia y Carrera de Postulación', 'Año de Graduación', `Ingrese un año de graduación válido entre 1990 y ${maxYear}.`);
+            return false;
+        }
+        setFieldValid(anoGrad, 'err-ano_grad');
+
+        const valInst = (instGrad?.value || '').trim().replace(/\s{2,}/g, ' ');
+        if (instGrad) instGrad.value = valInst;
+        if (!valInst || valInst.length < 2) {
+            setFieldInvalid(instGrad, 'err-inst_grad', 'Indique la institución de egreso.');
+            mostrarErrorDePaso(instGrad, 3, 'Paso 3: Academia y Carrera de Postulación', 'Plantel / Institución de Egreso', 'Indique el nombre del colegio, liceo o institución donde egresó.');
+            return false;
+        }
+        setFieldValid(instGrad, 'err-inst_grad');
+
+        if (tipoColegioSelect) setFieldValid(tipoColegioSelect);
+
+        const valObs = (obsEl?.value || '').trim().replace(/[ 	]{2,}/g, ' ');
+        if (obsEl) obsEl.value = valObs;
+        if (!valObs || valObs.length < 2) {
+            setFieldInvalid(obsEl, 'err-observaciones', 'Observaciones obligatorias (escriba "Ninguna" si no posee).');
+            mostrarErrorDePaso(obsEl, 3, 'Paso 3: Academia y Carrera de Postulación', 'Observaciones', 'Campo obligatorio (escriba "Ninguna" si no posee observaciones).');
+            return false;
+        }
+        setFieldValid(obsEl, 'err-observaciones');
     }
 
-    if (primerErrorElement) {
-        mostrarAvisoScroll(primerErrorElement.id);
-        return false;
-    }
-
+    limpiarAvisoErrorPaso();
     return true;
 }
 
@@ -1697,42 +2074,16 @@ function initFormSubmit() {
             return;
         }
 
-        // Validaciones del Paso 3
+        // Validación integral por pasos (Paso 1, Paso 2, Paso 3) con reporte exacto
+        if (!validateCurrentStep(1)) return;
+        if (!validateCurrentStep(2)) return;
+        if (!validateCurrentStep(3)) return;
+
         const carrera = document.getElementById('asp-carrera');
-        const anoGrad = document.getElementById('asp-ano_grad_alum');
         const instGrad = document.getElementById('asp-inst_grad_alum');
-        let errorPaso3 = null;
-
-        if (!carrera || !carrera.value) {
-            setFieldInvalid(carrera, 'err-carrera', 'Debe seleccionar una carrera de postulación.');
-            if (!errorPaso3) errorPaso3 = carrera;
-        }
-
-        const valAno = parseInt(anoGrad?.value || '0', 10);
-        if (!valAno || valAno < 1990 || valAno > (new Date().getFullYear() + 1)) {
-            setFieldInvalid(anoGrad, 'err-ano_grad', 'Año de graduación válido obligatorio.');
-            if (!errorPaso3) errorPaso3 = anoGrad;
-        }
-
-        if (instGrad) instGrad.value = instGrad.value.trim().replace(/\s{2,}/g, ' ');
+        const anoGrad = document.getElementById('asp-ano_grad_alum');
         const obsEl = document.getElementById('asp-observaciones');
-        if (obsEl) obsEl.value = obsEl.value.trim().replace(/[ \t]{2,}/g, ' ');
-
-        if (!instGrad?.value) {
-            setFieldInvalid(instGrad, 'err-inst_grad', 'Indique la institución de egreso.');
-            if (!errorPaso3) errorPaso3 = instGrad;
-        }
-
-        if (!obsEl?.value || obsEl.value.trim().length < 2) {
-            setFieldInvalid(obsEl, 'err-observaciones', 'Observaciones obligatorias (escriba "Ninguna" si no posee observaciones adicionales).');
-            if (!errorPaso3) errorPaso3 = obsEl;
-        }
-
-        if (errorPaso3) {
-            mostrarAvisoScroll(errorPaso3.id);
-            return;
-        }
-
+        const valAno = parseInt(anoGrad?.value || '0', 10);
         const valEdad = parseInt(document.getElementById('asp-edad_alum')?.value || '0', 10);
 
         // Construir Payload sanitizado sin espacios residuales (100% de los campos obligatorios)

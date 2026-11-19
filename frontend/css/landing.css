@@ -120,7 +120,8 @@ html[data-theme="ocre"] {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-html, body {
+html,
+body {
     overflow-x: hidden;
 }
 
@@ -191,7 +192,7 @@ body {
     color: #ffffff;
     letter-spacing: 0.3px;
     line-height: 1.3;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     white-space: normal;
 }
 
@@ -480,11 +481,45 @@ body {
     content: "✓";
 }
 
+.step-node.has-error .step-circle {
+    background: #ef4444 !important;
+    border-color: #b91c1c !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.35), 0 4px 12px rgba(239, 68, 68, 0.45) !important;
+    animation: pulseError 1.5s infinite;
+}
+
+.step-node.has-error .step-title span:first-child {
+    color: #ef4444 !important;
+    font-weight: 800;
+}
+
+.step-node.has-error .step-title span:last-child {
+    color: #b91c1c !important;
+}
+
+@keyframes pulseError {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+    }
+
+    50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
 /* ── FORMULARIO Y CAMPOS (FONDO VERDE SALVIA DE LA PALETA) ──── */
 .form-body {
     padding: 2.2rem;
     background: radial-gradient(circle at top right, rgba(var(--rgb-main), 0.18), transparent 55%),
-                radial-gradient(circle at bottom left, rgba(var(--rgb-frame), 0.22), transparent 55%);
+        radial-gradient(circle at bottom left, rgba(var(--rgb-frame), 0.22), transparent 55%);
 }
 
 .step-pane {
@@ -624,16 +659,146 @@ textarea.form-control {
     box-shadow: 0 0 0 3.5px rgba(var(--rgb-main), 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.form-control.is-invalid {
-    border-color: var(--danger) !important;
-    background-color: #fef2f2 !important;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+.form-control[readonly],
+input.form-control[readonly] {
+    background-color: #f8fafc;
+    color: #334155;
+    cursor: default;
 }
 
-.form-control.is-valid {
-    border-color: var(--success) !important;
+.form-control.is-invalid,
+input.form-control.is-invalid,
+select.form-control.is-invalid,
+textarea.form-control.is-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18) !important;
+}
+
+select.form-control.is-invalid {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23ef4444'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 1rem center !important;
+    background-size: 1.15rem !important;
+}
+
+.form-control.is-valid,
+input.form-control.is-valid,
+select.form-control.is-valid,
+textarea.form-control.is-valid,
+.form-control[readonly].is-valid,
+input.form-control[readonly].is-valid {
+    border-color: #10b981 !important;
     background-color: #f0fdf4 !important;
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15) !important;
+    color: #065f46 !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.18) !important;
+}
+
+.form-control.is-valid:focus,
+input.form-control.is-valid:focus,
+select.form-control.is-valid:focus,
+textarea.form-control.is-valid:focus {
+    border-color: #059669 !important;
+    background-color: #ecfdf5 !important;
+    box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.28) !important;
+}
+
+select.form-control.is-valid {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23059669'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2.2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 1rem center !important;
+    background-size: 1.15rem !important;
+}
+
+/* ── BANNER DE UBICACIÓN Y AVISO DE ERROR POR PASO ────────────────────────── */
+.step-error-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: #fef2f2;
+    border: 2px solid #ef4444;
+    border-left: 6px solid #dc2626;
+    color: #991b1b;
+    padding: 0.85rem 1.15rem;
+    border-radius: 10px;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    animation: slideDownFade 0.3s ease;
+    position: relative;
+    width: calc(100% + 6px);
+    margin-left: -3px;
+    box-sizing: border-box;
+}
+
+.step-error-alert-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.step-error-alert-body {
+    flex: 1;
+}
+
+.step-error-alert-title {
+    font-weight: 800;
+    font-size: 0.94rem;
+    margin-bottom: 0.2rem;
+    color: #b91c1c;
+}
+
+.step-error-alert-text {
+    font-size: 0.84rem;
+    color: #7f1d1d;
+    line-height: 1.4;
+}
+
+.step-error-alert-close {
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 0.2rem 0.5rem;
+    font-weight: bold;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.step-error-alert-close:hover {
+    background: rgba(239, 68, 68, 0.12);
+    color: #991b1b;
+}
+
+@keyframes highlightFieldPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+
+    50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.3);
+    }
+
+    100% {
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+    }
+}
+
+.field-error-highlight {
+    animation: highlightFieldPulse 1.4s ease-in-out 2 !important;
+}
+
+@keyframes slideDownFade {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .field-error-msg {
@@ -785,9 +950,12 @@ textarea.form-control {
 
 /* ── ANIMACIONES Y EFECTOS NOTABLES EN LOS BOTONES DEL FORMULARIO ─────────── */
 @keyframes btnPulseGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 5px 16px rgba(var(--rgb-btn), 0.4), 0 0 0 0 rgba(var(--rgb-btn), 0.4);
     }
+
     50% {
         box-shadow: 0 8px 24px rgba(var(--rgb-btn), 0.55), 0 0 0 5px rgba(var(--rgb-btn), 0);
     }
@@ -797,7 +965,9 @@ textarea.form-control {
     0% {
         left: -120%;
     }
-    55%, 100% {
+
+    55%,
+    100% {
         left: 140%;
     }
 }
@@ -2279,12 +2449,30 @@ textarea.form-control {
     transform: scale(1.12);
 }
 
-.theme-btn-rojo { background: linear-gradient(135deg, #cf3c47 0%, #b71e29 100%); }
-.theme-btn-azul { background: linear-gradient(135deg, #8ec5e8 0%, #3a7fb0 100%); }
-.theme-btn-ocre { background: linear-gradient(135deg, #e3c27a 0%, #b8892e 100%); }
+.theme-btn-rojo {
+    background: linear-gradient(135deg, #cf3c47 0%, #b71e29 100%);
+}
+
+.theme-btn-azul {
+    background: linear-gradient(135deg, #8ec5e8 0%, #3a7fb0 100%);
+}
+
+.theme-btn-ocre {
+    background: linear-gradient(135deg, #e3c27a 0%, #b8892e 100%);
+}
 
 @media (max-width: 768px) {
-    .theme-switcher-label { display: none; }
-    .theme-switcher { gap: 0.4rem; padding: 0.3rem 0.45rem; }
-    .theme-btn { width: 22px; height: 22px; }
+    .theme-switcher-label {
+        display: none;
+    }
+
+    .theme-switcher {
+        gap: 0.4rem;
+        padding: 0.3rem 0.45rem;
+    }
+
+    .theme-btn {
+        width: 22px;
+        height: 22px;
+    }
 }
