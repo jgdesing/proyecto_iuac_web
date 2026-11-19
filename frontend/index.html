@@ -505,6 +505,7 @@
                                 <div class="form-group">
                                     <label>Género <span class="req">*</span></label>
                                     <select class="form-control" id="asp-sex_alum" required>
+                                        <option value="" selected>-- Seleccione --</option>
                                         <option value="M">MASCULINO</option>
                                         <option value="F">FEMENINO</option>
                                     </select>
@@ -515,7 +516,8 @@
                                 <div class="form-group">
                                     <label>Estado Civil <span class="req">*</span></label>
                                     <select class="form-control" id="asp-est_civil_alum" required>
-                                        <option value="SOLTERO/A" selected>SOLTERO/A</option>
+                                        <option value="" selected>-- Seleccione --</option>
+                                        <option value="SOLTERO/A">SOLTERO/A</option>
                                         <option value="CASADO/A">CASADO/A</option>
                                         <option value="CONCUBINATO">CONCUBINATO</option>
                                         <option value="DIVORCIADO/A">DIVORCIADO/A</option>
@@ -528,7 +530,7 @@
                                 <div class="form-group">
                                     <label>Lugar de Nacimiento <span class="req">*</span></label>
                                     <select class="form-control" id="asp-lugar_nac_alum" required>
-                                        <option value="">SELECCIONE UN ESTADO...</option>
+                                        <option value="" selected>-- Seleccione --</option>
                                     </select>
                                     <div class="field-error-msg" id="err-lugar_nac"></div>
                                 </div>
@@ -691,7 +693,7 @@
                                 <div class="form-group">
                                     <label>Estado de Residencia <span class="req">*</span></label>
                                     <select class="form-control" id="asp-est_alum" required>
-                                        <option value="">SELECCIONE UN ESTADO...</option>
+                                        <option value="" selected>-- Seleccione --</option>
                                     </select>
                                     <div class="field-error-msg" id="err-estado"></div>
                                 </div>
@@ -700,7 +702,7 @@
                                 <div class="form-group">
                                     <label>Ciudad / Municipio <span class="req">*</span></label>
                                     <select class="form-control" id="asp-ciu_alum" required disabled>
-                                        <option value="">SELECCIONE UN ESTADO PRIMERO...</option>
+                                        <option value="" selected>-- Seleccione --</option>
                                     </select>
                                     <div class="field-error-msg" id="err-ciudad"></div>
                                 </div>
@@ -761,7 +763,7 @@
                                     </label>
                                     <select class="form-control" id="asp-carrera" required
                                         style="font-size:1rem; font-weight:700; height:55px;">
-                                        <option value="">-- Seleccione una Carrera de la Oferta Académica --</option>
+                                        <option value="" selected>-- Seleccione --</option>
                                         <option value="CTA">CTA - Control de Tránsito Aéreo</option>
                                         <option value="ICA">ICA - Información y Comunicaciones Aeronáuticas</option>
                                         <option value="IMA">IMA - Mantenimiento Aeronáutico</option>
@@ -777,7 +779,8 @@
                                 <div class="form-group">
                                     <label>Nivel Académico <span class="req">*</span></label>
                                     <select class="form-control" id="asp-niv_acad_alum" required>
-                                        <option value="BACHILLER" selected>BACHILLER</option>
+                                        <option value="" selected>-- Seleccione --</option>
+                                        <option value="BACHILLER">BACHILLER</option>
                                         <option value="ESTUDIANTE DE 5° AÑO">ESTUDIANTE DE 5° AÑO</option>
                                         <option value="TÉCNICO MEDIO">TÉCNICO MEDIO</option>
                                         <option value="UNIVERSITARIO / TSU">UNIVERSITARIO / TSU</option>
@@ -806,7 +809,8 @@
                                 <div class="form-group">
                                     <label>Tipo de Institución <span class="req">*</span></label>
                                     <select class="form-control" id="asp-tipo_colegio" required>
-                                        <option value="PÚBLICO" selected>PÚBLICO</option>
+                                        <option value="" selected>-- Seleccione --</option>
+                                        <option value="PÚBLICO">PÚBLICO</option>
                                         <option value="PRIVADO">PRIVADO</option>
                                     </select>
                                     <div class="field-error-msg" id="err-tipo_colegio"></div>
@@ -1169,7 +1173,7 @@
     <script src="js/geo_data.js?v=2.3"></script>
     <script src="js/qr_pdf_engine.js?v=3.0"></script>
     <script src="js/react_ui_enhancer.js?v=1.8"></script>
-    <script src="js/app.js?v=4.5"></script>
+    <script src="js/app.js?v=4.6"></script>
 
     <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
         <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">

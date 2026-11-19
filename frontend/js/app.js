@@ -729,7 +729,7 @@ function initGeoSelectors() {
 
     // 4.1 Poblar Combobox de Lugar de Nacimiento (24 Entidades + Dep. Federales + Exterior)
     if (lugarNacSelect) {
-        lugarNacSelect.innerHTML = '<option value="">SELECCIONE UN ESTADO...</option>';
+        lugarNacSelect.innerHTML = '<option value="" selected>-- Seleccione --</option>';
         estados.forEach(est => {
             const opt = document.createElement('option');
             opt.value = est.toUpperCase();
@@ -757,7 +757,7 @@ function initGeoSelectors() {
 
     if (!estadoSelect || !ciudadSelect) return;
 
-    estadoSelect.innerHTML = '<option value="">SELECCIONE UN ESTADO...</option>';
+    estadoSelect.innerHTML = '<option value="" selected>-- Seleccione --</option>';
     estados.forEach(est => {
         const opt = document.createElement('option');
         opt.value = est.toUpperCase();
@@ -767,7 +767,7 @@ function initGeoSelectors() {
 
     estadoSelect.addEventListener('change', () => {
         const estSeleccionado = (estadoSelect.value || '').toUpperCase();
-        ciudadSelect.innerHTML = '<option value="">SELECCIONE UNA CIUDAD...</option>';
+        ciudadSelect.innerHTML = '<option value="" selected>-- Seleccione --</option>';
 
         const ciudades = window.VENEZUELA_GEO[estSeleccionado] || 
             window.VENEZUELA_GEO[Object.keys(window.VENEZUELA_GEO || {}).find(k => k.toUpperCase() === estSeleccionado)];
@@ -2001,7 +2001,12 @@ function validateCurrentStep(step) {
         }
         setFieldValid(carrera, 'err-carrera');
 
-        if (nivAcadSelect) setFieldValid(nivAcadSelect);
+        if (!nivAcadSelect || !nivAcadSelect.value) {
+            setFieldInvalid(nivAcadSelect, 'err-niv_acad', 'Debe seleccionar un nivel académico.');
+            mostrarErrorDePaso(nivAcadSelect, 3, 'Paso 3: Academia y Carrera de Postulación', 'Nivel Académico', 'Debe seleccionar su nivel académico.');
+            return false;
+        }
+        setFieldValid(nivAcadSelect, 'err-niv_acad');
 
         const valAno = parseInt(anoGrad?.value || '0', 10);
         const maxYear = new Date().getFullYear() + 1;
@@ -2021,7 +2026,12 @@ function validateCurrentStep(step) {
         }
         setFieldValid(instGrad, 'err-inst_grad');
 
-        if (tipoColegioSelect) setFieldValid(tipoColegioSelect);
+        if (!tipoColegioSelect || !tipoColegioSelect.value) {
+            setFieldInvalid(tipoColegioSelect, 'err-tipo_colegio', 'Debe seleccionar el tipo de institución.');
+            mostrarErrorDePaso(tipoColegioSelect, 3, 'Paso 3: Academia y Carrera de Postulación', 'Tipo de Institución', 'Debe seleccionar si el plantel es público o privado.');
+            return false;
+        }
+        setFieldValid(tipoColegioSelect, 'err-tipo_colegio');
     }
 
     limpiarAvisoErrorPaso();
@@ -2066,24 +2076,24 @@ function initFormSubmit() {
             ape_alum: document.getElementById('asp-ape_alum')?.value?.trim().replace(/\s{2,}/g, ' '),
             fec_nac_alum: document.getElementById('asp-fec_nac_alum')?.value,
             edad_alum: valEdad,
-            sex_alum: document.getElementById('asp-sex_alum')?.value || 'M',
-            est_civil_alum: document.getElementById('asp-est_civil_alum')?.value || 'Soltero/a',
+            sex_alum: document.getElementById('asp-sex_alum')?.value || '',
+            est_civil_alum: document.getElementById('asp-est_civil_alum')?.value || '',
             lugar_nac_alum: document.getElementById('asp-lugar_nac_alum')?.value?.trim().replace(/\s{2,}/g, ' ') || '',
             nacionalidad_alum: document.getElementById('asp-nacionalidad_alum')?.value || 'VENEZOLANA',
 
-            pais_alum: document.getElementById('asp-pais_alum')?.value || 'Venezuela',
-            est_alum: document.getElementById('asp-est_alum')?.value,
-            ciu_alum: document.getElementById('asp-ciu_alum')?.value,
+            pais_alum: document.getElementById('asp-pais_alum')?.value || 'VENEZUELA',
+            est_alum: document.getElementById('asp-est_alum')?.value || '',
+            ciu_alum: document.getElementById('asp-ciu_alum')?.value || '',
             direc_alum: document.getElementById('asp-direc_alum')?.value?.trim().replace(/[ \t]{2,}/g, ' '),
             telemov_alum: document.getElementById('asp-telemov_alum')?.value?.trim(),
             telehabi_alum: document.getElementById('asp-telehabi_alum')?.value?.trim() || null,
             correo_alum: document.getElementById('asp-correo_alum')?.value?.trim().toLowerCase().replace(/\s+/g, ''),
 
             carrera: carrera.value,
-            niv_acad_alum: document.getElementById('asp-niv_acad_alum')?.value || 'Bachiller',
+            niv_acad_alum: document.getElementById('asp-niv_acad_alum')?.value || '',
             inst_grad_alum: instGrad.value,
             ano_grad_alum: valAno,
-            tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || 'Público',
+            tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || '',
             foto_ext: capturedPhotoExt || 'jpg',
             foto_base64: capturedPhotoBase64 || null,
             cedula_doc_base64: capturedAspiranteCedulaBase64 || null,
