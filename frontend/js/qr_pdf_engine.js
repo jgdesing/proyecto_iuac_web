@@ -418,9 +418,11 @@ async function obtenerImagenFotoCarnet(reg) {
     // 1. Probar variables en memoria directa (máxima prioridad, fidelidad y nitidez)
     const fuentesDirectas = [
         r.foto_base64,
+        r.foto_carnet_b64,
         window.capturedPhotoBase64,
         window.ultimoRegistroAspirante?.foto_base64,
-        (typeof r.foto_alum === 'string' && r.foto_alum.length > 50 && !r.foto_alum.endsWith('.jpg') && !r.foto_alum.endsWith('.png')) ? r.foto_alum : null
+        window.ultimoRegistroAspirante?.foto_carnet_b64,
+        (typeof r.foto_alum === 'string' && r.foto_alum.length > 100 && !r.foto_alum.endsWith('.jpg') && !r.foto_alum.endsWith('.png')) ? r.foto_alum : null
     ].filter(Boolean);
 
     for (const src of fuentesDirectas) {
@@ -430,7 +432,7 @@ async function obtenerImagenFotoCarnet(reg) {
         } catch (_) {}
     }
 
-    // 2. Probar elementos imagen ya montados en el DOM
+    // 2. Probar elementos imagen ya montados en el DOM (verificando que tengan atributo src real)
     const domSelectors = [
         '#planilla-foto-img',
         '#photo-preview-img',
@@ -439,7 +441,8 @@ async function obtenerImagenFotoCarnet(reg) {
     ];
     for (const sel of domSelectors) {
         const el = document.querySelector(sel);
-        if (el && el.tagName === 'IMG' && el.src) {
+        const attrSrc = el ? (el.getAttribute('src') || '').trim() : '';
+        if (el && el.tagName === 'IMG' && attrSrc && (attrSrc.startsWith('data:image/') || attrSrc.includes('fotos_aspirantes'))) {
             try {
                 const img = await cargarImagenPromesa(el.src);
                 if (img && (img.naturalWidth > 0 || img.width > 0)) return img;
@@ -453,9 +456,12 @@ async function obtenerImagenFotoCarnet(reg) {
     if (r.ruta_foto_archivo) rutasAProbar.push(r.ruta_foto_archivo);
     if (r.enlace_foto) rutasAProbar.push(r.enlace_foto);
     if (r.foto_alum && (r.foto_alum.endsWith('.jpg') || r.foto_alum.endsWith('.png'))) {
-        rutasAProbar.push(r.foto_alum.startsWith('/') ? r.foto_alum : `/fotos_aspirantes/${r.foto_alum}`);
+        const cleanFile = r.foto_alum.split('/').pop().split('\\').pop();
+        rutasAProbar.push(`/fotos_aspirantes/${cleanFile}`);
     }
     if (cedDigits) {
+        rutasAProbar.push(`/fotos_aspirantes/${cedDigits}.jpg`);
+        rutasAProbar.push(`/fotos_aspirantes/${cedDigits}.png`);
         if (typeof window.construirNombreFotoPersonalizado === 'function') {
             rutasAProbar.push(`/fotos_aspirantes/${window.construirNombreFotoPersonalizado(cedDigits, r.nom_alum, r.ape_alum, 'jpg')}`);
             rutasAProbar.push(`/fotos_aspirantes/${window.construirNombreFotoPersonalizado(cedDigits, r.nom_alum, r.ape_alum, 'png')}`);

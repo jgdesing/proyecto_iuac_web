@@ -173,11 +173,15 @@ def validate_aspirante_payload(data):
     cleaned['edad_alum'] = int(edad_actual)
 
     # 4. Género y Estado Civil
-    sex = limpiar_texto_estricto(data.get('sex_alum', 'M')).upper()
+    sex = limpiar_texto_estricto(data.get('sex_alum', '')).upper()
     if sex not in ('M', 'F'):
-        sex = 'M'
+        return False, None, "Debe seleccionar su género."
     cleaned['sex_alum'] = sex
-    cleaned['est_civil_alum'] = limpiar_texto_estricto(data.get('est_civil_alum', 'Soltero/a'))[:50]
+
+    est_civil = limpiar_texto_estricto(data.get('est_civil_alum', ''))[:50]
+    if not est_civil:
+        return False, None, "Debe seleccionar su estado civil."
+    cleaned['est_civil_alum'] = est_civil
 
     # 5. Teléfonos (Móvil obligatorio, habitación/secundario opcional)
     tel_mov_raw = data.get('telemov_alum')
@@ -215,6 +219,8 @@ def validate_aspirante_payload(data):
     cleaned['nacionalidad_alum'] = limpiar_texto_estricto(data.get('nacionalidad_alum', 'VENEZOLANA'))[:100]
     cleaned['etnia'] = 'Ninguna'  # Eliminado del formulario visual
 
+    if not cleaned['lugar_nac_alum']:
+        return False, None, "Debe seleccionar su lugar de nacimiento."
     if not cleaned['est_alum']:
         return False, None, "Debe seleccionar su Estado de residencia."
     if not cleaned['ciu_alum']:
@@ -223,7 +229,9 @@ def validate_aspirante_payload(data):
         return False, None, "Debe detallar su dirección de habitación completa (mínimo 8 caracteres)."
 
     # 8. Datos Académicos (Todos obligatorios)
-    cleaned['niv_acad_alum'] = limpiar_texto_estricto(data.get('niv_acad_alum', 'Bachiller'))[:150]
+    cleaned['niv_acad_alum'] = limpiar_texto_estricto(data.get('niv_acad_alum', ''))[:150]
+    if not cleaned['niv_acad_alum']:
+        return False, None, "Debe seleccionar su nivel académico."
     cleaned['inst_grad_alum'] = limpiar_texto_estricto(data.get('inst_grad_alum', ''))[:200]
     cleaned['ubica_inst_muni_alum'] = limpiar_texto_estricto(data.get('ubica_inst_muni_alum', ''))[:150]
     if not cleaned['inst_grad_alum'] or len(cleaned['inst_grad_alum']) < 3:
@@ -238,7 +246,9 @@ def validate_aspirante_payload(data):
     else:
         return False, None, "El año de graduación es obligatorio."
 
-    val_colegio = limpiar_texto_estricto(data.get('tipo_colegio', 'Público'))
+    val_colegio = limpiar_texto_estricto(data.get('tipo_colegio', ''))
+    if not val_colegio:
+        return False, None, "Debe seleccionar el tipo de institución."
     cleaned['tipo_colegio'] = 'Privado' if 'privad' in val_colegio.lower() else 'Público'
 
     # 9. Carrera de Postulación IUAC (Obligatoria)

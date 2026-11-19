@@ -49,14 +49,39 @@ app.config.from_object(Config)
 # CORS universal para permitir peticiones API y carga de imágenes en Canvas/PDF
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Servir fotos subidas de aspirantes desde la carpeta fotos_aspirantes
+# Servir fotos subidas de aspirantes desde la carpeta fotos_aspirantes (con fallback inteligente a sistema central)
 @app.route('/fotos_aspirantes/<path:filename>', methods=['GET'])
 def serve_foto_aspirante(filename):
+    import re, glob
     frontend_fotos = os.path.join(FRONTEND_DIR, 'fotos_aspirantes')
-    target_dir = UPLOAD_DIR if os.path.exists(os.path.join(UPLOAD_DIR, filename)) else frontend_fotos
-    resp = send_from_directory(target_dir, filename)
+    v1_fotos_asp = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'proyecto_iuac_v1', 'static', 'img', 'foto_aspirantes'))
+    v1_fotos_hist = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'proyecto_iuac_v1', 'static', 'img', 'fotos'))
+    dirs_to_check = [UPLOAD_DIR, frontend_fotos, v1_fotos_asp, v1_fotos_hist]
+
+    clean_name = os.path.basename(filename)
+    for d in dirs_to_check:
+        if os.path.isdir(d) and os.path.isfile(os.path.join(d, clean_name)):
+            resp = send_from_directory(d, clean_name)
+            resp.headers['Access-Control-Allow-Origin'] = '*'
+            resp.headers['Cache-Control'] = 'public, max-age=3600'
+            return resp
+
+    # Fallback por número de cédula extraído del nombre de archivo
+    m = re.search(r'(\d{6,9})', clean_name)
+    if m:
+        ced = m.group(1)
+        for d in dirs_to_check:
+            if not os.path.isdir(d):
+                continue
+            for cand in [f"{ced}.jpg", f"{ced}.png"] + [os.path.basename(p) for p in glob.glob(os.path.join(d, f"*{ced}*.*"))]:
+                if os.path.isfile(os.path.join(d, cand)):
+                    resp = send_from_directory(d, cand)
+                    resp.headers['Access-Control-Allow-Origin'] = '*'
+                    resp.headers['Cache-Control'] = 'public, max-age=3600'
+                    return resp
+
+    resp = send_from_directory(UPLOAD_DIR, clean_name)
     resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Cache-Control'] = 'public, max-age=3600'
     return resp
 
 @app.route('/uploads/fotos/<path:filename>', methods=['GET'])

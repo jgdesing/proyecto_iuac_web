@@ -11,6 +11,10 @@ logger = logging.getLogger("IUAC_DB_OPS")
 # Directorio oficial para alojar las fotografías tipo carnet de los aspirantes (/fotos_aspirantes)
 FOTOS_ASPIRANTES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'fotos_aspirantes'))
 FOTOS_ASPIRANTES_FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend', 'fotos_aspirantes'))
+FOTOS_CENTRAL_V1_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'proyecto_iuac_v1', 'static', 'img', 'foto_aspirantes'))
+FOTOS_HIST_V1_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'proyecto_iuac_v1', 'static', 'img', 'fotos'))
+os.makedirs(FOTOS_ASPIRANTES_DIR, exist_ok=True)
+os.makedirs(FOTOS_ASPIRANTES_FRONTEND_DIR, exist_ok=True)
 
 # Directorio oficial para alojar las fotocopias de cédula de representantes (/cedulas_representantes)
 CEDULAS_REPRES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'cedulas_representantes'))
@@ -89,6 +93,7 @@ def guardar_foto_aspirante(foto_base64, cedula_str, upload_dir=None, nom_alum=''
 
         ced_digits = re.sub(r'\D', '', str(cedula_str)) or str(cedula_str)
         filename = construir_nombre_archivo_foto(ced_digits, nom_alum=nom_alum, ape_alum=ape_alum, ext=ext_final)
+        filename_ced = f"{ced_digits}.{ext_final}"
 
         # Guardar copia física en carpeta /fotos_aspirantes (raíz y frontend) limpiando versiones previas de la misma cédula
         for target_dir in (FOTOS_ASPIRANTES_DIR, FOTOS_ASPIRANTES_FRONTEND_DIR, upload_dir):
@@ -98,13 +103,17 @@ def guardar_foto_aspirante(foto_base64, cedula_str, upload_dir=None, nom_alum=''
                 os.makedirs(target_dir, exist_ok=True)
                 for prev in glob.glob(os.path.join(target_dir, f"*-{ced_digits}.*")) + glob.glob(os.path.join(target_dir, f"foto_{ced_digits}.*")):
                     try:
-                        if os.path.basename(prev) != filename:
+                        if os.path.basename(prev) not in (filename, filename_ced):
                             os.remove(prev)
                     except Exception:
                         pass
                 filepath = os.path.join(target_dir, filename)
                 with open(filepath, 'wb') as f:
                     f.write(img_bytes)
+                filepath_ced = os.path.join(target_dir, filename_ced)
+                if filepath_ced != filepath:
+                    with open(filepath_ced, 'wb') as f2:
+                        f2.write(img_bytes)
             except Exception:
                 pass
 
@@ -218,7 +227,7 @@ def guardar_cedula_aspirante(doc_base64, cedula_aspirante):
     return filename, None
 
 def asegurar_columnas_representante(cur, conn):
-    """Garantiza que las columnas para aspirantes menores de edad existan en academico.estudiantes."""
+    """Garantiza que las columnas para aspirantes menores de edad y foto Base64 existan en academico.estudiantes."""
     sentencias = [
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula_repres TEXT;",
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS ced_repres VARCHAR(20);",
@@ -226,6 +235,7 @@ def asegurar_columnas_representante(cur, conn):
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS parentesco_repres VARCHAR(50);",
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS telemov_repres VARCHAR(50);",
         "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula TEXT;",
+        "ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS foto_carnet_b64 TEXT;",
         "ALTER TABLE academico.estudiantes ALTER COLUMN fotocopia_cedula TYPE TEXT;"
     ]
     for s in sentencias:
@@ -275,7 +285,7 @@ def obtener_aspirante_por_cedula(cedula):
             SELECT
                 ced_alum, tipo_cedula, nom_alum, ape_alum, fec_nac_alum, edad_alum,
                 sex_alum, est_civil_alum, pais_alum, est_alum, ciu_alum, direc_alum,
-                lugar_nac_alum, nacionalidad_alum, foto_alum,
+                lugar_nac_alum, nacionalidad_alum, foto_alum, foto_carnet_b64,
                 telemov_alum, telehabi_alum, correo_alum,
                 niv_acad_alum, inst_grad_alum, ano_grad_alum, tipo_colegio,
                 carrera, created_at,
@@ -302,43 +312,71 @@ def obtener_aspirante_por_cedula(cedula):
         else:
             data['fecha_registro'] = ''
 
-        # Cargar foto en base64 desde la columna foto_alum de la BD o desde la carpeta /fotos_aspirantes
+        # Cargar foto en base64 desde foto_carnet_b64, foto_alum de la BD o desde las carpetas físicas
         foto_base64 = None
-        foto_val = data.get('foto_alum')
-        if foto_val and isinstance(foto_val, str):
-            foto_str = foto_val.strip()
-            if foto_str.startswith('data:image/'):
-                foto_base64 = foto_str
-            elif len(foto_str) > 300 and not foto_str.endswith('.jpg') and not foto_str.endswith('.png'):
-                foto_base64 = f"data:image/jpeg;base64,{foto_str}"
+        for candidate_col in ('foto_carnet_b64', 'foto_alum'):
+            foto_val_c = data.get(candidate_col)
+            if foto_val_c and isinstance(foto_val_c, str):
+                foto_str = foto_val_c.strip()
+                if foto_str.startswith('data:image/'):
+                    foto_base64 = foto_str
+                    break
+                elif len(foto_str) > 300 and not foto_str.endswith('.jpg') and not foto_str.endswith('.png'):
+                    foto_base64 = f"data:image/jpeg;base64,{foto_str}"
+                    break
 
+        foto_val = data.get('foto_alum')
         nombre_jpg = construir_nombre_archivo_foto(ced_int, data.get('nom_alum', ''), data.get('ape_alum', ''), 'jpg')
         nombre_png = construir_nombre_archivo_foto(ced_int, data.get('nom_alum', ''), data.get('ape_alum', ''), 'png')
         archivo_encontrado = nombre_jpg
 
-        # Si no estaba en Base64 en BD, buscar en carpeta /fotos_aspirantes
+        # Si no estaba en Base64 en BD, buscar en carpetas físicas locales y del sistema central
         if not foto_base64:
-            posibles_archivos = (
-                [
-                    os.path.join(FOTOS_ASPIRANTES_DIR, nombre_jpg),
-                    os.path.join(FOTOS_ASPIRANTES_DIR, nombre_png),
-                    os.path.join(FOTOS_ASPIRANTES_FRONTEND_DIR, nombre_jpg),
-                    os.path.join(FOTOS_ASPIRANTES_FRONTEND_DIR, nombre_png),
-                ]
-                + glob.glob(os.path.join(FOTOS_ASPIRANTES_DIR, f"*-{ced_int}.*"))
-                + glob.glob(os.path.join(FOTOS_ASPIRANTES_FRONTEND_DIR, f"*-{ced_int}.*"))
-            )
-            if foto_val and isinstance(foto_val, str) and len(foto_val) < 260:
-                posibles_archivos.append(os.path.join(FOTOS_ASPIRANTES_DIR, os.path.basename(foto_val)))
+            carpetas_busqueda = [
+                FOTOS_ASPIRANTES_DIR,
+                FOTOS_ASPIRANTES_FRONTEND_DIR,
+                FOTOS_CENTRAL_V1_DIR,
+                FOTOS_HIST_V1_DIR
+            ]
+            posibles_archivos = []
+            for carpeta in carpetas_busqueda:
+                if not os.path.isdir(carpeta):
+                    continue
+                posibles_archivos.extend([
+                    os.path.join(carpeta, nombre_jpg),
+                    os.path.join(carpeta, nombre_png),
+                    os.path.join(carpeta, f"{ced_int}.jpg"),
+                    os.path.join(carpeta, f"{ced_int}.png"),
+                ])
+                if foto_val and isinstance(foto_val, str) and len(foto_val) < 260:
+                    posibles_archivos.append(os.path.join(carpeta, os.path.basename(foto_val)))
+                posibles_archivos.extend(glob.glob(os.path.join(carpeta, f"*-{ced_int}.*")))
+                posibles_archivos.extend(glob.glob(os.path.join(carpeta, f"*{ced_int}*.*")))
+
             for fpath in posibles_archivos:
-                if os.path.exists(fpath):
+                if os.path.isfile(fpath):
                     try:
                         archivo_encontrado = os.path.basename(fpath)
                         mime_t = 'image/png' if archivo_encontrado.lower().endswith('.png') else 'image/jpeg'
                         with open(fpath, 'rb') as f:
-                            encoded = base64.b64encode(f.read()).decode('utf-8')
+                            img_raw = f.read()
+                        if len(img_raw) > 50:
+                            encoded = base64.b64encode(img_raw).decode('utf-8')
                             foto_base64 = f"data:{mime_t};base64,{encoded}"
-                        break
+                            # Sincronizar copia local en FOTOS_ASPIRANTES_DIR y cachear en BD
+                            try:
+                                dest_local = os.path.join(FOTOS_ASPIRANTES_DIR, archivo_encontrado)
+                                if not os.path.exists(dest_local):
+                                    with open(dest_local, 'wb') as fl:
+                                        fl.write(img_raw)
+                                cur.execute(
+                                    "UPDATE academico.estudiantes SET foto_carnet_b64 = %s WHERE ced_alum = %s;",
+                                    (foto_base64, ced_int)
+                                )
+                                conn.commit()
+                            except Exception:
+                                conn.rollback()
+                            break
                     except Exception:
                         pass
 
@@ -372,7 +410,7 @@ def actualizar_foto_aspirante(cedula, foto_base64, nom_alum='', ape_alum='', ext
     """
     Aloja la fotografía en la carpeta '/fotos_aspirantes' bajo el formato
     primer_nom_primer_ape-ced_aspirante.jpg (o .png) y actualiza el campo foto_alum
-    de academico.estudiantes si el aspirante ya está inscrito.
+    y foto_carnet_b64 de academico.estudiantes si el aspirante ya está inscrito.
     """
     if not foto_base64:
         return False, None, "No se recibió ninguna fotografía."
@@ -412,15 +450,10 @@ def actualizar_foto_aspirante(cedula, foto_base64, nom_alum='', ape_alum='', ext
         return True, filename, None
 
     try:
-        try:
-            cur.execute("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;")
-            conn.commit()
-        except Exception:
-            conn.rollback()
-
+        asegurar_columnas_representante(cur, conn)
         cur.execute(
-            "UPDATE academico.estudiantes SET foto_alum = %s, updated_at = CURRENT_TIMESTAMP WHERE ced_alum = %s;",
-            (filename, ced_int)
+            "UPDATE academico.estudiantes SET foto_alum = %s, foto_carnet_b64 = %s, updated_at = CURRENT_TIMESTAMP WHERE ced_alum = %s;",
+            (filename, foto_data_uri, ced_int)
         )
         conn.commit()
         release_db(conn, cur, commit=True)
@@ -478,13 +511,9 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
 
         # Procesar fotografía si fue capturada o subida y alojarla como primer_nom_primer_ape-ced_aspirante.jpg/.png
         foto_nombre = None
+        foto_data_uri = None
         if data.get('foto_base64'):
-            try:
-                cur.execute("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;")
-                conn.commit()
-            except Exception:
-                conn.rollback()
-            _, foto_filename = guardar_foto_aspirante(
+            foto_data_uri, foto_filename = guardar_foto_aspirante(
                 data.get('foto_base64'),
                 str(ced_int),
                 FOTOS_ASPIRANTES_DIR,
@@ -494,7 +523,7 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             )
             foto_nombre = foto_filename
 
-        # Asegurar columnas para representante legal y procesar documento si es menor de edad
+        # Asegurar columnas para representante legal y foto_carnet_b64
         asegurar_columnas_representante(cur, conn)
         repres_doc_filename = None
         if data.get('repres_doc_base64'):
@@ -518,7 +547,7 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
         columnas = [
             'ced_alum', 'tipo_cedula', 'nom_alum', 'ape_alum', 'fec_nac_alum', 'edad_alum',
             'sex_alum', 'est_civil_alum', 'pais_alum', 'est_alum', 'ciu_alum', 'direc_alum',
-            'lugar_nac_alum', 'nacionalidad_alum', 'etnia', 'foto_alum',
+            'lugar_nac_alum', 'nacionalidad_alum', 'etnia', 'foto_alum', 'foto_carnet_b64',
             'telemov_alum', 'telehabi_alum', 'correo_alum',
             'niv_acad_alum', 'inst_grad_alum', 'ubica_inst_muni_alum', 'ano_grad_alum', 'tipo_colegio',
             'carrera', 'modalidad_ing', 'condicion_resi', 'turno_class',
@@ -544,6 +573,7 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             data.get('nacionalidad_alum', 'VENEZOLANA'),
             data.get('etnia', 'Ninguna'),
             foto_nombre,
+            foto_data_uri,
             data.get('telemov_alum'),
             data.get('telehabi_alum'),
             data.get('correo_alum'),
@@ -571,7 +601,7 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
 
         # Sanitización universal de última milla: limpiar espacios residuales o múltiples de cualquier cadena
         valores = [
-            re.sub(r'\s+', ' ', v).strip() if (isinstance(v, str) and c != 'foto_alum') else v
+            re.sub(r'\s+', ' ', v).strip() if (isinstance(v, str) and c not in ('foto_alum', 'foto_carnet_b64')) else v
             for c, v in zip(columnas, valores)
         ]
 
