@@ -580,12 +580,13 @@ body {
     font-size: 1.02rem;
     color: var(--text-main);
     background-color: #ffffff;
-    border: 2px solid var(--t-main);
+    border: 3px solid var(--t-main);
     border-radius: var(--radius-sm);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
     transition: var(--transition);
     outline: none;
     font-weight: 500;
+    box-sizing: border-box;
 }
 
 select.form-control {
@@ -609,6 +610,7 @@ textarea.form-control {
 
 .form-control:focus {
     border-color: var(--border-focus);
+    border-width: 3px;
     background-color: #ffffff;
     box-shadow: 0 0 0 3.5px rgba(var(--rgb-main), 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.04);
 }
@@ -1401,11 +1403,13 @@ textarea.form-control {
 /* ── CAPTURA DE FOTOGRAFÍA DESDE EL MÓVIL ─────────────────────────────────── */
 .photo-capture-card {
     background: linear-gradient(135deg, var(--t-pane) 0%, var(--t-pane-2) 100%);
-    border: 2px dashed var(--t-main);
+    border: 3px dashed var(--t-main);
     border-radius: var(--radius-md);
     padding: 1.15rem;
     text-align: center;
-    margin-bottom: 1.35rem;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1518,10 +1522,10 @@ textarea.form-control {
 /* ── TARJETA UNIFICADA DE CÉDULA DEL REPRESENTANTE (MENORES DE EDAD) ──────── */
 .repres-card-unificada {
     background: linear-gradient(135deg, var(--t-pane) 0%, var(--t-pane-2) 100%);
-    border: 2px dashed var(--t-main);
+    border: 3px dashed var(--t-main);
     border-radius: 14px;
     padding: 1.4rem 1.6rem;
-    margin: 0.85rem 0 0.5rem;
+    margin: 0;
     box-shadow: 0 4px 16px rgba(var(--rgb-main), 0.15);
     box-sizing: border-box;
     width: 100%;
@@ -1714,7 +1718,7 @@ textarea.form-control {
 
     .repres-card-unificada {
         padding: 1.1rem 0.85rem;
-        margin: 0.65rem 0 0.35rem;
+        margin: 0;
         border-radius: 12px;
     }
 

@@ -18,7 +18,7 @@
     <script>
         (function () { try { var t = localStorage.getItem('iuac_tema_color'); if (t === 'azul' || t === 'ocre') document.documentElement.setAttribute('data-theme', t); } catch (e) {} })();
     </script>
-    <link rel="stylesheet" href="css/landing.css?v=8.0">
+    <link rel="stylesheet" href="css/landing.css?v=8.2">
 </head>
 
 <body>
@@ -649,41 +649,43 @@
                         <p class="section-subtitle">Ingrese sus datos tal como aparecen en su documento de identidad
                             oficial.</p>
 
-                        <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL, LAPTOP O PC (PUNTO 5) -->
-                        <div class="photo-capture-card">
-                            <div class="photo-preview-box" id="photo-preview-box">
-                                <span class="photo-placeholder-icon" id="photo-placeholder-icon">👤</span>
-                                <img id="photo-preview-img" class="photo-preview-img" alt="Foto Aspirante">
-                            </div>
-                            <div class="photo-actions">
-                                <div style="font-size:0.78rem; color:#525252; font-weight:600; margin-bottom:0.2rem;">
-                                    Fotografía Tipo Carnet — Formatos <strong>.JPG o .PNG</strong> (Máx. <strong>5
-                                        MB</strong>)
-                                </div>
-                                <input type="file" id="asp-foto_alum" class="file-input-hidden"
-                                    accept=".jpg,.jpeg,.png,image/jpeg,image/png">
-                                <input type="file" id="asp-foto-camara-fallback" class="file-input-hidden"
-                                    accept="image/jpeg,image/png" capture="user">
-                                <div class="photo-buttons-dual">
-                                    <label for="asp-foto_alum" class="btn-photo-action" id="btn-subir-foto">
-                                        📂 Subir Archivo (.JPG / .PNG)
-                                    </label>
-                                    <button type="button" class="btn-photo-action btn-camera-live"
-                                        id="btn-activar-camara-principal">
-                                        📷 Activar Cámara (Laptop / Móvil)
-                                    </button>
-                                </div>
-                                <button type="button" class="btn-photo-remove" id="btn-quitar-foto"
-                                    style="display:none;">
-                                    ✕ Quitar Foto
-                                </button>
-                                <div id="status-foto-principal"
-                                    style="font-size:0.78rem; color:var(--t-dark); font-weight:800; display:none;"></div>
-                                <div class="field-error-msg" id="err-foto"></div>
-                            </div>
-                        </div>
-
                         <div class="form-grid">
+                            <!-- CAPTURA / SUBIDA DE FOTOGRAFÍA DESDE EL MÓVIL, LAPTOP O PC (ALINEADA EN CUADRÍCULA) -->
+                            <div class="col-12">
+                                <div class="photo-capture-card">
+                                    <div class="photo-preview-box" id="photo-preview-box">
+                                        <span class="photo-placeholder-icon" id="photo-placeholder-icon">👤</span>
+                                        <img id="photo-preview-img" class="photo-preview-img" alt="Foto Aspirante">
+                                    </div>
+                                    <div class="photo-actions">
+                                        <div style="font-size:0.78rem; color:#525252; font-weight:600; margin-bottom:0.2rem;">
+                                            Fotografía Tipo Carnet — Formatos <strong>.JPG o .PNG</strong> (Máx. <strong>5
+                                                MB</strong>)
+                                        </div>
+                                        <input type="file" id="asp-foto_alum" class="file-input-hidden"
+                                            accept=".jpg,.jpeg,.png,image/jpeg,image/png">
+                                        <input type="file" id="asp-foto-camara-fallback" class="file-input-hidden"
+                                            accept="image/jpeg,image/png" capture="user">
+                                        <div class="photo-buttons-dual">
+                                            <label for="asp-foto_alum" class="btn-photo-action" id="btn-subir-foto">
+                                                📂 Subir Archivo (.JPG / .PNG)
+                                            </label>
+                                            <button type="button" class="btn-photo-action btn-camera-live"
+                                                id="btn-activar-camara-principal">
+                                                📷 Activar Cámara (Laptop / Móvil)
+                                            </button>
+                                        </div>
+                                        <button type="button" class="btn-photo-remove" id="btn-quitar-foto"
+                                            style="display:none;">
+                                            ✕ Quitar Foto
+                                        </button>
+                                        <div id="status-foto-principal"
+                                            style="font-size:0.78rem; color:var(--t-dark); font-weight:800; display:none;"></div>
+                                        <div class="field-error-msg" id="err-foto"></div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Tipo de Documento y Cédula -->
                             <div class="col-4">
                                 <div class="form-group">
@@ -784,7 +786,7 @@
 
                             <!-- DOCUMENTO DE IDENTIDAD DEL ASPIRANTE (OBLIGATORIO PARA TODOS: MENOR O MAYOR DE EDAD) -->
                             <div class="col-12 lockable-field" id="seccion-cedula-aspirante">
-                                <div class="repres-card-unificada" style="margin-top:0.25rem;">
+                                <div class="repres-card-unificada">
                                     <div class="repres-header-unificado">
                                         <h4 class="repres-title-unificado">
                                             🪪 Documento de Identidad del Aspirante (Cédula Laminada o Pasaporte) <span class="req">*</span>
