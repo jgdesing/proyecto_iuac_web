@@ -295,6 +295,5 @@ def validate_aspirante_payload(data):
     cleaned['turno_class'] = 'DIURNO'
     cleaned['canal_inscripcion'] = 'WEB'
     cleaned['status_alum'] = 'REGISTRADO_WEB'
-    cleaned['observaciones'] = limpiar_texto_estricto(data.get('observaciones', 'Ninguna'))[:500] or 'Ninguna'
 
     return True, cleaned, None

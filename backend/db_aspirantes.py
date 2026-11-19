@@ -522,14 +522,10 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             'telemov_alum', 'telehabi_alum', 'correo_alum',
             'niv_acad_alum', 'inst_grad_alum', 'ubica_inst_muni_alum', 'ano_grad_alum', 'tipo_colegio',
             'carrera', 'modalidad_ing', 'condicion_resi', 'turno_class',
-            'canal_inscripcion', 'status_alum', 'observaciones', 'is_active', 'creado_por', 'actualizado_por',
+            'canal_inscripcion', 'status_alum', 'is_active', 'creado_por', 'actualizado_por',
             'fotocopia_cedula_repres', 'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
             'fotocopia_cedula'
         ]
-
-        obs_texto = str(data.get('observaciones') or 'Ninguna').strip()
-        if data.get('nom_repres'):
-            obs_texto += f" | Representante: {data.get('nom_repres')} (CI: {data.get('ced_repres')}, {data.get('parentesco_repres', 'Familiar')}, Tel: {data.get('telemov_repres')})"
 
         valores = [
             ced_int,
@@ -562,7 +558,6 @@ def insert_aspirante_web(data, ip_origen='127.0.0.1', user_agent=''):
             data.get('turno_class', 'DIURNO'),
             'WEB',
             'REGISTRADO_WEB',
-            obs_texto,
             True,
             'WEB_PUBLIC_FORM',
             'WEB_PUBLIC_FORM',

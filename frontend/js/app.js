@@ -1555,17 +1555,6 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
         return false;
     }
 
-    if (id === 'asp-observaciones') {
-        el.value = el.value.replace(/^\s+/, '').replace(/[ 	]{2,}/g, ' ');
-        const val = el.value.trim();
-        if (!val || val.length < 2) {
-            if (forzarError) setFieldInvalid(el, 'err-observaciones', 'Observaciones obligatorias (escriba "Ninguna" si no posee observaciones adicionales).');
-            return false;
-        }
-        setFieldValid(el, 'err-observaciones');
-        return true;
-    }
-
     return true;
 }
 
@@ -1600,7 +1589,6 @@ function initRealtimeValidations() {
     const paisInput = document.getElementById('asp-pais_alum');
     const nivAcadSelect = document.getElementById('asp-niv_acad_alum');
     const tipoColegioSelect = document.getElementById('asp-tipo_colegio');
-    const obsInput = document.getElementById('asp-observaciones');
 
     // 1. Cédula
     if (cedulaInput) {
@@ -1760,17 +1748,7 @@ function initRealtimeValidations() {
         });
     }
 
-    // 14. Observaciones
-    if (obsInput) {
-        obsInput.addEventListener('input', () => {
-            evaluarCampoEnTiempoReal(obsInput, false);
-        });
-        obsInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(obsInput, false);
-        });
-    }
-
-    // 15. Pre-evaluar campos iniciales con valor por defecto
+    // 14. Pre-evaluar campos iniciales con valor por defecto
     setTimeout(() => {
         evaluarCamposPasoActual(1);
     }, 200);
@@ -2012,7 +1990,6 @@ function validateCurrentStep(step) {
         const anoGrad = document.getElementById('asp-ano_grad_alum');
         const instGrad = document.getElementById('asp-inst_grad_alum');
         const tipoColegioSelect = document.getElementById('asp-tipo_colegio');
-        const obsEl = document.getElementById('asp-observaciones');
 
         if (!carrera || !carrera.value) {
             setFieldInvalid(carrera, 'err-carrera', 'Debe seleccionar una carrera de postulación.');
@@ -2042,15 +2019,6 @@ function validateCurrentStep(step) {
         setFieldValid(instGrad, 'err-inst_grad');
 
         if (tipoColegioSelect) setFieldValid(tipoColegioSelect);
-
-        const valObs = (obsEl?.value || '').trim().replace(/[ 	]{2,}/g, ' ');
-        if (obsEl) obsEl.value = valObs;
-        if (!valObs || valObs.length < 2) {
-            setFieldInvalid(obsEl, 'err-observaciones', 'Observaciones obligatorias (escriba "Ninguna" si no posee).');
-            mostrarErrorDePaso(obsEl, 3, 'Paso 3: Academia y Carrera de Postulación', 'Observaciones', 'Campo obligatorio (escriba "Ninguna" si no posee observaciones).');
-            return false;
-        }
-        setFieldValid(obsEl, 'err-observaciones');
     }
 
     limpiarAvisoErrorPaso();
@@ -2082,7 +2050,6 @@ function initFormSubmit() {
         const carrera = document.getElementById('asp-carrera');
         const instGrad = document.getElementById('asp-inst_grad_alum');
         const anoGrad = document.getElementById('asp-ano_grad_alum');
-        const obsEl = document.getElementById('asp-observaciones');
         const valAno = parseInt(anoGrad?.value || '0', 10);
         const valEdad = parseInt(document.getElementById('asp-edad_alum')?.value || '0', 10);
 
@@ -2106,7 +2073,7 @@ function initFormSubmit() {
             ciu_alum: document.getElementById('asp-ciu_alum')?.value,
             direc_alum: document.getElementById('asp-direc_alum')?.value?.trim().replace(/[ \t]{2,}/g, ' '),
             telemov_alum: document.getElementById('asp-telemov_alum')?.value?.trim(),
-            telehabi_alum: document.getElementById('asp-telehabi_alum')?.value?.trim(),
+            telehabi_alum: document.getElementById('asp-telehabi_alum')?.value?.trim() || null,
             correo_alum: document.getElementById('asp-correo_alum')?.value?.trim().toLowerCase().replace(/\s+/g, ''),
 
             carrera: carrera.value,
@@ -2114,7 +2081,6 @@ function initFormSubmit() {
             inst_grad_alum: instGrad.value,
             ano_grad_alum: valAno,
             tipo_colegio: document.getElementById('asp-tipo_colegio')?.value || 'Público',
-            observaciones: obsEl?.value || 'Ninguna',
             foto_ext: capturedPhotoExt || 'jpg',
             foto_base64: capturedPhotoBase64 || null,
             cedula_doc_base64: capturedAspiranteCedulaBase64 || null,

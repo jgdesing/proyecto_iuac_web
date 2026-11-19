@@ -726,9 +726,10 @@
                             </div>
                             <div class="col-6 lockable-field">
                                 <div class="form-group">
-                                    <label>Teléfono Habitación / Móvil (Opcional)</label>
+                                    <label>Teléfono Habitación / Secundario (Opcional)</label>
                                     <input type="tel" class="form-control" id="asp-telehabi_alum"
-                                        placeholder="Ej: 0243-2345678 o 0414-0000000" maxlength="12" inputmode="tel">
+                                        placeholder="Opcional (Dejar en blanco si no posee)" maxlength="12" inputmode="tel">
+                                    <div class="field-hint" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Campo opcional. Si no posee segundo teléfono, déjelo vacío.</div>
                                     <div class="field-error-msg" id="err-telehab"></div>
                                 </div>
                             </div>
@@ -813,15 +814,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-12 lockable-field">
-                                <div class="form-group">
-                                    <label>Observaciones del Aspirante <span class="req">*</span></label>
-                                    <textarea class="form-control" id="asp-observaciones"
-                                        placeholder="Indique alguna condición o dato de interés (escriba 'Ninguna' si no tiene)..."
-                                        required>Ninguna</textarea>
-                                    <div class="field-error-msg" id="err-observaciones"></div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
 
@@ -1177,7 +1170,7 @@
     <script src="js/geo_data.js?v=2.2"></script>
     <script src="js/qr_pdf_engine.js?v=3.0"></script>
     <script src="js/react_ui_enhancer.js?v=1.8"></script>
-    <script src="js/app.js?v=4.1"></script>
+    <script src="js/app.js?v=4.2"></script>
 
     <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
         <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">

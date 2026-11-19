@@ -36,7 +36,7 @@ COLUMNAS_VACIADO_ESTUDIANTES = [
     'foto_alum', 'fotocopia_cedula', 'fotocopia_cedula_repres',
     'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
     'derechos_aeronauticos', 'comprobante_derechos',
-    'canal_inscripcion', 'status_alum', 'nucleo', 'observaciones',
+    'canal_inscripcion', 'status_alum', 'nucleo',
     'is_active', 'creado_por', 'actualizado_por'
 ]
 
@@ -283,7 +283,6 @@ def generar_contenido_sql(registros):
         out.write("    comprobante_derechos = EXCLUDED.comprobante_derechos,\n")
         out.write("    nucleo = EXCLUDED.nucleo,\n")
         out.write("    status_alum = EXCLUDED.status_alum,\n")
-        out.write("    observaciones = EXCLUDED.observaciones,\n")
         out.write("    updated_at = CURRENT_TIMESTAMP;\n\n")
 
         # 2. Sincronizar Prioridad y Carrera en academico.estudiante_especialidades
@@ -314,7 +313,7 @@ def generar_contenido_csv(registros):
         'carrera', 'niv_acad_alum', 'inst_grad_alum', 'ano_grad_alum', 'tipo_colegio',
         'posee_foto', 'posee_cedula_aspirante', 'posee_cedula_repres',
         'ced_repres', 'nom_repres', 'parentesco_repres', 'telemov_repres',
-        'acuse_recibo_sms', 'folio_sms', 'status_alum', 'observaciones', 'created_at'
+        'acuse_recibo_sms', 'folio_sms', 'status_alum', 'created_at'
     ]
     output_csv = io.StringIO()
     output_csv.write('\ufeff')  # BOM UTF-8 para Microsoft Excel
