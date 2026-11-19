@@ -18,7 +18,7 @@
     <script>
         (function () { try { var t = localStorage.getItem('iuac_tema_color'); if (t === 'azul' || t === 'ocre') document.documentElement.setAttribute('data-theme', t); } catch (e) { } })();
     </script>
-    <link rel="stylesheet" href="css/landing.css?v=8.6">
+    <link rel="stylesheet" href="css/landing.css?v=8.7">
 </head>
 
 <body>
@@ -1017,7 +1017,7 @@
                     <h5>INSTITUTO NACIONAL DE AERONÁUTICA CIVIL (INAC)</h5>
                     <h3>INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL</h3>
                     <h2>"MAYOR (AV) MIGUEL RODRÍGUEZ"</h2>
-                    <div class="planilla-subtitulo-dep">DEPARTAMENTO DE CAPTACIÓN, SELECCIÓN Y ADMISIÓN</div>
+                    <div class="planilla-subtitulo-dep">DEPARTAMENTO DE CAPTACIÓN, SELECCIÓN Y ACREDITACIÓN</div>
                     <div class="planilla-tipo-doc">PLANILLA OFICIAL DE PREINSCRIPCIÓN DE ASPIRANTES — CONVOCATORIA
                         2026-2027</div>
                 </div>
@@ -1081,10 +1081,10 @@
         <div class="p-seccion">
             <div class="p-seccion-titulo">3. ANTECEDENTES ACADÉMICOS Y ESPECIALIDAD DE POSTULACIÓN</div>
             <table class="p-table">
-                <tr style="background:#f1f5f9;">
-                    <td colspan="3" style="font-size:9pt; padding:6px;">
+                <tr style="background:#edf4fc;">
+                    <td colspan="3" style="font-size:10pt; padding:8px;">
                         <strong>ESPECIALIDAD AERONÁUTICA DE POSTULACIÓN:</strong><br>
-                        <span id="p-carrera" style="font-weight:900; color:#1a1a1a; font-size:10pt;">--</span>
+                        <span id="p-carrera" style="font-weight:900; color:#0f2d59; font-size:11.5pt;">--</span>
                     </td>
                 </tr>
                 <tr>
@@ -1100,52 +1100,36 @@
             </table>
         </div>
 
-        <!-- 4. RECAUDOS A CONSIGNAR -->
-        <div class="p-seccion">
-            <div class="p-seccion-titulo">4. RECAUDOS EXIGIDOS PARA LA CONSIGNACIÓN EN EL DEPARTAMENTO DE CAPTACIÓN
-            </div>
-            <div class="p-recaudos-grid">
-                <div class="p-recaudo-item">[ ] 02 Fotocopias legibles de la C.I. ampliada a color.</div>
-                <div class="p-recaudo-item">[ ] Fondo negro y copia del Título de Bachiller o Constancia de 5° Año.
-                </div>
-                <div class="p-recaudo-item">[ ] Calificaciones Certificadas de 1° a 4° o 5° año (original y copia).
-                </div>
-                <div class="p-recaudo-item">[ ] 02 Fotos tipo carnet en fondo blanco (recientes y formales).</div>
-                <div class="p-recaudo-item">[ ] Copia legible de la Partida de Nacimiento.</div>
-                <div class="p-recaudo-item">[ ] Comprobante de Registro del Sistema Nacional de Ingreso (SNI).</div>
-            </div>
-        </div>
-
-        <!-- 5. DECLARACIÓN JURADA Y FIRMAS -->
-        <div class="p-seccion" style="margin-top:8px;">
+        <!-- DECLARACIÓN JURADA, FIRMAS Y QR -->
+        <div class="p-seccion" style="margin-top:12px;">
             <p class="p-juramento">
-                <em>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que
+                <em><strong>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que
                     cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el Instituto
-                    Universitario de Aeronáutica Civil (IUAC)."</em>
+                    Universitario de Aeronáutica Civil (IUAC)."</strong></em>
             </p>
             <div class="p-firmas-container">
                 <div class="p-firma-box">
                     <div class="p-firma-linea"></div>
-                    <strong>FIRMA DEL ASPIRANTE</strong>
-                    <div style="font-size:7.5pt; margin-top:2px;">C.I.: <span id="p-firma-ci">--</span></div>
+                    <strong style="font-size:10pt;">FIRMA DEL ASPIRANTE</strong>
+                    <div style="font-size:9.5pt; font-weight:700; margin-top:3px;">C.I.: <span id="p-firma-ci">--</span></div>
                     <div class="p-huella-box">Huella Pulgar Derecho</div>
                 </div>
                 <div class="p-firma-box">
                     <div class="p-firma-linea"></div>
-                    <strong>REVISADO Y RECIBIDO POR:</strong>
-                    <div style="font-size:7.5pt; margin-top:2px;">Depto. de Captación, Selección y Admisión IUAC</div>
-                    <div class="p-sello-box">SELLO INSTITUCIONAL / FECHA</div>
+                    <strong style="font-size:10pt;">REVISADO Y RECIBIDO POR:</strong>
+                    <div style="font-size:9pt; font-weight:700; margin-top:3px;">Depto. de Captación, Selección y Acreditación IUAC</div>
+                    <div class="p-sello-box" style="font-size:8.5pt; font-weight:700;">SELLO INSTITUCIONAL / FECHA</div>
                 </div>
             </div>
-            <!-- 6. CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA EN LA PARTE INFERIOR -->
+            <!-- CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA EN LA PARTE INFERIOR -->
             <div class="p-qr-footer-box"
-                style="margin-top:8px; border:1px solid #1a1a1a; background:#f8fafc; padding:6px 10px; display:flex; align-items:center; gap:12px;">
-                <canvas id="planilla-qr-canvas" width="90" height="90"
-                    style="width:72px; height:72px; flex-shrink:0; border:1px solid #cbd5e1; background:#fff;"></canvas>
-                <div style="font-size:7pt; line-height:1.3; color:#1a1a1a; text-align:left;">
-                    <strong style="font-size:7.5pt; display:block; color:#1a1a1a;">CÓDIGO QR DE VERIFICACIÓN OFICIAL DE
+                style="margin-top:12px; border:1.5px solid #16365c; background:#f1f6fc; padding:10px 14px; display:flex; align-items:center; gap:16px;">
+                <canvas id="planilla-qr-canvas" width="140" height="140"
+                    style="width:112px; height:112px; flex-shrink:0; border:1px solid #cbd5e1; background:#fff;"></canvas>
+                <div style="font-size:9pt; line-height:1.45; color:#1e293b; text-align:left;">
+                    <strong style="font-size:10.5pt; display:block; color:#0f2d59; margin-bottom:2px;">CÓDIGO QR DE VERIFICACIÓN OFICIAL DE
                         CÉDULA E INSCRIPCIÓN — IUAC</strong>
-                    <span><strong>C.I. Titular:</strong> <span id="p-qr-ci">--</span> &nbsp;|&nbsp;
+                    <span style="font-size:9.5pt;"><strong>C.I. Titular:</strong> <span id="p-qr-ci">--</span> &nbsp;|&nbsp;
                         <strong>Folio:</strong> <span id="p-qr-folio">--</span> &nbsp;|&nbsp; <strong>Acuse
                             SMS:</strong> <span id="p-qr-sms"
                             style="color:#166534; font-weight:700;">--</span></span><br>
@@ -1171,7 +1155,7 @@
     <!-- Scripts de Carga Ultra Rápida -->
     <script src="js/theme_switcher.js?v=1.0"></script>
     <script src="js/geo_data.js?v=2.3"></script>
-    <script src="js/qr_pdf_engine.js?v=3.0"></script>
+    <script src="js/qr_pdf_engine.js?v=3.1"></script>
     <script src="js/react_ui_enhancer.js?v=1.8"></script>
     <script src="js/app.js?v=4.6"></script>
 

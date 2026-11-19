@@ -566,26 +566,26 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.strokeStyle = '#3a3a3a';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(centerX - 240, y + 118);
-    ctx.lineTo(centerX + 240, y + 118);
-    ctx.moveTo(centerX - 240, y + 140);
-    ctx.lineTo(centerX + 240, y + 140);
+    ctx.moveTo(centerX - 260, y + 118);
+    ctx.lineTo(centerX + 260, y + 118);
+    ctx.moveTo(centerX - 260, y + 140);
+    ctx.lineTo(centerX + 260, y + 140);
     ctx.stroke();
     ctx.font = 'bold 14.5px Arial, sans-serif';
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillText('DEPARTAMENTO DE CAPTACIÓN, SELECCIÓN Y ADMISIÓN', centerX, y + 134);
+    ctx.fillText('DEPARTAMENTO DE CAPTACIÓN, SELECCIÓN Y ACREDITACIÓN', centerX, y + 134);
 
-    // Banda gris de título del documento
-    ctx.fillStyle = '#e2e8f0';
-    ctx.fillRect(centerX - 335, y + 148, 670, 26);
-    ctx.fillStyle = '#1a1a1a';
+    // Banda de título del documento
+    ctx.fillStyle = '#dce7f5';
+    ctx.fillRect(centerX - 340, y + 148, 680, 26);
+    ctx.fillStyle = '#0f2d59';
     ctx.font = 'bold 15px Arial, sans-serif';
     ctx.fillText('PLANILLA OFICIAL DE PREINSCRIPCIÓN DE ASPIRANTES — CONVOCATORIA 2026-2027', centerX, y + 166);
 
     y += 192;
 
     // Línea divisoria superior
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = '#0f2d59';
     ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(M, y);
@@ -593,49 +593,55 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.stroke();
     y += 10;
 
-    // Barra de Control Azul Oscuro
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(M, y, contentW, 34);
+    // Barra de Control (Nuevo color de fondo Azul Marino Institucional IUAC)
+    ctx.fillStyle = '#16365c';
+    ctx.fillRect(M, y, contentW, 38);
+    ctx.strokeStyle = '#0f2642';
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(M, y, contentW, 38);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 15px Arial, sans-serif';
+    ctx.font = 'bold 15.5px Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`N° FOLIO: ${folio}`, M + 14, y + 22);
+    ctx.fillText(`N° FOLIO: ${folio}`, M + 16, y + 25);
     ctx.textAlign = 'center';
-    ctx.fillText(`FECHA EMISIÓN: ${fechaEmision}`, W / 2, y + 22);
+    ctx.fillText(`FECHA EMISIÓN: ${fechaEmision}`, W / 2, y + 25);
     ctx.textAlign = 'right';
-    ctx.fillText('CONDICIÓN: PREINSCRITO EN LÍNEA', W - M - 14, y + 22);
-    y += 46;
+    ctx.fillText('CONDICIÓN: PREINSCRITO EN LÍNEA', W - M - 16, y + 25);
+    y += 50;
 
-    // Helper para dibujar secciones y celdas de tabla
+    // Helper para dibujar secciones (Puntos 1, 2 y 3 con nuevo color de fondo Azul Aeronáutico Institucional)
     const drawSectionHeader = (titulo) => {
-        ctx.fillStyle = '#262626';
-        ctx.fillRect(M, y, contentW, 28);
+        ctx.fillStyle = '#214d7e';
+        ctx.fillRect(M, y, contentW, 32);
+        // Acento lateral izquierdo institucional
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(M, y, 7, 32);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 14.5px Arial, sans-serif';
+        ctx.font = 'bold 15.5px Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(titulo, M + 10, y + 19);
-        y += 30;
+        ctx.fillText(titulo, M + 16, y + 22);
+        y += 34;
     };
 
-    const drawTableRow = (cols, rowH = 54, bg = '#ffffff') => {
+    const drawTableRow = (cols, rowH = 58, bg = '#ffffff') => {
         let curX = M;
         for (const col of cols) {
             const cellW = Math.round(contentW * col.w);
             ctx.fillStyle = col.bg || bg;
             ctx.fillRect(curX, y, cellW, rowH);
-            ctx.strokeStyle = '#525252';
+            ctx.strokeStyle = '#64748b';
             ctx.lineWidth = 1.4;
             ctx.strokeRect(curX, y, cellW, rowH);
 
             ctx.textAlign = 'left';
-            ctx.fillStyle = '#3a3a3a';
-            ctx.font = 'bold 12.5px Arial, sans-serif';
-            ctx.fillText(col.label, curX + 10, y + 18);
+            ctx.fillStyle = '#334155';
+            ctx.font = 'bold 13px Arial, sans-serif';
+            ctx.fillText(col.label, curX + 12, y + 20);
 
             ctx.fillStyle = col.valColor || '#000000';
-            ctx.font = col.valFont || 'bold 15.5px Arial, sans-serif';
+            ctx.font = col.valFont || 'bold 16.5px Arial, sans-serif';
             const valStr = String(col.value || '--');
-            ctx.fillText(valStr.slice(0, 82), curX + 10, y + 41);
+            ctx.fillText(valStr.slice(0, 82), curX + 12, y + 44);
 
             curX += cellW;
         }
@@ -649,7 +655,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
         { w: 0.25, label: 'CÉDULA DE IDENTIDAD:', value: cedFormateada },
         { w: 0.25, label: 'NACIONALIDAD:', value: reg.nacionalidad_alum || 'VENEZOLANA' },
         { w: 0.25, label: 'GÉNERO:', value: sexoTexto },
-        { w: 0.25, label: 'ESTADO CIVIL:', value: reg.est_civil_alum || 'Soltero/a' }
+        { w: 0.25, label: 'ESTADO CIVIL:', value: (reg.est_civil_alum || 'SOLTERO/A').toUpperCase() }
     ]);
     drawTableRow([
         { w: 0.50, label: 'NOMBRES COMPLETOS:', value: reg.nom_alum || '--' },
@@ -668,24 +674,25 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     drawTableRow([
         { w: 0.25, label: 'FECHA DE NACIMIENTO:', value: reg.fec_nac_alum || '--' },
         { w: 0.25, label: 'EDAD:', value: edadCalc ? `${edadCalc} años` : '--' },
-        { w: 0.50, label: 'LUGAR DE NACIMIENTO:', value: reg.lugar_nac_alum || '--' }
+        { w: 0.50, label: 'LUGAR DE NACIMIENTO:', value: (reg.lugar_nac_alum || '--').toUpperCase() }
     ]);
 
+    const esMenor = (edadCalc && edadCalc < 18) || Boolean(reg.nom_repres);
     // Fila adicional de Representante Legal si el aspirante es menor de edad
-    if ((edadCalc && edadCalc < 18) || reg.nom_repres) {
+    if (esMenor) {
         drawTableRow([
             { w: 0.50, label: 'CONDICIÓN LEGAL DEL ASPIRANTE:', value: 'MENOR DE EDAD (REQUIERE REPRESENTANTE)', bg: '#fffbeb', valColor: '#9a3412' },
-            { w: 0.50, label: 'FOTOCOPIA CÉDULA REPRESENTANTE:', value: 'CONSIGNADA / ALOJADA EN SISTEMA IUAC', bg: '#fffbeb', valColor: '#262626' }
-        ], 50);
+            { w: 0.50, label: 'FOTOCOPIA CÉDULA REPRESENTANTE:', value: 'CONSIGNADA / ALOJADA EN SISTEMA IUAC', bg: '#fffbeb', valColor: '#1e293b' }
+        ], 52);
     }
-    y += 12;
+    y += 14;
 
     // SECCIÓN 2: DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO
     drawSectionHeader('2. DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO');
     drawTableRow([
-        { w: 0.33, label: 'ESTADO:', value: reg.est_alum || '--' },
-        { w: 0.33, label: 'CIUDAD / MUNICIPIO:', value: reg.ciu_alum || '--' },
-        { w: 0.34, label: 'PAÍS:', value: reg.pais_alum || 'Venezuela' }
+        { w: 0.33, label: 'ESTADO:', value: (reg.est_alum || '--').toUpperCase() },
+        { w: 0.33, label: 'CIUDAD / MUNICIPIO:', value: (reg.ciu_alum || '--').toUpperCase() },
+        { w: 0.34, label: 'PAÍS:', value: (reg.pais_alum || 'VENEZUELA').toUpperCase() }
     ]);
     drawTableRow([
         { w: 1.00, label: 'DIRECCIÓN DE HABITACIÓN:', value: reg.direc_alum || '--' }
@@ -695,7 +702,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
         { w: 0.33, label: 'TELÉFONO HABITACIÓN:', value: reg.telehabi_alum || 'No registrado' },
         { w: 0.34, label: 'CORREO ELECTRÓNICO:', value: reg.correo_alum || '--' }
     ]);
-    y += 12;
+    y += 14;
 
     // SECCIÓN 3: ANTECEDENTES ACADÉMICOS Y CARRERA
     drawSectionHeader('3. ANTECEDENTES ACADÉMICOS Y ESPECIALIDAD DE POSTULACIÓN');
@@ -704,150 +711,137 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
             w: 1.00,
             label: 'ESPECIALIDAD AERONÁUTICA DE POSTULACIÓN:',
             value: carreraTexto,
-            bg: '#f1f5f9',
-            valColor: '#1a1a1a',
-            valFont: '900 18px Arial, sans-serif'
+            bg: '#edf4fc',
+            valColor: '#0f2d59',
+            valFont: '900 19px Arial, sans-serif'
         }
-    ], 58);
+    ], 62);
     drawTableRow([
-        { w: 0.33, label: 'NIVEL ACADÉMICO:', value: reg.niv_acad_alum || 'Bachiller' },
+        { w: 0.33, label: 'NIVEL ACADÉMICO:', value: (reg.niv_acad_alum || 'BACHILLER').toUpperCase() },
         { w: 0.33, label: 'AÑO DE GRADUACIÓN:', value: String(reg.ano_grad_alum || '--') },
-        { w: 0.34, label: 'TIPO DE INSTITUCIÓN:', value: reg.tipo_colegio || 'Público' }
+        { w: 0.34, label: 'TIPO DE INSTITUCIÓN:', value: (reg.tipo_colegio || 'PÚBLICO').toUpperCase() }
     ]);
     drawTableRow([
         { w: 1.00, label: 'PLANTEL O INSTITUCIÓN DE EGRESO:', value: reg.inst_grad_alum || '--' }
     ]);
-    y += 12;
+    y += 18;
 
-    // SECCIÓN 4: RECAUDOS EXIGIDOS
-    drawSectionHeader('4. RECAUDOS EXIGIDOS PARA LA CONSIGNACIÓN EN EL DEPARTAMENTO DE CAPTACIÓN');
-    const esMenor = (edadCalc && edadCalc < 18) || Boolean(reg.nom_repres);
-    const recBoxH = esMenor ? 104 : 88;
-    ctx.fillStyle = '#f8fafc';
-    ctx.fillRect(M, y, contentW, recBoxH);
-    ctx.strokeStyle = '#525252';
-    ctx.lineWidth = 1.4;
-    ctx.strokeRect(M, y, contentW, recBoxH);
-
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = '13.5px Arial, sans-serif';
+    // DECLARACIÓN JURADA (Aumento de +9px en las letras: de 13px a 22px para ocupar armónicamente el espacio en la hoja Carta)
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'italic bold 21.5px Arial, sans-serif';
     ctx.textAlign = 'left';
-    const col1X = M + 12;
-    const col2X = M + Math.round(contentW / 2) + 10;
-    ctx.fillText('[  ] 02 Fotocopias legibles de la C.I. ampliada a color.', col1X, y + 24);
-    ctx.fillText('[  ] Calificaciones Certificadas de 1° a 4° o 5° año (original y copia).', col1X, y + 50);
-    ctx.fillText('[  ] Copia legible de la Partida de Nacimiento.', col1X, y + 76);
+    ctx.fillText('"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos', M, y + 22);
+    ctx.fillText('y que cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos', M, y + 50);
+    ctx.fillText('por el Instituto Universitario de Aeronáutica Civil (IUAC)."', M, y + 78);
+    y += (esMenor ? 92 : 98);
 
-    ctx.fillText('[  ] Fondo negro y copia del Título de Bachiller o Constancia de 5° Año.', col2X, y + 24);
-    ctx.fillText('[  ] 02 Fotos tipo carnet en fondo blanco (recientes y formales).', col2X, y + 50);
-    ctx.fillText('[  ] Comprobante de Registro del Sistema Nacional de Ingreso (SNI).', col2X, y + 76);
-
-    if (esMenor) {
-        ctx.fillStyle = '#9a3412';
-        ctx.font = 'bold 12.5px Arial, sans-serif';
-        ctx.fillText('[ X ] Fotocopia de Cédula del Representante Legal (Consignada en Portal IUAC).', col1X, y + 96);
-    }
-    y += recBoxH + 12;
-
-    // SECCIÓN 5: DECLARACIÓN JURADA Y FIRMAS
-    ctx.fillStyle = '#262626';
-    ctx.font = 'italic 13px Arial, sans-serif';
-    ctx.fillText('"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que cumplo con la totalidad de los requisitos', M, y + 14);
-    ctx.fillText('de admisión reglamentarios exigidos por el Instituto Universitario de Aeronáutica Civil (IUAC)."', M, y + 32);
-    y += 44;
-
+    // RECUADROS DE FIRMAS (Mayor altura y mayor tamaño de letras)
     const firmaW = Math.round((contentW - 28) / 2);
-    const firmaH = 140;
+    const firmaH = esMenor ? 184 : 210;
+
     // Caja Firma Aspirante (Izquierda)
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = '#0f2d59';
+    ctx.lineWidth = 2;
     ctx.strokeRect(M, y, firmaW, firmaH);
 
+    const areaFirmaIzqW = firmaW - 140;
+    const lineaFirmaIzqY = y + firmaH - 72;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.moveTo(M + 40, y + 82);
-    ctx.lineTo(M + firmaW - 125, y + 82);
+    ctx.moveTo(M + 34, lineaFirmaIzqY);
+    ctx.lineTo(M + areaFirmaIzqW - 14, lineaFirmaIzqY);
     ctx.stroke();
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 14px Arial, sans-serif';
-    ctx.fillText('FIRMA DEL ASPIRANTE', M + (firmaW - 100) / 2, y + 102);
-    ctx.font = '13px Arial, sans-serif';
-    ctx.fillText(`C.I.: ${cedFormateada}`, M + (firmaW - 100) / 2, y + 122);
+    ctx.font = 'bold 18.5px Arial, sans-serif';
+    ctx.fillText('FIRMA DEL ASPIRANTE', M + (areaFirmaIzqW + 20) / 2, lineaFirmaIzqY + 26);
+    ctx.font = 'bold 17px Arial, sans-serif';
+    ctx.fillText(`C.I.: ${cedFormateada}`, M + (areaFirmaIzqW + 20) / 2, lineaFirmaIzqY + 50);
 
-    // Casilla Huella Pulgar Derecho
-    const huellaX = M + firmaW - 102;
+    // Casilla Huella Pulgar Derecho (Más alta y letras más grandes)
+    const huellaW = 118;
+    const huellaH = firmaH - 28;
+    const huellaX = M + firmaW - huellaW - 16;
     const huellaY = y + 14;
-    ctx.setLineDash([4, 3]);
-    ctx.strokeStyle = '#6b6b6b';
-    ctx.strokeRect(huellaX, huellaY, 88, 112);
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = '#475569';
+    ctx.lineWidth = 1.6;
+    ctx.strokeRect(huellaX, huellaY, huellaW, huellaH);
     ctx.setLineDash([]);
-    ctx.fillStyle = '#6b6b6b';
-    ctx.font = '11px Arial, sans-serif';
-    ctx.fillText('Huella Pulgar', huellaX + 44, huellaY + 52);
-    ctx.fillText('Derecho', huellaX + 44, huellaY + 68);
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 14.5px Arial, sans-serif';
+    ctx.fillText('Huella Pulgar', huellaX + huellaW / 2, huellaY + huellaH / 2 - 6);
+    ctx.fillText('Derecho', huellaX + huellaW / 2, huellaY + huellaH / 2 + 14);
 
     // Caja Revisado y Recibido Por (Derecha)
     const revX = M + firmaW + 28;
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1.6;
+    ctx.strokeStyle = '#0f2d59';
+    ctx.lineWidth = 2;
     ctx.strokeRect(revX, y, firmaW, firmaH);
 
+    const lineaFirmaDerY = y + firmaH - 86;
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.8;
     ctx.beginPath();
-    ctx.moveTo(revX + 60, y + 72);
-    ctx.lineTo(revX + firmaW - 60, y + 72);
+    ctx.moveTo(revX + 54, lineaFirmaDerY);
+    ctx.lineTo(revX + firmaW - 54, lineaFirmaDerY);
     ctx.stroke();
 
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 14px Arial, sans-serif';
-    ctx.fillText('REVISADO Y RECIBIDO POR:', revX + firmaW / 2, y + 92);
-    ctx.font = '12.5px Arial, sans-serif';
-    ctx.fillText('Depto. de Captación, Selección y Admisión IUAC', revX + firmaW / 2, y + 110);
-    ctx.fillStyle = '#6b6b6b';
-    ctx.font = 'bold 11.5px Arial, sans-serif';
-    ctx.fillText('SELLO INSTITUCIONAL / FECHA', revX + firmaW / 2, y + 129);
+    ctx.font = 'bold 18.5px Arial, sans-serif';
+    ctx.fillText('REVISADO Y RECIBIDO POR:', revX + firmaW / 2, lineaFirmaDerY + 25);
+    ctx.font = 'bold 15.5px Arial, sans-serif';
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText('Depto. de Captación, Selección y Acreditación IUAC', revX + firmaW / 2, lineaFirmaDerY + 49);
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 14.5px Arial, sans-serif';
+    ctx.fillText('SELLO INSTITUCIONAL / FECHA', revX + firmaW / 2, lineaFirmaDerY + 72);
 
-    y += firmaH + 16;
+    y += firmaH + (esMenor ? 18 : 22);
 
-    // 6. FRANJA INFERIOR DE VERIFICACIÓN CON CÓDIGO QR DE LA CÉDULA DEL ASPIRANTE
-    const qrFooterH = 148;
-    ctx.fillStyle = '#f8fafc';
+    // FRANJA INFERIOR DE VERIFICACIÓN CON CÓDIGO QR AMPLIADO Y LETRAS MÁS GRANDES
+    const qrFooterH = esMenor ? 210 : 230;
+    ctx.fillStyle = '#f1f6fc';
     ctx.fillRect(M, y, contentW, qrFooterH);
-    ctx.strokeStyle = '#1a1a1a';
-    ctx.lineWidth = 1.8;
+    ctx.strokeStyle = '#16365c';
+    ctx.lineWidth = 2.2;
     ctx.strokeRect(M, y, contentW, qrFooterH);
 
-    // Generar QR en canvas auxiliar e incrustarlo en la parte inferior
+    // Generar QR ampliado en canvas auxiliar e incrustarlo en la parte inferior
+    const qrSize = esMenor ? 182 : 198;
+    const qrPadY = Math.round((qrFooterH - qrSize) / 2);
     const qrTempCanvas = document.createElement('canvas');
-    dibujarQREnCanvas(qrTempCanvas, qrPayload, 132);
-    ctx.drawImage(qrTempCanvas, M + 12, y + 8, 132, 132);
+    dibujarQREnCanvas(qrTempCanvas, qrPayload, qrSize);
+    ctx.drawImage(qrTempCanvas, M + 18, y + qrPadY, qrSize, qrSize);
 
-    // Texto explicativo junto al QR en el pie de la planilla
-    const qrTextX = M + 162;
+    // Texto explicativo con letras aumentadas junto al QR en el pie de la planilla
+    const qrTextX = M + qrSize + 36;
     const acuseRecibo = reg.acuse_recibo || (window.ultimoSmsData && window.ultimoSmsData.acuse_recibo) || 'ACK-IUAC-REGISTRADO';
     const telMovil = reg.telemov_alum || 'Teléfono Registrado';
 
     ctx.textAlign = 'left';
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 15px Arial, sans-serif';
-    ctx.fillText('CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA E INSCRIPCIÓN — IUAC', qrTextX, y + 27);
+    ctx.fillStyle = '#0f2d59';
+    ctx.font = '900 18.5px Arial, sans-serif';
+    ctx.fillText('CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA E INSCRIPCIÓN — IUAC', qrTextX, y + 36);
 
-    ctx.fillStyle = '#1a1a1a';
-    ctx.font = 'bold 14px Arial, sans-serif';
-    ctx.fillText(`TITULAR: ${cedFormateada}  |  ${(reg.nom_alum || '')} ${(reg.ape_alum || '')}`.trim(), qrTextX, y + 49);
+    ctx.fillStyle = '#000000';
+    ctx.font = 'bold 18.5px Arial, sans-serif';
+    ctx.fillText(`TITULAR: ${cedFormateada}  |  ${((reg.nom_alum || '') + ' ' + (reg.ape_alum || '')).trim().toUpperCase()}`, qrTextX, y + 68);
 
-    ctx.fillStyle = '#3a3a3a';
-    ctx.font = 'bold 12.5px Arial, sans-serif';
-    ctx.fillText(`FOLIO: ${folio}   •   ESPECIALIDAD: ${carreraTexto}`, qrTextX, y + 71);
+    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 16px Arial, sans-serif';
+    ctx.fillText(`FOLIO: ${folio}   •   ESPECIALIDAD: ${carreraTexto}`, qrTextX, y + 100);
 
     ctx.fillStyle = '#166534';
-    ctx.font = 'bold 12px Arial, sans-serif';
-    ctx.fillText(`ACUSE RECIBO SMS: ${acuseRecibo}   •   NOTIFICADO A: ${telMovil}`, qrTextX, y + 93);
+    ctx.font = 'bold 15.5px Arial, sans-serif';
+    ctx.fillText(`ACUSE RECIBO SMS: ${acuseRecibo}   •   NOTIFICADO A: ${telMovil}`, qrTextX, y + 132);
 
-    ctx.fillStyle = '#525252';
-    ctx.font = '11.5px Arial, sans-serif';
-    ctx.fillText('Escanee el código QR en Captación para validar los datos del titular y el acuse de recibo institucional.', qrTextX, y + 114);
-    ctx.fillText('Documento electrónico oficial generado en una (01) sola página por el Portal de Admisión IUAC.', qrTextX, y + 132);
+    ctx.fillStyle = '#334155';
+    ctx.font = 'bold 14.5px Arial, sans-serif';
+    ctx.fillText('Escanee el código QR en Captación para validar los datos del titular y el acuse de recibo institucional.', qrTextX, y + 166);
+    ctx.fillText('Documento electrónico oficial generado en una (01) sola página por el Portal de Admisión IUAC.', qrTextX, y + 192);
 
     // Exportar como archivo PDF real de 1 sola página y descargarlo con nombre personalizado por aspirante (ced_alum)
     const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
