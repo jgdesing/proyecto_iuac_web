@@ -729,21 +729,21 @@ function initGeoSelectors() {
 
     // 4.1 Poblar Combobox de Lugar de Nacimiento (24 Entidades + Dep. Federales + Exterior)
     if (lugarNacSelect) {
-        lugarNacSelect.innerHTML = '<option value="">Seleccione un Estado...</option>';
+        lugarNacSelect.innerHTML = '<option value="">SELECCIONE UN ESTADO...</option>';
         estados.forEach(est => {
             const opt = document.createElement('option');
-            opt.value = est;
-            opt.textContent = est;
+            opt.value = est.toUpperCase();
+            opt.textContent = est.toUpperCase();
             lugarNacSelect.appendChild(opt);
         });
         const optDep = document.createElement('option');
-        optDep.value = 'Dependencias Federales';
-        optDep.textContent = 'Dependencias Federales';
+        optDep.value = 'DEPENDENCIAS FEDERALES';
+        optDep.textContent = 'DEPENDENCIAS FEDERALES';
         lugarNacSelect.appendChild(optDep);
 
         const optExt = document.createElement('option');
-        optExt.value = 'En el Exterior';
-        optExt.textContent = 'En el Exterior';
+        optExt.value = 'EN EL EXTERIOR';
+        optExt.textContent = 'EN EL EXTERIOR';
         lugarNacSelect.appendChild(optExt);
 
         lugarNacSelect.addEventListener('change', () => {
@@ -757,23 +757,26 @@ function initGeoSelectors() {
 
     if (!estadoSelect || !ciudadSelect) return;
 
+    estadoSelect.innerHTML = '<option value="">SELECCIONE UN ESTADO...</option>';
     estados.forEach(est => {
         const opt = document.createElement('option');
-        opt.value = est;
-        opt.textContent = est;
+        opt.value = est.toUpperCase();
+        opt.textContent = est.toUpperCase();
         estadoSelect.appendChild(opt);
     });
 
     estadoSelect.addEventListener('change', () => {
-        const estSeleccionado = estadoSelect.value;
-        ciudadSelect.innerHTML = '<option value="">Seleccione una ciudad...</option>';
+        const estSeleccionado = (estadoSelect.value || '').toUpperCase();
+        ciudadSelect.innerHTML = '<option value="">SELECCIONE UNA CIUDAD...</option>';
 
-        if (estSeleccionado && window.VENEZUELA_GEO[estSeleccionado]) {
-            const ciudades = window.VENEZUELA_GEO[estSeleccionado];
+        const ciudades = window.VENEZUELA_GEO[estSeleccionado] || 
+            window.VENEZUELA_GEO[Object.keys(window.VENEZUELA_GEO || {}).find(k => k.toUpperCase() === estSeleccionado)];
+
+        if (estSeleccionado && ciudades) {
             ciudades.forEach(ciu => {
                 const opt = document.createElement('option');
-                opt.value = ciu;
-                opt.textContent = ciu;
+                opt.value = ciu.toUpperCase();
+                opt.textContent = ciu.toUpperCase();
                 ciudadSelect.appendChild(opt);
             });
             ciudadSelect.disabled = false;

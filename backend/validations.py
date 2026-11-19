@@ -238,7 +238,8 @@ def validate_aspirante_payload(data):
     else:
         return False, None, "El año de graduación es obligatorio."
 
-    cleaned['tipo_colegio'] = limpiar_texto_estricto(data.get('tipo_colegio', 'Público'))[:50]
+    val_colegio = limpiar_texto_estricto(data.get('tipo_colegio', 'Público'))
+    cleaned['tipo_colegio'] = 'Privado' if 'privad' in val_colegio.lower() else 'Público'
 
     # 9. Carrera de Postulación IUAC (Obligatoria)
     carrera = limpiar_texto_estricto(data.get('carrera', '')).upper()

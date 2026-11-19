@@ -1,33 +1,32 @@
 /**
  * geo_data.js - Catálogo Geográfico Oficial de Venezuela para IUAC Web
- * Precarga local de los 24 estados y principales ciudades/municipios.
+ * Precarga local de los 24 estados y principales ciudades/municipios en MAYÚSCULAS.
  * Garantiza respuesta inmediata (0ms) en dispositivos móviles sin saturar la red.
  */
 
 window.VENEZUELA_GEO = {
-    "Amazonas": ["Puerto Ayacucho", "San Fernando de Atabapo", "Maroa", "San Carlos de Río Negro", "Isla Ratón", "La Esmeralda"],
-    "Anzoátegui": ["Barcelona", "Puerto La Cruz", "Lechería", "Guanta", "El Tigre", "Anaco", "Cantaura", "Pariaguán", "Clarines", "Aragua de Barcelona"],
-    "Apure": ["San Fernando de Apure", "Achaguas", "Biruaca", "Guasdualito", "Elorza", "San Juan de Payara"],
-    "Aragua": ["Maracay", "Turmero", "La Victoria", "Cagua", "El Limón", "Villa de Cura", "Palo Negro", "Santa Cruz", "San Mateo", "Ocumare de la Costa"],
-    "Barinas": ["Barinas", "Barinitas", "Socopó", "Ciudad Bolivia", "Sabaneta", "Santa Bárbara"],
-    "Bolívar": ["Ciudad Guayana", "Puerto Ordaz", "San Félix", "Ciudad Bolívar", "Upata", "Caicara del Orinoco", "Tumeremo", "Santa Elena de Uairén"],
-    "Carabobo": ["Valencia", "Puerto Cabello", "Guacara", "Naguanagua", "San Diego", "Mariara", "Tocuyito", "Morón", "San Joaquín", "Güigüe"],
-    "Cojedes": ["San Carlos", "Tinaquillo", "Tinaco", "El Baúl", "El Pao", "Las Vegas"],
-    "Delta Amacuro": ["Tucupita", "Pedernales", "Curiapo", "Sierra Imataca"],
-    "Distrito Capital": ["Caracas", "Libertador", "Sucre (Catia)", "El Valle", "El Paraíso", "Coche", "Antímano", "La Pastora", "San Juan", "Altagracia"],
-    "Falcón": ["Coro", "Punto Fijo", "Chichiriviche", "Tucacas", "Dabajuro", "Churuguara", "Punta Cardón"],
-    "Guárico": ["San Juan de los Morros", "Calabozo", "Valle de la Pascua", "Zaraza", "Altagracia de Orituco", "Tucupido"],
-    "La Guaira": ["La Guaira", "Maiquetía", "Catia La Mar", "Caraballeda", "Caruao", "Naiguatá", "Macuto"],
-    "Lara": ["Barquisimeto", "Cabudare", "Carora", "El Tocuyo", "Quíbor", "Duaca", "Sanare", "Siquisique"],
-    "Mérida": ["Mérida", "El Vigía", "Ejido", "Tovar", "Lagunillas", "Mucuchíes", "Bailadores", "Timotes"],
-    "Miranda": ["Los Teques", "Petare", "Baruta", "Chacao", "El Hatillo", "Guarenas", "Guatire", "Charallave", "Ocumare del Tuy", "Cúa", "Higuerote", "Río Chico"],
-    "Monagas": ["Maturín", "Punta de Mata", "Caripe", "Caripito", "Temblador", "Caicara de Maturín"],
-    "Nueva Esparta": ["La Asunción", "Porlamar", "Pampatar", "Juan Griego", "El Valle del Espíritu Santo", "Punta de Piedras"],
-    "Portuguesa": ["Guanare", "Acarigua", "Araure", "Turén", "Biscucuy", "Villa Bruzual"],
-    "Sucre": ["Cumaná", "Carúpano", "Güiria", "Cariaco", "Araya", "Río Caribe"],
-    "Táchira": ["San Cristóbal", "Táriba", "Rubio", "San Antonio del Táchira", "La Grita", "Colón", "Capacho"],
-    "Trujillo": ["Trujillo", "Valera", "Boconó", "Carache", "La Puerta", "Sabana de Mendoza"],
-    "Yaracuy": ["San Felipe", "Yaritagua", "Chivacoa", "Nirgua", "Cocorote", "Urachiche"],
-    "Zulia": ["Maracaibo", "San Francisco", "Cabimas", "Ciudad Ojeda", "Santa Bárbara del Zulia", "Machiques", "Villa del Rosario", "Los Puertos de Altagracia"]
+    "AMAZONAS": ["PUERTO AYACUCHO", "SAN FERNANDO DE ATABAPO", "MAROA", "SAN CARLOS DE RÍO NEGRO", "ISLA RATÓN", "LA ESMERALDA"],
+    "ANZOÁTEGUI": ["BARCELONA", "PUERTO LA CRUZ", "LECHERÍA", "GUANTA", "EL TIGRE", "ANACO", "CANTAURA", "PARIAGUÁN", "CLARINES", "ARAGUA DE BARCELONA"],
+    "APURE": ["SAN FERNANDO DE APURE", "ACHAGUAS", "BIRUACA", "GUASDUALITO", "ELORZA", "SAN JUAN DE PAYARA"],
+    "ARAGUA": ["MARACAY", "TURMERO", "LA VICTORIA", "CAGUA", "EL LIMÓN", "VILLA DE CURA", "PALO NEGRO", "SANTA CRUZ", "SAN MATEO", "OCUMARE DE LA COSTA"],
+    "BARINAS": ["BARINAS", "BARINITAS", "SOCOPÓ", "CIUDAD BOLIVIA", "SABANETA", "SANTA BÁRBARA"],
+    "BOLÍVAR": ["CIUDAD GUAYANA", "PUERTO ORDAZ", "SAN FÉLIX", "CIUDAD BOLÍVAR", "UPATA", "CAICARA DEL ORINOCO", "TUMEREMO", "SANTA ELENA DE UAIRÉN"],
+    "CARABOBO": ["VALENCIA", "PUERTO CABELLO", "GUACARA", "NAGUANAGUA", "SAN DIEGO", "MARIARA", "TOCUYITO", "MORÓN", "SAN JOAQUÍN", "GÜIGÜE"],
+    "COJEDES": ["SAN CARLOS", "TINAQUILLO", "TINACO", "EL BAÚL", "EL PAO", "LAS VEGAS"],
+    "DELTA AMACURO": ["TUCUPITA", "PEDERNALES", "CURIAPO", "SIERRA IMATACA"],
+    "DISTRITO CAPITAL": ["CARACAS", "LIBERTADOR", "SUCRE (CATIA)", "EL VALLE", "EL PARAÍSO", "COCHE", "ANTÍMANO", "LA PASTORA", "SAN JUAN", "ALTAGRACIA"],
+    "FALCÓN": ["CORO", "PUNTO FIJO", "CHICHIRIVICHE", "TUCACAS", "DABAJURO", "CHURUGUARA", "PUNTA CARDÓN"],
+    "GUÁRICO": ["SAN JUAN DE LOS MORROS", "CALABOZO", "VALLE DE LA PASCUA", "ZARAZA", "ALTAGRACIA DE ORITUCO", "TUCUPIDO"],
+    "LA GUAIRA": ["LA GUAIRA", "MAIQUETÍA", "CATIA LA MAR", "CARABALLEDA", "CARUAO", "NAIGUATÁ", "MACUTO"],
+    "LARA": ["BARQUISIMETO", "CABUDARE", "CARORA", "EL TOCUYO", "QUÍBOR", "DUACA", "SANARE", "SIQUISIQUE"],
+    "MÉRIDA": ["MÉRIDA", "EL VIGÍA", "EJIDO", "TOVAR", "LAGUNILLAS", "MUCUCHÍES", "BAILADORES", "TIMOTES"],
+    "MIRANDA": ["LOS TEQUES", "PETARE", "BARUTA", "CHACAO", "EL HATILLO", "GUARENAS", "GUATIRE", "CHARALLAVE", "OCUMARE DEL TUY", "CÚA", "HIGUEROTE", "RÍO CHICO"],
+    "MONAGAS": ["MATURÍN", "PUNTA DE MATA", "CARIPE", "CARIPITO", "TEMBLADOR", "CAICARA DE MATURÍN"],
+    "NUEVA ESPARTA": ["LA ASUNCIÓN", "PORLAMAR", "PAMPATAR", "JUAN GRIEGO", "EL VALLE DEL ESPÍRITU SANTO", "PUNTA DE PIEDRAS"],
+    "PORTUGUESA": ["GUANARE", "ACARIGUA", "ARAURE", "TURÉN", "BISCUCLUY", "VILLA BRUZUAL"],
+    "SUCRE": ["CUMANÁ", "CARÚPANO", "GÜIRIA", "CARIACO", "ARAYA", "RÍO CARIBE"],
+    "TÁCHIRA": ["SAN CRISTÓBAL", "TÁRIBA", "RUBIO", "SAN ANTONIO DEL TÁCHIRA", "LA GRITA", "COLÓN", "CAPACHO"],
+    "TRUJILLO": ["TRUJILLO", "VALERA", "BOCONÓ", "CARACHE", "LA PUERTA", "SABANA DE MENDOZA"],
+    "YARACUY": ["SAN FELIPE", "YARITAGUA", "CHIVACOA", "NIRGUA", "COCOROTE", "URACHICHE"],
+    "ZULIA": ["MARACAIBO", "SAN FRANCISCO", "CABIMAS", "CIUDAD OJEDA", "SANTA BÁRBARA DEL ZULIA", "MACHIQUES", "VILLA DEL ROSARIO", "LOS PUERTOS DE ALTAGRACIA"]
 };
-

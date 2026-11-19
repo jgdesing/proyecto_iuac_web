@@ -81,8 +81,13 @@ def init_schema_if_needed():
                 conn.commit()
                 logger.info("Esquema academico y tablas creados exitosamente en la nube.")
         else:
-            # Asegurar que foto_alum sea tipo TEXT para almacenar la fotografía directamente en la BD
-            cur.execute("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;")
+            # Asegurar que foto_alum sea tipo TEXT (si ninguna vista depende de ella)
+            cur.execute("""
+                DO $$ BEGIN
+                    ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;
+                EXCEPTION WHEN OTHERS THEN NULL;
+                END $$;
+            """)
             conn.commit()
     except Exception as e:
         logger.warning(f"Aviso al verificar/crear esquema: {e}")

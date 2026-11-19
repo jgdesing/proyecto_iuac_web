@@ -130,7 +130,10 @@ def obtener_aspirantes_web(solo_pendientes=False, fecha_desde=None):
                     'estado_sms': row[4]
                 }
         except Exception:
-            pass  # Si aún no existe academico.sms_logs, continúa de forma segura
+            try:
+                conn.rollback()
+            except Exception:
+                pass
 
         registros = []
         for r in filas:
@@ -203,10 +206,16 @@ def generar_contenido_sql(registros):
 
     # 1. Ajustes DDL preventivos e idempotentes en bd_aspirantes
     out.write("-- 1. Garantizar columnas requeridas en bd_aspirantes (Fotografías y Representantes)\n")
-    out.write("ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;\n")
+    out.write("DO $$ BEGIN\n")
+    out.write("    ALTER TABLE academico.estudiantes ALTER COLUMN foto_alum TYPE TEXT;\n")
+    out.write("EXCEPTION WHEN OTHERS THEN NULL;\n")
+    out.write("END $$;\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS tipo_cedula VARCHAR(10) DEFAULT 'V';\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula TEXT;\n")
-    out.write("ALTER TABLE academico.estudiantes ALTER COLUMN fotocopia_cedula TYPE TEXT;\n")
+    out.write("DO $$ BEGIN\n")
+    out.write("    ALTER TABLE academico.estudiantes ALTER COLUMN fotocopia_cedula TYPE TEXT;\n")
+    out.write("EXCEPTION WHEN OTHERS THEN NULL;\n")
+    out.write("END $$;\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS fotocopia_cedula_repres TEXT;\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS ced_repres VARCHAR(20);\n")
     out.write("ALTER TABLE academico.estudiantes ADD COLUMN IF NOT EXISTS nom_repres VARCHAR(150);\n")
