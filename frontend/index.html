@@ -730,8 +730,11 @@
                                 <div class="form-group">
                                     <label>Teléfono Habitación / Secundario (Opcional)</label>
                                     <input type="tel" class="form-control" id="asp-telehabi_alum"
-                                        placeholder="Opcional (Dejar en blanco si no posee)" maxlength="12" inputmode="tel">
-                                    <div class="field-hint" style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Campo opcional. Si no posee segundo teléfono, déjelo vacío.</div>
+                                        placeholder="Opcional (Dejar en blanco si no posee)" maxlength="12"
+                                        inputmode="tel">
+                                    <div class="field-hint"
+                                        style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Campo
+                                        opcional. Si no posee segundo teléfono, déjelo vacío.</div>
                                     <div class="field-error-msg" id="err-telehab"></div>
                                 </div>
                             </div>
@@ -944,21 +947,20 @@
                             <div class="descarga-item-info">
                                 <div class="descarga-item-icon">📄</div>
                                 <div>
-                                    <div class="descarga-item-name">Instructivo Oficial de Admisión IUAC 2026-2027</div>
-                                    <div class="descarga-item-desc">Etapas del proceso, cronograma de consignación de
-                                        carpetas y requisitos obligatorios.</div>
-                                    <div class="descarga-item-meta">PDF • Carpeta Oficial: /descargas • Oficial IUAC
-                                    </div>
+                                    <div class="descarga-item-name">Instructivo de Admisión IUAC 2026-2027</div>
+                                    <div class="descarga-item-desc">Armar el expediente físico de
+                                        pregrado.</div>
+                                    <!--<div class="descarga-item-meta">PDF • Carpeta Oficial: /descargas • Oficial IUAC
+                                    </div>-->
                                 </div>
                             </div>
                             <div class="descarga-item-actions">
-                                <a href="descargas/instructivo_admision_iuac_2026_2027.pdf" target="_blank"
+                                <a href="descargas/intructivo.pdf" target="_blank"
                                     class="btn-descarga-action btn-descarga-ver"
                                     title="Abrir y leer documento en el navegador">
                                     👁️ Ver
                                 </a>
-                                <a href="descargas/instructivo_admision_iuac_2026_2027.pdf"
-                                    download="instructivo_admision_iuac_2026_2027.pdf"
+                                <a href="descargas/intructivo.pdf" download="intructivo.pdf"
                                     class="btn-descarga-action btn-descarga-bajar"
                                     title="Descargar PDF a su PC o móvil">
                                     📥 Descargar
@@ -971,21 +973,21 @@
                             <div class="descarga-item-info">
                                 <div class="descarga-item-icon">🏥</div>
                                 <div>
-                                    <div class="descarga-item-name">Guía de Perfil Médico y Aptitud Física</div>
-                                    <div class="descarga-item-desc">Exámenes clínicos, oftalmológicos, auditivos y
-                                        aptitud psicofísica por especialidad aeronáutica.</div>
-                                    <div class="descarga-item-meta">PDF • Carpeta Oficial: /descargas • Requisito de
-                                        Salud</div>
+                                    <div class="descarga-item-name">Temario / Guía</div>
+                                    <div class="descarga-item-desc">Programa temático orientado a la formación de
+                                        futuros aspirantes en
+                                        Matemática, Lenguaje, Socio Crítica y Física.</div>
+                                    <!--<div class="descarga-item-meta">PDF • Carpeta Oficial: /descargas • Requisito de
+                                        Salud</div>-->
                                 </div>
                             </div>
                             <div class="descarga-item-actions">
-                                <a href="descargas/guia_perfil_medico_y_recaudos_iuac.pdf" target="_blank"
+                                <a href="descargas/temario.pdf" target="_blank"
                                     class="btn-descarga-action btn-descarga-ver"
                                     title="Abrir y leer documento en el navegador">
                                     👁️ Ver
                                 </a>
-                                <a href="descargas/guia_perfil_medico_y_recaudos_iuac.pdf"
-                                    download="guia_perfil_medico_y_recaudos_iuac.pdf"
+                                <a href="descargas/temario.pdf" download="temario.pdf"
                                     class="btn-descarga-action btn-descarga-bajar"
                                     title="Descargar PDF a su PC o móvil">
                                     📥 Descargar
@@ -1103,21 +1105,24 @@
         <!-- DECLARACIÓN JURADA, FIRMAS Y QR -->
         <div class="p-seccion" style="margin-top:12px;">
             <p class="p-juramento">
-                <em><strong>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que
-                    cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el Instituto
-                    Universitario de Aeronáutica Civil (IUAC)."</strong></em>
+                <em><strong>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos
+                        y que
+                        cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el Instituto
+                        Universitario de Aeronáutica Civil (IUAC)."</strong></em>
             </p>
             <div class="p-firmas-container">
                 <div class="p-firma-box">
                     <div class="p-firma-linea"></div>
                     <strong style="font-size:10pt;">FIRMA DEL ASPIRANTE</strong>
-                    <div style="font-size:9.5pt; font-weight:700; margin-top:3px;">C.I.: <span id="p-firma-ci">--</span></div>
+                    <div style="font-size:9.5pt; font-weight:700; margin-top:3px;">C.I.: <span id="p-firma-ci">--</span>
+                    </div>
                     <div class="p-huella-box">Huella Pulgar Derecho</div>
                 </div>
                 <div class="p-firma-box">
                     <div class="p-firma-linea"></div>
                     <strong style="font-size:10pt;">REVISADO Y RECIBIDO POR:</strong>
-                    <div style="font-size:9pt; font-weight:700; margin-top:3px;">Depto. de Captación, Selección y Acreditación IUAC</div>
+                    <div style="font-size:9pt; font-weight:700; margin-top:3px;">Depto. de Captación, Selección y
+                        Acreditación IUAC</div>
                     <div class="p-sello-box" style="font-size:8.5pt; font-weight:700;">SELLO INSTITUCIONAL / FECHA</div>
                 </div>
             </div>
@@ -1127,9 +1132,11 @@
                 <canvas id="planilla-qr-canvas" width="140" height="140"
                     style="width:112px; height:112px; flex-shrink:0; border:1px solid #cbd5e1; background:#fff;"></canvas>
                 <div style="font-size:9pt; line-height:1.45; color:#1e293b; text-align:left;">
-                    <strong style="font-size:10.5pt; display:block; color:#0f2d59; margin-bottom:2px;">CÓDIGO QR DE VERIFICACIÓN OFICIAL DE
+                    <strong style="font-size:10.5pt; display:block; color:#0f2d59; margin-bottom:2px;">CÓDIGO QR DE
+                        VERIFICACIÓN OFICIAL DE
                         CÉDULA E INSCRIPCIÓN — IUAC</strong>
-                    <span style="font-size:9.5pt;"><strong>C.I. Titular:</strong> <span id="p-qr-ci">--</span> &nbsp;|&nbsp;
+                    <span style="font-size:9.5pt;"><strong>C.I. Titular:</strong> <span id="p-qr-ci">--</span>
+                        &nbsp;|&nbsp;
                         <strong>Folio:</strong> <span id="p-qr-folio">--</span> &nbsp;|&nbsp; <strong>Acuse
                             SMS:</strong> <span id="p-qr-sms"
                             style="color:#166534; font-weight:700;">--</span></span><br>
