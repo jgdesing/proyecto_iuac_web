@@ -18,7 +18,7 @@
     <script>
         (function () { try { var t = localStorage.getItem('iuac_tema_color'); if (t === 'azul' || t === 'ocre') document.documentElement.setAttribute('data-theme', t); } catch (e) { } })();
     </script>
-    <link rel="stylesheet" href="css/landing.css?v=8.4">
+    <link rel="stylesheet" href="css/landing.css?v=8.5">
 </head>
 
 <body>
@@ -894,10 +894,10 @@
                         IUAC: Su preinscripción ha sido registrada exitosamente. Conserve su número de folio y este
                         mensaje como acuse oficial.
                     </div>
-                    <button type="button" id="btn-imprimir-qr-cedula" class="btn-sms-native"
-                        style="cursor:pointer; background:var(--t-primary); color:#ffffff; border:none; padding:12px 18px; border-radius:8px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:10px; font-size:0.95rem; box-shadow:0 2px 8px rgba(0,0,0,0.15);"
+                    <button type="button" id="btn-imprimir-qr-cedula" class="btn-imprimir-qr-cedula"
                         onclick="window.imprimirTarjetaQRCedula && window.imprimirTarjetaQRCedula(window.ultimoRegistroAspirante)">
-                        🖨️ Imprimir Cédula en Código QR (con Logo Institucional IUAC)
+                        <span style="font-size:1.25rem;">🖨️</span>
+                        <span>Imprimir Cédula en Código QR (con Logo Institucional IUAC)</span>
                     </button>
                 </div>
             </div>
@@ -1170,7 +1170,7 @@
     <script src="js/geo_data.js?v=2.2"></script>
     <script src="js/qr_pdf_engine.js?v=3.0"></script>
     <script src="js/react_ui_enhancer.js?v=1.8"></script>
-    <script src="js/app.js?v=4.2"></script>
+    <script src="js/app.js?v=4.3"></script>
 
     <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
         <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">

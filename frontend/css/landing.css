@@ -38,6 +38,7 @@
     --rgb-frame: 33, 33, 33;
 
     /* Tokens heredados (usados por otras reglas) */
+    --t-primary: var(--t-btn-1);
     --primary: var(--t-main);
     --primary-light: var(--t-btn-hover);
     --accent: var(--t-accent);
@@ -87,6 +88,7 @@ html[data-theme="azul"] {
     --rgb-main: 58, 127, 176;
     --rgb-btn: 58, 127, 176;
     --rgb-dark: 35, 79, 112;
+    --t-primary: var(--t-btn-1);
 }
 
 /* ── TEMA AMARILLO OCRE CLARO ────────────────────────────────────────────── */
@@ -111,6 +113,7 @@ html[data-theme="ocre"] {
     --rgb-main: 184, 137, 46;
     --rgb-btn: 184, 137, 46;
     --rgb-dark: 119, 87, 27;
+    --t-primary: var(--t-btn-1);
 }
 
 * {
@@ -1567,6 +1570,45 @@ select.form-control.is-valid {
 .btn-sms-native:hover {
     background: var(--t-dark);
     text-decoration: none;
+}
+
+#btn-imprimir-qr-cedula,
+.btn-imprimir-qr-cedula {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.65rem !important;
+    width: 100% !important;
+    background: linear-gradient(135deg, var(--t-btn-1) 0%, var(--t-dark) 100%) !important;
+    color: #ffffff !important;
+    font-size: 0.96rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.3px !important;
+    padding: 14px 20px !important;
+    border-radius: 10px !important;
+    border: 2px solid var(--t-darker) !important;
+    margin-top: 12px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28) !important;
+    cursor: pointer !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+    transition: var(--transition) !important;
+    text-decoration: none !important;
+    line-height: 1.35 !important;
+    text-align: center !important;
+}
+
+#btn-imprimir-qr-cedula:hover,
+.btn-imprimir-qr-cedula:hover {
+    background: linear-gradient(135deg, var(--t-btn-hover) 0%, var(--t-btn-1) 100%) !important;
+    color: #ffffff !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.38) !important;
+}
+
+#btn-imprimir-qr-cedula:active,
+.btn-imprimir-qr-cedula:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22) !important;
 }
 
 .modal-actions {
