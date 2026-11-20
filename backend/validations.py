@@ -6,7 +6,6 @@ CARRERAS_VALIDAS = {
     'CTA': 'Control de Tránsito Aéreo',
     'ICA': 'Información y Comunicaciones Aeronáuticas',
     'IMA': 'Mantenimiento Aeronáutico',
-    'SAR': 'Búsqueda y Salvamento',
     'ETA': 'Electrónica Aeronáutica'
 }
 

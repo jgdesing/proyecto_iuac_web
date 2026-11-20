@@ -8,12 +8,11 @@
 // redirige las peticiones AJAX al servidor Flask local en http://127.0.0.1:5050
 const API_BASE = (window.location.protocol === 'file:') ? 'http://127.0.0.1:5050' : '';
 
-// Diccionario oficial de carreras IUAC activas (solo activo = TRUE)
+// Diccionario oficial de carreras IUAC activas (solo activo = TRUE: CTA, ICA, ETA, IMA)
 const MAPA_CARRERAS = {
     'CTA': 'Control de Tránsito Aéreo (CTA)',
     'ICA': 'Información y Comunicaciones Aeronáuticas (ICA)',
     'IMA': 'Mantenimiento Aeronáutico (IMA)',
-    'SAR': 'Búsqueda y Salvamento (SAR)',
     'ETA': 'Electrónica Aeronáutica (ETA)'
 };
 

@@ -66,7 +66,7 @@ def serve_foto_aspirante(filename):
             resp.headers['Cache-Control'] = 'public, max-age=3600'
             return resp
 
-    # Fallback por número de cédula extraído del nombre de archivo
+    # Fallback por número de cédula extraído del nombre de archivo (disco y Base64 en PostgreSQL/Neon)
     m = re.search(r'(\d{6,9})', clean_name)
     if m:
         ced = m.group(1)
@@ -79,6 +79,21 @@ def serve_foto_aspirante(filename):
                     resp.headers['Access-Control-Allow-Origin'] = '*'
                     resp.headers['Cache-Control'] = 'public, max-age=3600'
                     return resp
+        # Fallback directo desde Base64 en PostgreSQL/Neon (para contenedores efímeros en Render)
+        try:
+            import base64
+            d_asp, _ = obtener_aspirante_por_cedula(int(ced))
+            b64_val = (d_asp or {}).get('foto_base64')
+            if b64_val and isinstance(b64_val, str):
+                encoded = b64_val.split(',', 1)[1] if ',' in b64_val else b64_val
+                img_bytes = base64.b64decode(encoded)
+                mime = 'image/png' if 'image/png' in b64_val else 'image/jpeg'
+                resp = Response(img_bytes, mimetype=mime)
+                resp.headers['Access-Control-Allow-Origin'] = '*'
+                resp.headers['Cache-Control'] = 'public, max-age=3600'
+                return resp
+        except Exception:
+            pass
 
     resp = send_from_directory(UPLOAD_DIR, clean_name)
     resp.headers['Access-Control-Allow-Origin'] = '*'

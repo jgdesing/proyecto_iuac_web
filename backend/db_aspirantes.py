@@ -464,18 +464,20 @@ def actualizar_foto_aspirante(cedula, foto_base64, nom_alum='', ape_alum='', ext
         return False, None, str(e)
 
 def get_active_carreras():
-    """Retorna exclusivamente las carreras oficiales activas del IUAC (activo = TRUE)."""
+    """Retorna exclusivamente las carreras oficiales activas del IUAC (activo = TRUE: CTA, ICA, ETA, IMA)."""
     conn, cur = get_db_cursor()
     if not conn:
         return [
             {"codigo": "CTA", "nombre": "Control de Tránsito Aéreo"},
             {"codigo": "ICA", "nombre": "Información y Comunicaciones Aeronáuticas"},
             {"codigo": "IMA", "nombre": "Mantenimiento Aeronáutico"},
-            {"codigo": "SAR", "nombre": "Búsqueda y Salvamento"},
             {"codigo": "ETA", "nombre": "Electrónica Aeronáutica"}
         ]
     try:
-        cur.execute("SELECT codigo, nombre, descripcion FROM academico.carreras WHERE activo = TRUE ORDER BY carrera_id ASC, codigo ASC;")
+        cur.execute("UPDATE academico.carreras SET activo = FALSE WHERE codigo NOT IN ('CTA', 'ICA', 'ETA', 'IMA') AND activo = TRUE;")
+        cur.execute("UPDATE academico.carreras SET activo = TRUE WHERE codigo IN ('CTA', 'ICA', 'ETA', 'IMA') AND activo = FALSE;")
+        conn.commit()
+        cur.execute("SELECT codigo, nombre, descripcion FROM academico.carreras WHERE activo = TRUE AND codigo IN ('CTA', 'ICA', 'ETA', 'IMA') ORDER BY carrera_id ASC, codigo ASC;")
         rows = cur.fetchall()
         if rows:
             return [{"codigo": r[0], "nombre": r[1], "descripcion": r[2]} for r in rows]
