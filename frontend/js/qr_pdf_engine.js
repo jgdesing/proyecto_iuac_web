@@ -566,7 +566,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.font = '900 21px Arial, sans-serif';
     ctx.fillText('INSTITUTO UNIVERSITARIO DE AERONÁUTICA CIVIL', centerX, y + 86);
     ctx.font = 'italic bold 17px Arial, sans-serif';
-    ctx.fillText('"MAYOR (AV) MIGUEL RODRÍGUEZ"', centerX, y + 109);
+    ctx.fillText('"MAYOR (AV.) MIGUEL RODRÍGUEZ"', centerX, y + 109);
 
     // Subtítulo Departamento
     ctx.strokeStyle = '#3a3a3a';
@@ -597,42 +597,43 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.moveTo(M, y);
     ctx.lineTo(W - M, y);
     ctx.stroke();
-    y += 10;
+    y += 12;
 
     // Barra de Control (Nuevo color de fondo Azul Marino Institucional IUAC)
     ctx.fillStyle = '#16365c';
-    ctx.fillRect(M, y, contentW, 38);
+    ctx.fillRect(M, y, contentW, 40);
     ctx.strokeStyle = '#0f2642';
     ctx.lineWidth = 1.2;
-    ctx.strokeRect(M, y, contentW, 38);
+    ctx.strokeRect(M, y, contentW, 40);
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 15.5px Arial, sans-serif';
     ctx.textAlign = 'left';
-    ctx.fillText(`N° FOLIO: ${folio}`, M + 16, y + 25);
+    ctx.fillText(`N° FOLIO: ${folio}`, M + 16, y + 26);
     ctx.textAlign = 'center';
-    ctx.fillText(`FECHA EMISIÓN: ${fechaEmision}`, W / 2, y + 25);
+    ctx.fillText(`FECHA EMISIÓN: ${fechaEmision}`, W / 2, y + 26);
     ctx.textAlign = 'right';
-    ctx.fillText('CONDICIÓN: PREINSCRITO EN LÍNEA', W - M - 16, y + 25);
-    y += 50;
+    ctx.fillText('CONDICIÓN: PREINSCRITO EN LÍNEA', W - M - 16, y + 26);
+    y += 56;
 
-    // Helper para dibujar secciones (Puntos 1, 2 y 3 con nuevo color de fondo Azul Aeronáutico Institucional)
+    // Helper para dibujar secciones (Puntos 1, 2 y 3 con color de fondo Azul Aeronáutico Institucional)
     const drawSectionHeader = (titulo) => {
         ctx.fillStyle = '#214d7e';
-        ctx.fillRect(M, y, contentW, 32);
+        ctx.fillRect(M, y, contentW, 36);
         // Acento lateral izquierdo institucional
         ctx.fillStyle = '#38bdf8';
-        ctx.fillRect(M, y, 7, 32);
+        ctx.fillRect(M, y, 7, 36);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 15.5px Arial, sans-serif';
+        ctx.font = 'bold 16px Arial, sans-serif';
         ctx.textAlign = 'left';
-        ctx.fillText(titulo, M + 16, y + 22);
-        y += 34;
+        ctx.fillText(titulo, M + 16, y + 24);
+        y += 38;
     };
 
-    const drawTableRow = (cols, rowH = 58, bg = '#ffffff') => {
+    const drawTableRow = (cols, rowH = 66, bg = '#ffffff') => {
         let curX = M;
-        for (const col of cols) {
-            const cellW = Math.round(contentW * col.w);
+        cols.forEach((col, idx) => {
+            const isLast = (idx === cols.length - 1);
+            const cellW = isLast ? (M + contentW - curX) : Math.round(contentW * col.w);
             ctx.fillStyle = col.bg || bg;
             ctx.fillRect(curX, y, cellW, rowH);
             ctx.strokeStyle = '#64748b';
@@ -641,16 +642,16 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
 
             ctx.textAlign = 'left';
             ctx.fillStyle = '#334155';
-            ctx.font = 'bold 13px Arial, sans-serif';
-            ctx.fillText(col.label, curX + 12, y + 20);
+            ctx.font = 'bold 13.5px Arial, sans-serif';
+            ctx.fillText(col.label, curX + 12, y + 22);
 
             ctx.fillStyle = col.valColor || '#000000';
-            ctx.font = col.valFont || 'bold 16.5px Arial, sans-serif';
+            ctx.font = col.valFont || 'bold 17px Arial, sans-serif';
             const valStr = String(col.value || '--');
-            ctx.fillText(valStr.slice(0, 82), curX + 12, y + 44);
+            ctx.fillText(valStr.slice(0, 82), curX + 12, y + 48);
 
             curX += cellW;
-        }
+        });
         y += rowH;
     };
 
@@ -689,9 +690,9 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
         drawTableRow([
             { w: 0.50, label: 'CONDICIÓN LEGAL DEL ASPIRANTE:', value: 'MENOR DE EDAD (REQUIERE REPRESENTANTE)', bg: '#fffbeb', valColor: '#9a3412' },
             { w: 0.50, label: 'FOTOCOPIA CÉDULA REPRESENTANTE:', value: 'CONSIGNADA / ALOJADA EN SISTEMA IUAC', bg: '#fffbeb', valColor: '#1e293b' }
-        ], 52);
+        ], 56);
     }
-    y += 14;
+    y += 22;
 
     // SECCIÓN 2: DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO
     drawSectionHeader('2. DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO');
@@ -708,7 +709,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
         { w: 0.33, label: 'TELÉFONO HABITACIÓN:', value: reg.telehabi_alum || 'No registrado' },
         { w: 0.34, label: 'CORREO ELECTRÓNICO:', value: reg.correo_alum || '--' }
     ]);
-    y += 14;
+    y += 22;
 
     // SECCIÓN 3: ANTECEDENTES ACADÉMICOS Y CARRERA
     drawSectionHeader('3. ANTECEDENTES ACADÉMICOS Y ESPECIALIDAD DE POSTULACIÓN');
@@ -719,9 +720,9 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
             value: carreraTexto,
             bg: '#edf4fc',
             valColor: '#0f2d59',
-            valFont: '900 19px Arial, sans-serif'
+            valFont: '900 20px Arial, sans-serif'
         }
-    ], 62);
+    ], 70);
     drawTableRow([
         { w: 0.33, label: 'NIVEL ACADÉMICO:', value: (reg.niv_acad_alum || 'BACHILLER').toUpperCase() },
         { w: 0.33, label: 'AÑO DE GRADUACIÓN:', value: String(reg.ano_grad_alum || '--') },
@@ -730,28 +731,70 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     drawTableRow([
         { w: 1.00, label: 'PLANTEL O INSTITUCIÓN DE EGRESO:', value: reg.inst_grad_alum || '--' }
     ]);
-    y += 18;
+    y += 30;
 
-    // DECLARACIÓN JURADA (Aumento de +9px en las letras: de 13px a 22px para ocupar armónicamente el espacio en la hoja Carta)
+    // DECLARACIÓN JURADA JUSTIFICADA (Alineada exactamente con los bordes izquierdo M y derecho M + contentW del cuadro Punto 3)
+    const drawJustifiedParagraph = (texto, x, startY, maxWidth, lineHeight) => {
+        const words = texto.trim().split(/\s+/);
+        const lines = [];
+        let currentLine = [];
+
+        for (const word of words) {
+            const testLine = currentLine.concat(word);
+            const testStr = testLine.join(' ');
+            if (ctx.measureText(testStr).width > maxWidth && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = [word];
+            } else {
+                currentLine = testLine;
+            }
+        }
+        if (currentLine.length > 0) lines.push(currentLine);
+
+        let curY = startY;
+        ctx.textAlign = 'left';
+        lines.forEach((lineWords, idx) => {
+            const isLastLine = (idx === lines.length - 1);
+            if (isLastLine || lineWords.length === 1) {
+                ctx.fillText(lineWords.join(' '), x, curY);
+            } else {
+                const totalWordsW = lineWords.reduce((acc, w) => acc + ctx.measureText(w).width, 0);
+                const extraSpace = Math.max(0, maxWidth - totalWordsW);
+                const gap = extraSpace / (lineWords.length - 1);
+                let curX = x;
+                lineWords.forEach((w, wIdx) => {
+                    if (wIdx === lineWords.length - 1) {
+                        const wWidth = ctx.measureText(w).width;
+                        ctx.fillText(w, x + maxWidth - wWidth, curY);
+                    } else {
+                        ctx.fillText(w, curX, curY);
+                        curX += ctx.measureText(w).width + gap;
+                    }
+                });
+            }
+            curY += lineHeight;
+        });
+        return curY;
+    };
+
     ctx.fillStyle = '#1e293b';
-    ctx.font = 'italic bold 21.5px Arial, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos', M, y + 22);
-    ctx.fillText('y que cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos', M, y + 50);
-    ctx.fillText('por el Instituto Universitario de Aeronáutica Civil (IUAC)."', M, y + 78);
-    y += (esMenor ? 92 : 98);
+    ctx.font = 'italic bold 21px Arial, sans-serif';
+    const textoDeclaracion = '"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el Instituto Universitario de Aeronáutica Civil (IUAC)."';
+    y = drawJustifiedParagraph(textoDeclaracion, M, y + 22, contentW, 32);
 
-    // RECUADROS DE FIRMAS (Mayor altura y mayor tamaño de letras)
+    // RECUADROS DE FIRMAS (Bajados hacia la parte inferior de la única hoja Carta sin generar segunda hoja)
     const firmaW = Math.round((contentW - 28) / 2);
-    const firmaH = esMenor ? 184 : 210;
+    const firmaH = esMenor ? 225 : 245;
+    const bottomMargin = 62;
+    y = Math.max(y + 28, H - bottomMargin - firmaH);
 
     // Caja Firma Aspirante (Izquierda)
     ctx.strokeStyle = '#0f2d59';
     ctx.lineWidth = 2;
     ctx.strokeRect(M, y, firmaW, firmaH);
 
-    const areaFirmaIzqW = firmaW - 140;
-    const lineaFirmaIzqY = y + firmaH - 72;
+    const areaFirmaIzqW = firmaW - 146;
+    const lineaFirmaIzqY = y + firmaH - 78;
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 1.8;
     ctx.beginPath();
@@ -761,25 +804,25 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
 
     ctx.textAlign = 'center';
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 18.5px Arial, sans-serif';
-    ctx.fillText('FIRMA DEL ASPIRANTE', M + (areaFirmaIzqW + 20) / 2, lineaFirmaIzqY + 26);
-    ctx.font = 'bold 17px Arial, sans-serif';
-    ctx.fillText(`C.I.: ${cedFormateada}`, M + (areaFirmaIzqW + 20) / 2, lineaFirmaIzqY + 50);
+    ctx.font = 'bold 19px Arial, sans-serif';
+    ctx.fillText('FIRMA DEL ASPIRANTE', M + (areaFirmaIzqW + 20) / 2, lineaFirmaIzqY + 28);
+    ctx.font = 'bold 17.5px Arial, sans-serif';
+    ctx.fillText(`C.I.: ${cedFormateada}`, M + (areaFirmaIzqW + 20) / 2, lineaFirmaIzqY + 54);
 
-    // Casilla Huella Pulgar Derecho (Más alta y letras más grandes)
-    const huellaW = 118;
-    const huellaH = firmaH - 28;
+    // Casilla Huella Pulgar Derecho
+    const huellaW = 124;
+    const huellaH = firmaH - 32;
     const huellaX = M + firmaW - huellaW - 16;
-    const huellaY = y + 14;
+    const huellaY = y + 16;
     ctx.setLineDash([5, 4]);
     ctx.strokeStyle = '#475569';
     ctx.lineWidth = 1.6;
     ctx.strokeRect(huellaX, huellaY, huellaW, huellaH);
     ctx.setLineDash([]);
     ctx.fillStyle = '#475569';
-    ctx.font = 'bold 14.5px Arial, sans-serif';
+    ctx.font = 'bold 15px Arial, sans-serif';
     ctx.fillText('Huella Pulgar', huellaX + huellaW / 2, huellaY + huellaH / 2 - 6);
-    ctx.fillText('Derecho', huellaX + huellaW / 2, huellaY + huellaH / 2 + 14);
+    ctx.fillText('Derecho', huellaX + huellaW / 2, huellaY + huellaH / 2 + 16);
 
     // Caja Revisado y Recibido Por (Derecha)
     const revX = M + firmaW + 28;
@@ -787,7 +830,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.lineWidth = 2;
     ctx.strokeRect(revX, y, firmaW, firmaH);
 
-    const lineaFirmaDerY = y + firmaH - 86;
+    const lineaFirmaDerY = y + firmaH - 92;
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 1.8;
     ctx.beginPath();
@@ -796,58 +839,14 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     ctx.stroke();
 
     ctx.fillStyle = '#000000';
-    ctx.font = 'bold 18.5px Arial, sans-serif';
-    ctx.fillText('REVISADO Y RECIBIDO POR:', revX + firmaW / 2, lineaFirmaDerY + 25);
-    ctx.font = 'bold 15.5px Arial, sans-serif';
-    ctx.fillStyle = '#1e293b';
-    ctx.fillText('Depto. de Captación, Selección y Acreditación IUAC', revX + firmaW / 2, lineaFirmaDerY + 49);
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 14.5px Arial, sans-serif';
-    ctx.fillText('SELLO INSTITUCIONAL / FECHA', revX + firmaW / 2, lineaFirmaDerY + 72);
-
-    y += firmaH + (esMenor ? 18 : 22);
-
-    // FRANJA INFERIOR DE VERIFICACIÓN CON CÓDIGO QR AMPLIADO Y LETRAS MÁS GRANDES
-    const qrFooterH = esMenor ? 210 : 230;
-    ctx.fillStyle = '#f1f6fc';
-    ctx.fillRect(M, y, contentW, qrFooterH);
-    ctx.strokeStyle = '#16365c';
-    ctx.lineWidth = 2.2;
-    ctx.strokeRect(M, y, contentW, qrFooterH);
-
-    // Generar QR ampliado en canvas auxiliar e incrustarlo en la parte inferior
-    const qrSize = esMenor ? 182 : 198;
-    const qrPadY = Math.round((qrFooterH - qrSize) / 2);
-    const qrTempCanvas = document.createElement('canvas');
-    dibujarQREnCanvas(qrTempCanvas, qrPayload, qrSize);
-    ctx.drawImage(qrTempCanvas, M + 18, y + qrPadY, qrSize, qrSize);
-
-    // Texto explicativo con letras aumentadas junto al QR en el pie de la planilla
-    const qrTextX = M + qrSize + 36;
-    const acuseRecibo = reg.acuse_recibo || (window.ultimoSmsData && window.ultimoSmsData.acuse_recibo) || 'ACK-IUAC-REGISTRADO';
-    const telMovil = reg.telemov_alum || 'Teléfono Registrado';
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#0f2d59';
-    ctx.font = '900 18.5px Arial, sans-serif';
-    ctx.fillText('CÓDIGO QR DE VERIFICACIÓN OFICIAL DE CÉDULA E INSCRIPCIÓN — IUAC', qrTextX, y + 36);
-
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 18.5px Arial, sans-serif';
-    ctx.fillText(`TITULAR: ${cedFormateada}  |  ${((reg.nom_alum || '') + ' ' + (reg.ape_alum || '')).trim().toUpperCase()}`, qrTextX, y + 68);
-
-    ctx.fillStyle = '#1e293b';
+    ctx.font = 'bold 19px Arial, sans-serif';
+    ctx.fillText('REVISADO Y RECIBIDO POR:', revX + firmaW / 2, lineaFirmaDerY + 27);
     ctx.font = 'bold 16px Arial, sans-serif';
-    ctx.fillText(`FOLIO: ${folio}   •   ESPECIALIDAD: ${carreraTexto}`, qrTextX, y + 100);
-
-    ctx.fillStyle = '#166534';
-    ctx.font = 'bold 15.5px Arial, sans-serif';
-    ctx.fillText(`ACUSE RECIBO SMS: ${acuseRecibo}   •   NOTIFICADO A: ${telMovil}`, qrTextX, y + 132);
-
-    ctx.fillStyle = '#334155';
-    ctx.font = 'bold 14.5px Arial, sans-serif';
-    ctx.fillText('Escanee el código QR en Captación para validar los datos del titular y el acuse de recibo institucional.', qrTextX, y + 166);
-    ctx.fillText('Documento electrónico oficial generado en una (01) sola página por el Portal de Admisión IUAC.', qrTextX, y + 192);
+    ctx.fillStyle = '#1e293b';
+    ctx.fillText('Depto. de Captación, Selección y Acreditación IUAC', revX + firmaW / 2, lineaFirmaDerY + 52);
+    ctx.fillStyle = '#475569';
+    ctx.font = 'bold 15px Arial, sans-serif';
+    ctx.fillText('SELLO INSTITUCIONAL / FECHA', revX + firmaW / 2, lineaFirmaDerY + 77);
 
     // Exportar como archivo PDF real de 1 sola página y descargarlo con nombre personalizado por aspirante (ced_alum)
     const jpegDataUrl = canvas.toDataURL('image/jpeg', 0.92);
