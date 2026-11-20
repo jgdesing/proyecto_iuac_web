@@ -652,6 +652,7 @@ let currentStep = 1;
 const totalSteps = 3;
 let formularioBloqueadoPorEdad = false;
 let formularioBloqueadoPorCedula = false;
+let formularioBloqueadoPorCorreo = false;
 
 function initStepper() {
     const btnNext = document.getElementById('btn-step-next');
@@ -661,6 +662,11 @@ function initStepper() {
         btnNext.addEventListener('click', () => {
             if (formularioBloqueadoPorCedula) {
                 mostrarAvisoScroll('cedula-lock-banner');
+                return;
+            }
+            if (formularioBloqueadoPorCorreo) {
+                const correoEl = document.getElementById('asp-correo_alum');
+                mostrarErrorDePaso(correoEl, 2, 'Paso 2: Residencia y Canales de Contacto', 'Correo Electrónico', 'Este correo electrónico ya se encuentra registrado en el sistema. No puede proseguir con la carga de datos.');
                 return;
             }
             if (formularioBloqueadoPorEdad) {
@@ -1281,6 +1287,8 @@ function limpiarAvisoErrorPaso() {
 // ── 7. VALIDACIONES EN TIEMPO REAL PARA TODOS LOS CAMPOS ─────────────────────
 let cedulaDisponible = false;
 let checkCedulaTimeout = null;
+let correoDisponible = true;
+let checkCorreoTimeout = null;
 
 const REGEX_LETRAS_Y_ESPACIOS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\.]+$/;
 const REGEX_EMAIL = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
@@ -1527,6 +1535,10 @@ function evaluarCampoEnTiempoReal(el, forzarError = true) {
         }
         if (!REGEX_EMAIL.test(val)) {
             setFieldInvalid(el, 'err-correo', 'Formato de correo no válido (ej: aspirante@correo.com).');
+            return false;
+        }
+        if (!correoDisponible || formularioBloqueadoPorCorreo) {
+            setFieldInvalid(el, 'err-correo', '⚠️ Este correo electrónico ya se encuentra registrado en el sistema. No puede proseguir con la carga de datos.');
             return false;
         }
         setFieldValid(el, 'err-correo');
@@ -1789,17 +1801,49 @@ function initRealtimeValidations() {
         onFormat: formatearTelefonoInput
     });
 
-    // 8. Correo Electrónico (keydown, keyup, change, blur: letra a letra)
-    vincularEventosTiempoReal(correoInput, {
-        onKeydown: (e) => {
+    // 8. Correo Electrónico (keydown, keyup, change, blur: letra a letra + verificación remota con BD)
+    if (correoInput) {
+        const procesarCorreoEnVivo = () => {
+            correoInput.value = correoInput.value.replace(/\s+/g, '').toLowerCase();
+            const val = correoInput.value.trim();
+            clearTimeout(checkCorreoTimeout);
+            const statusLabel = document.getElementById('asp-correo-status');
+
+            if (!val) {
+                setFieldInvalid(correoInput, 'err-correo', 'El correo electrónico es obligatorio.');
+                if (statusLabel) statusLabel.innerHTML = '';
+                correoDisponible = false;
+                desbloquearFormularioPorCorreoRegistrado();
+            } else if (!REGEX_EMAIL.test(val)) {
+                setFieldInvalid(correoInput, 'err-correo', 'Formato de correo no válido (ej: aspirante@correo.com).');
+                if (statusLabel) statusLabel.innerHTML = '';
+                correoDisponible = false;
+                desbloquearFormularioPorCorreoRegistrado();
+            } else {
+                if (statusLabel) statusLabel.innerHTML = '<span style="color:var(--t-dark); font-size:0.75rem;">⏳ Verificando correo en el sistema...</span>';
+                checkCorreoTimeout = setTimeout(() => verificarCorreoRemoto(val), 300);
+            }
+        };
+
+        correoInput.addEventListener('keydown', (e) => {
             if (e.key === ' ') {
                 e.preventDefault();
                 setFieldInvalid(correoInput, 'err-correo', 'El correo electrónico no puede contener espacios.');
-                return false;
+                return;
             }
-            return true;
-        }
-    });
+        });
+        correoInput.addEventListener('keyup', procesarCorreoEnVivo);
+        correoInput.addEventListener('input', procesarCorreoEnVivo);
+        correoInput.addEventListener('change', procesarCorreoEnVivo);
+        correoInput.addEventListener('blur', () => {
+            correoInput.value = correoInput.value.trim().toLowerCase();
+            if (REGEX_EMAIL.test(correoInput.value)) {
+                verificarCorreoRemoto(correoInput.value);
+            } else {
+                evaluarCampoEnTiempoReal(correoInput, true);
+            }
+        });
+    }
 
     // 9. Dirección (keydown, keyup, change, blur: letra a letra)
     vincularEventosTiempoReal(direcInput);
@@ -1835,6 +1879,73 @@ function initRealtimeValidations() {
     setTimeout(() => {
         evaluarCamposPasoActual(1);
     }, 200);
+}
+
+function bloquearFormularioPorCorreoRegistrado() {
+    formularioBloqueadoPorCorreo = true;
+    const btnNext = document.getElementById('btn-step-next');
+    const btnSubmit = document.getElementById('btn-step-submit');
+    if (btnNext) btnNext.disabled = true;
+    if (btnSubmit) btnSubmit.disabled = true;
+
+    // Deshabilitar campos del Paso 3 para que no prosiga con la carga de datos
+    document.querySelectorAll('#step-pane-3 input, #step-pane-3 select, #step-pane-3 textarea').forEach(el => {
+        el.disabled = true;
+    });
+}
+
+function desbloquearFormularioPorCorreoRegistrado() {
+    if (!formularioBloqueadoPorCorreo) return;
+    formularioBloqueadoPorCorreo = false;
+
+    if (formularioBloqueadoPorCedula || formularioBloqueadoPorEdad) return;
+
+    const btnNext = document.getElementById('btn-step-next');
+    const btnSubmit = document.getElementById('btn-step-submit');
+    if (btnNext) btnNext.disabled = false;
+    if (btnSubmit) btnSubmit.disabled = false;
+
+    document.querySelectorAll('#step-pane-3 input, #step-pane-3 select, #step-pane-3 textarea').forEach(el => {
+        el.disabled = false;
+    });
+}
+
+async function verificarCorreoRemoto(correo) {
+    const statusLabel = document.getElementById('asp-correo-status');
+    const input = document.getElementById('asp-correo_alum');
+    if (!input) return;
+
+    try {
+        const res = await fetch(`${API_BASE}/api/validar-correo?correo=${encodeURIComponent(correo)}`);
+        const data = await res.json();
+
+        if (res.ok && data.ok) {
+            if (data.exists) {
+                correoDisponible = false;
+                bloquearFormularioPorCorreoRegistrado();
+                setFieldInvalid(input, 'err-correo', '⚠️ Este correo electrónico ya se encuentra registrado en el sistema. No puede proseguir con la carga de datos.');
+                if (statusLabel) {
+                    statusLabel.innerHTML = '<span style="color:#dc2626; font-size:0.75rem; font-weight:800;">⚠️ Correo ya registrado</span>';
+                }
+            } else {
+                correoDisponible = true;
+                desbloquearFormularioPorCorreoRegistrado();
+                setFieldValid(input, 'err-correo');
+                if (statusLabel) {
+                    statusLabel.innerHTML = '<span style="color:#10b981; font-size:0.75rem; font-weight:700;">✓ Correo disponible</span>';
+                }
+            }
+        } else {
+            correoDisponible = false;
+            setFieldInvalid(input, 'err-correo', data.error || 'Formato de correo electrónico no válido.');
+            if (statusLabel) statusLabel.innerHTML = '';
+        }
+    } catch (e) {
+        correoDisponible = true;
+        desbloquearFormularioPorCorreoRegistrado();
+        setFieldValid(input, 'err-correo');
+        if (statusLabel) statusLabel.innerHTML = '';
+    }
 }
 
 async function verificarCedulaRemota(cedula) {
@@ -2065,6 +2176,11 @@ function validateCurrentStep(step) {
             mostrarErrorDePaso(correo, 2, 'Paso 2: Residencia y Canales de Contacto', 'Correo Electrónico', 'Ingrese un correo electrónico válido (ejemplo: aspirante@correo.com).');
             return false;
         }
+        if (!correoDisponible || formularioBloqueadoPorCorreo) {
+            setFieldInvalid(correo, 'err-correo', '⚠️ Este correo electrónico ya se encuentra registrado en el sistema. No puede proseguir con la carga de datos.');
+            mostrarErrorDePaso(correo, 2, 'Paso 2: Residencia y Canales de Contacto', 'Correo Electrónico', 'Este correo electrónico ya se encuentra registrado en el sistema. Ingrese un correo diferente.');
+            return false;
+        }
         setFieldValid(correo, 'err-correo');
 
     } else if (step === 3) {
@@ -2132,6 +2248,11 @@ function initFormSubmit() {
 
         if (formularioBloqueadoPorEdad) {
             mostrarAvisoScroll('age-lock-banner');
+            return;
+        }
+        if (formularioBloqueadoPorCorreo || !correoDisponible) {
+            const correoEl = document.getElementById('asp-correo_alum');
+            mostrarErrorDePaso(correoEl, 2, 'Paso 2: Residencia y Canales de Contacto', 'Correo Electrónico', 'Este correo electrónico ya se encuentra registrado en el sistema.');
             return;
         }
 

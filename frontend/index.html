@@ -735,7 +735,10 @@
 
                             <div class="col-12 lockable-field">
                                 <div class="form-group">
-                                    <label>Correo Electrónico Personal <span class="req">*</span></label>
+                                    <label style="display:flex; justify-content:space-between; align-items:center;">
+                                        <span>Correo Electrónico Personal <span class="req">*</span></span>
+                                        <span id="asp-correo-status"></span>
+                                    </label>
                                     <input type="email" class="form-control" id="asp-correo_alum"
                                         placeholder="ejemplo@correo.com" required>
                                     <div class="field-error-msg" id="err-correo"></div>
@@ -876,18 +879,10 @@
 
             <!-- Acuse de Recibo Oficial de Notificación SMS Instantáneo -->
             <div class="sms-acuse-box" id="voucher-sms-container">
-                <div class="sms-acuse-header">
-                    <span class="sms-badge-sent" id="voucher-sms-badge">✓ SMS Enviado Instantáneamente</span>
-                    <span class="sms-acuse-code" id="voucher-sms-acuse">ACK-IUAC-GENERANDO...</span>
-                </div>
                 <div class="sms-acuse-body">
                     <div class="sms-acuse-row">
                         <span class="sms-acuse-label">📱 Teléfono Notificado:</span>
                         <strong class="sms-acuse-val" id="voucher-sms-telefono">--</strong>
-                    </div>
-                    <div class="sms-acuse-row">
-                        <span class="sms-acuse-label">📑 Acuse de Recibo (DLR):</span>
-                        <strong class="sms-acuse-val font-mono" id="voucher-sms-dlr">Generando...</strong>
                     </div>
                     <div class="sms-acuse-msg" id="voucher-sms-preview">
                         IUAC: Su preinscripción ha sido registrada exitosamente. Conserve su número de folio y este
@@ -1127,7 +1122,7 @@
     <script src="js/geo_data.js?v=2.3"></script>
     <script src="js/qr_pdf_engine.js?v=3.6"></script>
     <script src="js/react_ui_enhancer.js?v=1.8"></script>
-    <script src="js/app.js?v=4.9"></script>
+    <script src="js/app.js?v=5.0"></script>
 
     <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
         <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">

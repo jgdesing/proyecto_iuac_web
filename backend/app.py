@@ -6,7 +6,7 @@ from flask_cors import CORS
 from config import Config
 from database import init_db_pool, check_db_health
 from security import create_limiter, apply_security_headers, check_honeypot, contains_malicious_payload
-from validations import validate_aspirante_payload, validar_cedula_venezolana
+from validations import validate_aspirante_payload, validar_cedula_venezolana, REGEX_EMAIL
 from db_aspirantes import (
     check_cedula_exists,
     check_correo_exists,
@@ -178,7 +178,7 @@ def api_carreras():
     carreras = get_active_carreras()
     return jsonify({"ok": True, "data": carreras})
 
-# ── 4. VALIDACIÓN EN TIEMPO REAL DE CÉDULA ────────────────────────────────────
+# ── 4. VALIDACIÓN EN TIEMPO REAL DE CÉDULA Y CORREO ──────────────────────────
 @app.route('/api/validar-cedula/<cedula>', methods=['GET'])
 @limiter.limit("60 per minute")
 def api_validar_cedula(cedula):
@@ -197,6 +197,31 @@ def api_validar_cedula(cedula):
         })
     except Exception as e:
         return jsonify({"ok": False, "error": "No se pudo verificar la cédula en este momento."}), 500
+
+@app.route('/api/validar-correo', methods=['GET', 'POST'])
+@limiter.limit("90 per minute")
+def api_validar_correo():
+    if request.method == 'POST':
+        payload = request.get_json(silent=True) or {}
+        correo_raw = payload.get('correo', '')
+    else:
+        correo_raw = request.args.get('correo', '')
+
+    correo_clean = str(correo_raw or '').strip().lower()
+    if not correo_clean or not REGEX_EMAIL.match(correo_clean):
+        return jsonify({"ok": False, "valid": False, "error": "Formato de correo electrónico no válido."}), 400
+
+    try:
+        existe = check_correo_exists(correo_clean)
+        return jsonify({
+            "ok": True,
+            "correo": correo_clean,
+            "exists": existe,
+            "disponible": not existe,
+            "mensaje": "Correo disponible para preinscripción" if not existe else "Este correo electrónico ya se encuentra registrado en el sistema."
+        })
+    except Exception:
+        return jsonify({"ok": False, "error": "No se pudo verificar el correo electrónico en este momento."}), 500
 
 # ── 4.1 RECUPERACIÓN / CONSULTA DE PLANILLA DE ASPIRANTE INSCRITO ────────────
 @app.route('/api/aspirantes/planilla/<cedula>', methods=['GET'])
