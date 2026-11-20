@@ -698,7 +698,7 @@ async function descargarPlanillaPDFOficial(datosPlanilla) {
     drawSectionHeader('2. DATOS DE UBICACIÓN RESIDENCIAL Y CONTACTO');
     drawTableRow([
         { w: 0.33, label: 'ESTADO:', value: (reg.est_alum || '--').toUpperCase() },
-        { w: 0.33, label: 'CIUDAD / MUNICIPIO:', value: (reg.ciu_alum || '--').toUpperCase() },
+        { w: 0.33, label: 'CIUDAD:', value: (reg.ciu_alum || '--').toUpperCase() },
         { w: 0.34, label: 'PAÍS:', value: (reg.pais_alum || 'VENEZUELA').toUpperCase() }
     ]);
     drawTableRow([

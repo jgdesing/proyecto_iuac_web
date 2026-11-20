@@ -1286,18 +1286,19 @@ const REGEX_LETRAS_Y_ESPACIOS = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s\.]+$/;
 const REGEX_EMAIL = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const PREFIJOS_MOVILES = ['0412', '0414', '0424', '0416', '0426'];
 
-function evaluarCampoEnTiempoReal(el, forzarError = false) {
+function evaluarCampoEnTiempoReal(el, forzarError = true) {
     if (!el || !el.id) return true;
     const id = el.id;
 
     if (id === 'asp-ced_alum') {
         const val = el.value.trim();
         if (!val) {
-            if (forzarError) setFieldInvalid(el, 'err-cedula', 'El número de cédula es obligatorio.');
+            if (forzarError) setFieldInvalid(el, 'err-cedula', 'El número de cédula es obligatorio (8 dígitos numéricos).');
             return false;
         }
         if (val.length < 8) {
-            if (forzarError || val.length > 0) setFieldInvalid(el, 'err-cedula', 'La cédula debe contener exactamente 8 dígitos (solo números).');
+            const faltan = 8 - val.length;
+            setFieldInvalid(el, 'err-cedula', `Faltan ${faltan} dígito(s): la cédula debe contener exactamente 8 dígitos numéricos.`);
             return false;
         }
         if (cedulaDisponible) {
@@ -1313,16 +1314,22 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
     }
 
     if (id === 'asp-nom_alum') {
-        el.value = el.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+        const rawVal = el.value;
+        const tieneInvalido = /[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/.test(rawVal);
+        el.value = rawVal.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
             .replace(/^\s+/, '')
             .replace(/\s{2,}/g, ' ');
         const val = el.value.trim();
+        if (tieneInvalido) {
+            setFieldInvalid(el, 'err-nombres', 'Carácter no permitido: solo se permiten letras y espacios.');
+            return false;
+        }
         if (!val) {
             if (forzarError) setFieldInvalid(el, 'err-nombres', 'El campo Nombres es obligatorio.');
             return false;
         }
         if (val.length < 2) {
-            if (forzarError) setFieldInvalid(el, 'err-nombres', 'Mínimo 2 letras.');
+            setFieldInvalid(el, 'err-nombres', 'Escriba al menos 2 letras para sus nombres.');
             return false;
         }
         if (!REGEX_LETRAS_Y_ESPACIOS.test(val)) {
@@ -1334,16 +1341,22 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
     }
 
     if (id === 'asp-ape_alum') {
-        el.value = el.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
+        const rawVal = el.value;
+        const tieneInvalido = /[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/.test(rawVal);
+        el.value = rawVal.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, '')
             .replace(/^\s+/, '')
             .replace(/\s{2,}/g, ' ');
         const val = el.value.trim();
+        if (tieneInvalido) {
+            setFieldInvalid(el, 'err-apellidos', 'Carácter no permitido: solo se permiten letras y espacios.');
+            return false;
+        }
         if (!val) {
             if (forzarError) setFieldInvalid(el, 'err-apellidos', 'El campo Apellidos es obligatorio.');
             return false;
         }
         if (val.length < 2) {
-            if (forzarError) setFieldInvalid(el, 'err-apellidos', 'Mínimo 2 letras.');
+            setFieldInvalid(el, 'err-apellidos', 'Escriba al menos 2 letras para sus apellidos.');
             return false;
         }
         if (!REGEX_LETRAS_Y_ESPACIOS.test(val)) {
@@ -1461,7 +1474,7 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
             return false;
         }
         if (val.length < 8) {
-            if (forzarError) setFieldInvalid(el, 'err-direccion', 'Por favor detalle su dirección completa (mínimo 8 caracteres).');
+            setFieldInvalid(el, 'err-direccion', `Por favor detalle su dirección completa (mínimo 8 caracteres, lleva ${val.length}).`);
             return false;
         }
         setFieldValid(el, 'err-direccion');
@@ -1474,13 +1487,16 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
             if (forzarError) setFieldInvalid(el, 'err-telemov', 'El teléfono celular es obligatorio.');
             return false;
         }
-        if (digits.length !== 11) {
-            if (forzarError) setFieldInvalid(el, 'err-telemov', 'Debe contener 11 dígitos (ej: 0412-1234567).');
-            return false;
+        if (digits.length >= 4) {
+            const prefix = digits.slice(0, 4);
+            if (!PREFIJOS_MOVILES.includes(prefix)) {
+                setFieldInvalid(el, 'err-telemov', `Prefijo '${prefix}' no válido. Use 0412, 0414, 0424, 0416 o 0426.`);
+                return false;
+            }
         }
-        const prefix = digits.slice(0, 4);
-        if (!PREFIJOS_MOVILES.includes(prefix)) {
-            setFieldInvalid(el, 'err-telemov', `Prefijo '${prefix}' no válido. Use 0412, 0414, 0424, 0416 o 0426.`);
+        if (digits.length !== 11) {
+            const faltan = 11 - digits.length;
+            setFieldInvalid(el, 'err-telemov', `Faltan ${faltan} dígito(s): debe contener 11 dígitos (ej: 0412-1234567).`);
             return false;
         }
         setFieldValid(el, 'err-telemov');
@@ -1490,12 +1506,12 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
     if (id === 'asp-telehabi_alum') {
         const val = el.value.trim();
         if (!val) {
-            setFieldValid(el, 'err-telehab');
+            clearFieldError(el, 'err-telehab');
             return true;
         }
         const digits = val.replace(/\D/g, '');
         if (digits.length < 10 || digits.length > 11) {
-            if (forzarError) setFieldInvalid(el, 'err-telehab', 'Teléfono no válido (debe contener 10 u 11 dígitos).');
+            setFieldInvalid(el, 'err-telehab', `Teléfono incompleto (${digits.length} dígitos): debe contener 10 u 11 dígitos.`);
             return false;
         }
         setFieldValid(el, 'err-telehab');
@@ -1510,7 +1526,7 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
             return false;
         }
         if (!REGEX_EMAIL.test(val)) {
-            if (forzarError) setFieldInvalid(el, 'err-correo', 'Formato de correo no válido (ej: aspirante@correo.com).');
+            setFieldInvalid(el, 'err-correo', 'Formato de correo no válido (ej: aspirante@correo.com).');
             return false;
         }
         setFieldValid(el, 'err-correo');
@@ -1532,10 +1548,15 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
     }
 
     if (id === 'asp-ano_grad_alum') {
-        const val = parseInt(el.value || '0', 10);
+        const raw = (el.value || '').trim();
         const maxYear = new Date().getFullYear() + 1;
-        if (!val || val < 1990 || val > maxYear) {
-            if (forzarError) setFieldInvalid(el, 'err-ano_grad', `Año válido entre 1990 y ${maxYear}.`);
+        if (!raw) {
+            if (forzarError) setFieldInvalid(el, 'err-ano_grad', `El año de graduación es obligatorio (entre 1990 y ${maxYear}).`);
+            return false;
+        }
+        const val = parseInt(raw, 10);
+        if (raw.length < 4 || !val || val < 1990 || val > maxYear) {
+            setFieldInvalid(el, 'err-ano_grad', `Ingrese un año de 4 dígitos válido entre 1990 y ${maxYear}.`);
             return false;
         }
         setFieldValid(el, 'err-ano_grad');
@@ -1546,7 +1567,11 @@ function evaluarCampoEnTiempoReal(el, forzarError = false) {
         el.value = el.value.replace(/^\s+/, '').replace(/\s{2,}/g, ' ');
         const val = el.value.trim();
         if (!val) {
-            if (forzarError) setFieldInvalid(el, 'err-inst_grad', 'Indique la institución de egreso.');
+            if (forzarError) setFieldInvalid(el, 'err-inst_grad', 'Indique la institución o plantel de egreso.');
+            return false;
+        }
+        if (val.length < 3) {
+            setFieldInvalid(el, 'err-inst_grad', 'Escriba el nombre completo del plantel (mínimo 3 caracteres).');
             return false;
         }
         setFieldValid(el, 'err-inst_grad');
@@ -1572,6 +1597,60 @@ function evaluarCamposPasoActual(step) {
     });
 }
 
+function esTeclaControlONavegacion(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return true;
+    const teclasControl = [
+        'Backspace', 'Delete', 'Tab', 'Escape', 'Enter',
+        'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+        'Home', 'End', 'Shift', 'CapsLock', 'Control', 'Alt', 'Meta'
+    ];
+    return teclasControl.includes(e.key);
+}
+
+function vincularEventosTiempoReal(el, opciones = {}) {
+    if (!el) return;
+    const { onKeydown, onFormat } = opciones;
+
+    // 1. keydown (Al presionar la tecla)
+    el.addEventListener('keydown', (e) => {
+        if (typeof onKeydown === 'function') {
+            const bloqueado = onKeydown(e);
+            if (bloqueado === false) return;
+        }
+        setTimeout(() => {
+            if (typeof onFormat === 'function') onFormat(el);
+            evaluarCampoEnTiempoReal(el, true);
+        }, 0);
+    });
+
+    // 2. keyup (Al soltar la tecla)
+    el.addEventListener('keyup', () => {
+        if (typeof onFormat === 'function') onFormat(el);
+        evaluarCampoEnTiempoReal(el, true);
+    });
+
+    // 3. change (Al confirmar el cambio)
+    el.addEventListener('change', () => {
+        if (typeof onFormat === 'function') onFormat(el);
+        evaluarCampoEnTiempoReal(el, true);
+    });
+
+    // 4. blur (Al perder el foco)
+    el.addEventListener('blur', () => {
+        if (typeof el.value === 'string' && el.tagName !== 'SELECT') {
+            el.value = el.value.trim();
+        }
+        if (typeof onFormat === 'function') onFormat(el);
+        evaluarCampoEnTiempoReal(el, true);
+    });
+
+    // Soporte adicional para pegado o teclado táctil móvil
+    el.addEventListener('input', () => {
+        if (typeof onFormat === 'function') onFormat(el);
+        evaluarCampoEnTiempoReal(el, true);
+    });
+}
+
 function initRealtimeValidations() {
     const cedulaInput = document.getElementById('asp-ced_alum');
     const nombresInput = document.getElementById('asp-nom_alum');
@@ -1580,6 +1659,8 @@ function initRealtimeValidations() {
     const lugarNacInput = document.getElementById('asp-lugar_nac_alum');
     const sexInput = document.getElementById('asp-sex_alum');
     const estCivilInput = document.getElementById('asp-est_civil_alum');
+    const estadoInput = document.getElementById('asp-est_alum');
+    const ciudadInput = document.getElementById('asp-ciu_alum');
     const telemovInput = document.getElementById('asp-telemov_alum');
     const telehabInput = document.getElementById('asp-telehabi_alum');
     const correoInput = document.getElementById('asp-correo_alum');
@@ -1593,165 +1674,164 @@ function initRealtimeValidations() {
     const nivAcadSelect = document.getElementById('asp-niv_acad_alum');
     const tipoColegioSelect = document.getElementById('asp-tipo_colegio');
 
-    // 1. Cédula
+    // 1. Cédula (keydown, keyup, change, blur: dígito a dígito)
     if (cedulaInput) {
-        cedulaInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);
-            const val = e.target.value.trim();
+        const procesarCedulaEnVivo = () => {
+            cedulaInput.value = cedulaInput.value.replace(/\D/g, '').slice(0, 8);
+            const val = cedulaInput.value.trim();
             clearTimeout(checkCedulaTimeout);
             const statusLabel = document.getElementById('asp-cedula-status');
 
             if (!val) {
-                setFieldInvalid(cedulaInput, 'err-cedula', 'El número de cédula es obligatorio.');
-                statusLabel.innerHTML = '';
+                setFieldInvalid(cedulaInput, 'err-cedula', 'El número de cédula es obligatorio (8 dígitos numéricos).');
+                if (statusLabel) statusLabel.innerHTML = '';
                 cedulaDisponible = false;
                 desbloquearFormularioPorCedulaRegistrada();
             } else if (val.length < 8) {
-                setFieldInvalid(cedulaInput, 'err-cedula', 'La cédula debe contener exactamente 8 dígitos (solo números).');
-                statusLabel.innerHTML = '';
+                const faltan = 8 - val.length;
+                setFieldInvalid(cedulaInput, 'err-cedula', `Faltan ${faltan} dígito(s): la cédula debe contener exactamente 8 dígitos numéricos.`);
+                if (statusLabel) statusLabel.innerHTML = '';
                 cedulaDisponible = false;
                 desbloquearFormularioPorCedulaRegistrada();
             } else {
                 setFieldValid(cedulaInput, 'err-cedula');
-                statusLabel.innerHTML = '<span style="color:var(--t-dark); font-size:0.75rem;">⏳ Comprobando disponibilidad...</span>';
+                if (statusLabel) statusLabel.innerHTML = '<span style="color:var(--t-dark); font-size:0.75rem;">⏳ Comprobando disponibilidad...</span>';
                 checkCedulaTimeout = setTimeout(() => verificarCedulaRemota(val), 350);
             }
+        };
+
+        cedulaInput.addEventListener('keydown', (e) => {
+            if (esTeclaControlONavegacion(e)) return;
+            if (!/^\d$/.test(e.key)) {
+                e.preventDefault();
+                setFieldInvalid(cedulaInput, 'err-cedula', `Tecla '${e.key}' no permitida: la cédula solo acepta dígitos numéricos (0-9).`);
+            }
         });
-        cedulaInput.addEventListener('blur', (e) => {
-            e.target.value = e.target.value.trim();
-            evaluarCampoEnTiempoReal(cedulaInput, false);
+        cedulaInput.addEventListener('keyup', procesarCedulaEnVivo);
+        cedulaInput.addEventListener('input', procesarCedulaEnVivo);
+        cedulaInput.addEventListener('change', procesarCedulaEnVivo);
+        cedulaInput.addEventListener('blur', () => {
+            cedulaInput.value = cedulaInput.value.trim();
+            evaluarCampoEnTiempoReal(cedulaInput, true);
         });
     }
 
-    // 2. Nombres
-    if (nombresInput) {
-        nombresInput.addEventListener('input', () => {
-            evaluarCampoEnTiempoReal(nombresInput, false);
-        });
-        nombresInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(nombresInput, false);
-        });
-    }
+    // 2. Nombres (keydown, keyup, change, blur: letra a letra)
+    vincularEventosTiempoReal(nombresInput, {
+        onKeydown: (e) => {
+            if (esTeclaControlONavegacion(e)) return true;
+            if (e.key.length === 1 && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]$/.test(e.key)) {
+                e.preventDefault();
+                setFieldInvalid(nombresInput, 'err-nombres', `Carácter '${e.key}' no permitido: solo se aceptan letras y espacios.`);
+                return false;
+            }
+            return true;
+        }
+    });
 
-    // 3. Apellidos
-    if (apellidosInput) {
-        apellidosInput.addEventListener('input', () => {
-            evaluarCampoEnTiempoReal(apellidosInput, false);
-        });
-        apellidosInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(apellidosInput, false);
-        });
-    }
+    // 3. Apellidos (keydown, keyup, change, blur: letra a letra)
+    vincularEventosTiempoReal(apellidosInput, {
+        onKeydown: (e) => {
+            if (esTeclaControlONavegacion(e)) return true;
+            if (e.key.length === 1 && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]$/.test(e.key)) {
+                e.preventDefault();
+                setFieldInvalid(apellidosInput, 'err-apellidos', `Carácter '${e.key}' no permitido: solo se aceptan letras y espacios.`);
+                return false;
+            }
+            return true;
+        }
+    });
 
     // 4. Fecha de Nacimiento y Bloqueo Reglamentario de Edad
-    if (fecNacInput) {
-        fecNacInput.addEventListener('change', () => {
-            evaluarCampoEnTiempoReal(fecNacInput, false);
-        });
-        fecNacInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(fecNacInput, false);
-        });
-    }
+    vincularEventosTiempoReal(fecNacInput);
 
-    // 5. Selectores de Género y Estado Civil
-    if (sexInput) {
-        sexInput.addEventListener('change', () => evaluarCampoEnTiempoReal(sexInput, false));
-        sexInput.addEventListener('blur', () => evaluarCampoEnTiempoReal(sexInput, false));
-    }
-    if (estCivilInput) {
-        estCivilInput.addEventListener('change', () => evaluarCampoEnTiempoReal(estCivilInput, false));
-        estCivilInput.addEventListener('blur', () => evaluarCampoEnTiempoReal(estCivilInput, false));
-    }
+    // 5. Selectores de Género, Estado Civil, Lugar de Nacimiento, Estado y Ciudad
+    vincularEventosTiempoReal(sexInput);
+    vincularEventosTiempoReal(estCivilInput);
+    vincularEventosTiempoReal(lugarNacInput);
+    vincularEventosTiempoReal(estadoInput);
+    vincularEventosTiempoReal(ciudadInput);
 
-    // 6. Lugar de Nacimiento
-    if (lugarNacInput) {
-        lugarNacInput.addEventListener('change', () => evaluarCampoEnTiempoReal(lugarNacInput, false));
-        lugarNacInput.addEventListener('blur', () => evaluarCampoEnTiempoReal(lugarNacInput, false));
-    }
+    // 6. Teléfono Celular (keydown, keyup, change, blur: dígito a dígito)
+    const formatearTelefonoInput = (el) => {
+        let digits = el.value.replace(/\D/g, '').slice(0, 11);
+        if (digits.length > 4) {
+            el.value = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+        } else {
+            el.value = digits;
+        }
+    };
 
-    // 7. Teléfono Celular
-    if (telemovInput) {
-        telemovInput.addEventListener('input', (e) => {
-            let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-            if (digits.length > 4) {
-                e.target.value = `${digits.slice(0, 4)}-${digits.slice(4)}`;
-            } else {
-                e.target.value = digits;
+    vincularEventosTiempoReal(telemovInput, {
+        onKeydown: (e) => {
+            if (esTeclaControlONavegacion(e)) return true;
+            if (e.key.length === 1 && !/^\d$/.test(e.key)) {
+                e.preventDefault();
+                setFieldInvalid(telemovInput, 'err-telemov', `Carácter '${e.key}' no válido: ingrese solo dígitos numéricos (ej: 0412-1234567).`);
+                return false;
             }
-            evaluarCampoEnTiempoReal(telemovInput, false);
-        });
-        telemovInput.addEventListener('blur', () => {
-            telemovInput.value = telemovInput.value.trim();
-            evaluarCampoEnTiempoReal(telemovInput, false);
-        });
-    }
+            return true;
+        },
+        onFormat: formatearTelefonoInput
+    });
 
-    // 8. Teléfono Habitación (Opcional)
-    if (telehabInput) {
-        telehabInput.addEventListener('input', (e) => {
-            let digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-            if (digits.length > 4) {
-                e.target.value = `${digits.slice(0, 4)}-${digits.slice(4)}`;
-            } else {
-                e.target.value = digits;
+    // 7. Teléfono Habitación (Opcional, dígito a dígito)
+    vincularEventosTiempoReal(telehabInput, {
+        onKeydown: (e) => {
+            if (esTeclaControlONavegacion(e)) return true;
+            if (e.key.length === 1 && !/^\d$/.test(e.key)) {
+                e.preventDefault();
+                setFieldInvalid(telehabInput, 'err-telehab', `Carácter '${e.key}' no válido: ingrese solo dígitos numéricos.`);
+                return false;
             }
-            evaluarCampoEnTiempoReal(telehabInput, false);
-        });
-        telehabInput.addEventListener('blur', () => {
-            telehabInput.value = telehabInput.value.trim();
-            evaluarCampoEnTiempoReal(telehabInput, false);
-        });
-    }
+            return true;
+        },
+        onFormat: formatearTelefonoInput
+    });
 
-    // 9. Correo Electrónico
-    if (correoInput) {
-        correoInput.addEventListener('input', () => {
-            evaluarCampoEnTiempoReal(correoInput, false);
-        });
-        correoInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(correoInput, false);
-        });
-    }
+    // 8. Correo Electrónico (keydown, keyup, change, blur: letra a letra)
+    vincularEventosTiempoReal(correoInput, {
+        onKeydown: (e) => {
+            if (e.key === ' ') {
+                e.preventDefault();
+                setFieldInvalid(correoInput, 'err-correo', 'El correo electrónico no puede contener espacios.');
+                return false;
+            }
+            return true;
+        }
+    });
 
-    // 10. Dirección
-    if (direcInput) {
-        direcInput.addEventListener('input', () => {
-            evaluarCampoEnTiempoReal(direcInput, false);
-        });
-        direcInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(direcInput, false);
-        });
-    }
+    // 9. Dirección (keydown, keyup, change, blur: letra a letra)
+    vincularEventosTiempoReal(direcInput);
 
-    // 11. Carrera
-    if (carreraSelect) {
-        carreraSelect.addEventListener('change', () => evaluarCampoEnTiempoReal(carreraSelect, false));
-        carreraSelect.addEventListener('blur', () => evaluarCampoEnTiempoReal(carreraSelect, false));
-    }
+    // 10. Carrera, Nivel Académico y Tipo de Institución
+    vincularEventosTiempoReal(carreraSelect);
+    vincularEventosTiempoReal(nivAcadSelect);
+    vincularEventosTiempoReal(tipoColegioSelect);
+    vincularEventosTiempoReal(tipoCedulaSelect);
+    vincularEventosTiempoReal(nacInput);
+    vincularEventosTiempoReal(paisInput);
 
-    // 12. Año de Graduación
-    if (anoGradInput) {
-        anoGradInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
-            evaluarCampoEnTiempoReal(anoGradInput, false);
-        });
-        anoGradInput.addEventListener('blur', () => {
-            anoGradInput.value = anoGradInput.value.trim();
-            evaluarCampoEnTiempoReal(anoGradInput, false);
-        });
-    }
+    // 11. Año de Graduación (keydown, keyup, change, blur: dígito a dígito)
+    vincularEventosTiempoReal(anoGradInput, {
+        onKeydown: (e) => {
+            if (esTeclaControlONavegacion(e)) return true;
+            if (e.key.length === 1 && !/^\d$/.test(e.key)) {
+                e.preventDefault();
+                setFieldInvalid(anoGradInput, 'err-ano_grad', `Carácter '${e.key}' no permitido: ingrese un año de 4 dígitos numéricos.`);
+                return false;
+            }
+            return true;
+        },
+        onFormat: (el) => {
+            el.value = el.value.replace(/\D/g, '').slice(0, 4);
+        }
+    });
 
-    // 13. Plantel de Egreso
-    if (instGradInput) {
-        instGradInput.addEventListener('input', () => {
-            evaluarCampoEnTiempoReal(instGradInput, false);
-        });
-        instGradInput.addEventListener('blur', () => {
-            evaluarCampoEnTiempoReal(instGradInput, false);
-        });
-    }
+    // 12. Plantel de Egreso (keydown, keyup, change, blur: letra a letra)
+    vincularEventosTiempoReal(instGradInput);
 
-    // 14. Pre-evaluar campos iniciales con valor por defecto
+    // 13. Pre-evaluar campos iniciales con valor por defecto
     setTimeout(() => {
         evaluarCamposPasoActual(1);
     }, 200);
@@ -2317,7 +2397,7 @@ async function imprimirPlanillaOficial() {
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.innerHTML = txtOriginal || '📥 Descargar Planilla de Pre-Inscripción (PDF)';
+            btn.innerHTML = txtOriginal || '📥 Descargar Planilla de Preinscripción (PDF)';
         }
     }
 }

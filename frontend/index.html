@@ -694,7 +694,7 @@
                             </div>
                             <div class="col-4 lockable-field">
                                 <div class="form-group">
-                                    <label>Ciudad / Municipio <span class="req">*</span></label>
+                                    <label>Ciudad <span class="req">*</span></label>
                                     <select class="form-control" id="asp-ciu_alum" required disabled>
                                         <option value="" selected>-- Seleccione --</option>
                                     </select>
@@ -912,7 +912,7 @@
             <div class="modal-actions">
                 <button type="button" class="btn btn-primary" id="btn-imprimir-planilla"
                     onclick="imprimirPlanillaOficial()">
-                    📥 Descargar Planilla de Pre-Inscripción (PDF)
+                    📥 Descargar Planilla de Preinscripción (PDF)
                 </button>
                 <button type="button" class="btn btn-secondary" onclick="location.reload()">
                     Finalizar y Cerrar
@@ -948,12 +948,12 @@
                                 </div>
                             </div>
                             <div class="descarga-item-actions">
-                                <a href="descargas/intructivo.pdf" target="_blank"
+                                <a href="descargas/instructivo.pdf" target="_blank"
                                     class="btn-descarga-action btn-descarga-ver"
                                     title="Abrir y leer documento en el navegador">
                                     👁️ Ver
                                 </a>
-                                <a href="descargas/intructivo.pdf" download="intructivo.pdf"
+                                <a href="descargas/instructivo.pdf" download="instructivo.pdf"
                                     class="btn-descarga-action btn-descarga-bajar"
                                     title="Descargar PDF a su PC o móvil">
                                     📥 Descargar
@@ -1058,7 +1058,7 @@
             <table class="p-table">
                 <tr>
                     <td style="width:33%;"><strong>ESTADO:</strong><br><span id="p-estado">--</span></td>
-                    <td style="width:33%;"><strong>CIUDAD / MUNICIPIO:</strong><br><span id="p-ciudad">--</span></td>
+                    <td style="width:33%;"><strong>CIUDAD:</strong><br><span id="p-ciudad">--</span></td>
                     <td style="width:34%;"><strong>PAÍS:</strong><br><span id="p-pais">Venezuela</span></td>
                 </tr>
                 <tr>
@@ -1098,7 +1098,9 @@
         <!-- DECLARACIÓN JURADA Y FIRMAS -->
         <div class="p-seccion" style="margin-top:16px;">
             <p class="p-juramento">
-                <em><strong>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos y que cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el Instituto Universitario de Aeronáutica Civil (IUAC)."</strong></em>
+                <em><strong>"Declaro bajo fe de juramento que todos los datos contenidos en esta planilla son fidedignos
+                        y que cumplo con la totalidad de los requisitos de admisión reglamentarios exigidos por el
+                        Instituto Universitario de Aeronáutica Civil (IUAC)."</strong></em>
             </p>
             <div class="p-firmas-container">
                 <div class="p-firma-box">
@@ -1134,9 +1136,9 @@
     <!-- Scripts de Carga Ultra Rápida -->
     <script src="js/theme_switcher.js?v=1.0"></script>
     <script src="js/geo_data.js?v=2.3"></script>
-    <script src="js/qr_pdf_engine.js?v=3.5"></script>
+    <script src="js/qr_pdf_engine.js?v=3.6"></script>
     <script src="js/react_ui_enhancer.js?v=1.8"></script>
-    <script src="js/app.js?v=4.8"></script>
+    <script src="js/app.js?v=4.9"></script>
 
     <div class="modal-overlay" id="modal-carnet-qr" style="display:none; z-index:99999;">
         <div class="modal-card" style="max-width:440px; padding:1.25rem; text-align:center;">

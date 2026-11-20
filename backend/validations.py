@@ -223,7 +223,7 @@ def validate_aspirante_payload(data):
     if not cleaned['est_alum']:
         return False, None, "Debe seleccionar su Estado de residencia."
     if not cleaned['ciu_alum']:
-        return False, None, "Debe seleccionar su Ciudad o Municipio."
+        return False, None, "Debe seleccionar su Ciudad."
     if not cleaned['direc_alum'] or len(cleaned['direc_alum']) < 8:
         return False, None, "Debe detallar su dirección de habitación completa (mínimo 8 caracteres)."
 
