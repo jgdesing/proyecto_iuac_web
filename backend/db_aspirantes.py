@@ -468,10 +468,10 @@ def get_active_carreras():
     conn, cur = get_db_cursor()
     if not conn:
         return [
-            {"codigo": "CTA", "nombre": "Control de Tránsito Aéreo"},
-            {"codigo": "ICA", "nombre": "Información y Comunicaciones Aeronáuticas"},
-            {"codigo": "IMA", "nombre": "Mantenimiento Aeronáutico"},
-            {"codigo": "ETA", "nombre": "Electrónica Aeronáutica"}
+            {"codigo": "CTA", "nombre": "Licenciado en Aeronáutica Civil, mención Control de Tránsito Aéreo."},
+            {"codigo": "ICA", "nombre": "Licenciado en Aeronáutica Civil, mención Información y Comunicación Aeronáutica."},
+            {"codigo": "ETA", "nombre": "Ingeniero en Aeronáutica Civil, mención Electrónica para la Seguridad del Transito Aéreo."},
+            {"codigo": "IMA", "nombre": "Ingeniería en Mantenimiento Aeronáutico."}
         ]
     try:
         cur.execute("UPDATE academico.carreras SET activo = FALSE WHERE codigo NOT IN ('CTA', 'ICA', 'ETA', 'IMA') AND activo = TRUE;")

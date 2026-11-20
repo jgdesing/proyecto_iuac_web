@@ -10,10 +10,10 @@ const API_BASE = (window.location.protocol === 'file:') ? 'http://127.0.0.1:5050
 
 // Diccionario oficial de carreras IUAC activas (solo activo = TRUE: CTA, ICA, ETA, IMA)
 const MAPA_CARRERAS = {
-    'CTA': 'Control de Tránsito Aéreo (CTA)',
-    'ICA': 'Información y Comunicaciones Aeronáuticas (ICA)',
-    'IMA': 'Mantenimiento Aeronáutico (IMA)',
-    'ETA': 'Electrónica Aeronáutica (ETA)'
+    'CTA': 'Licenciado en Aeronáutica Civil, mención Control de Tránsito Aéreo.',
+    'ICA': 'Licenciado en Aeronáutica Civil, mención Información y Comunicación Aeronáutica.',
+    'ETA': 'Ingeniero en Aeronáutica Civil, mención Electrónica para la Seguridad del Transito Aéreo.',
+    'IMA': 'Ingeniería en Mantenimiento Aeronáutico.'
 };
 
 let capturedPhotoBase64 = null;

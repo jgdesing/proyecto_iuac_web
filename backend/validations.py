@@ -3,10 +3,10 @@ from datetime import date, datetime
 from config import Config
 
 CARRERAS_VALIDAS = {
-    'CTA': 'Control de Tránsito Aéreo',
-    'ICA': 'Información y Comunicaciones Aeronáuticas',
-    'IMA': 'Mantenimiento Aeronáutico',
-    'ETA': 'Electrónica Aeronáutica'
+    'CTA': 'Licenciado en Aeronáutica Civil, mención Control de Tránsito Aéreo.',
+    'ICA': 'Licenciado en Aeronáutica Civil, mención Información y Comunicación Aeronáutica.',
+    'ETA': 'Ingeniero en Aeronáutica Civil, mención Electrónica para la Seguridad del Transito Aéreo.',
+    'IMA': 'Ingeniería en Mantenimiento Aeronáutico.'
 }
 
 REGEX_EMAIL = re.compile(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$')

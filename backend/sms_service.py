@@ -82,11 +82,11 @@ def generar_codigo_acuse(cedula, telefono):
 def formatear_carrera_sms(codigo_o_nombre):
     """Abrevia el nombre de la carrera para optimizar los 160 caracteres estándar de SMS."""
     mapa = {
-        'CTA': 'Control de Tránsito Aéreo',
-        'ICA': 'Inf. y Comunicaciones Aeronáuticas',
-        'IMA': 'Mantenimiento Aeronáutico',
+        'CTA': 'Lic. Aeronáutica Civil (CTA)',
+        'ICA': 'Lic. Aeronáutica Civil (ICA)',
+        'IMA': 'Ing. Mantenimiento Aeronáutico',
         'SAR': 'Búsqueda y Salvamento',
-        'ETA': 'Electrónica Aeronáutica'
+        'ETA': 'Ing. Aeronáutica Civil (ETA)'
     }
     return mapa.get(codigo_o_nombre, codigo_o_nombre)
 
