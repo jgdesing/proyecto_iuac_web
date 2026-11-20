@@ -1171,6 +1171,7 @@ function initRecuperarPlanillaModal() {
                 cerrar();
                 mostrarModalExito(data);
 
+                await recargarMotorPDFEnVivo();
                 if (typeof window.descargarPlanillaPDFOficial === 'function') {
                     await window.descargarPlanillaPDFOficial(ultimoRegistroAspirante);
                 }
@@ -2281,7 +2282,21 @@ function llenarPlanillaImpresion(data, info) {
     }
 }
 
-// ── DESCARGAR PLANILLA OFICIAL EN PDF DIRECTO AL DISPOSITIVO (CON QR) ────────
+// ── DESCARGAR PLANILLA OFICIAL EN PDF DIRECTO AL DISPOSITIVO ──────────────────
+function recargarMotorPDFEnVivo() {
+    return new Promise((resolve) => {
+        try {
+            const s = document.createElement('script');
+            s.src = `js/qr_pdf_engine.js?nocache=${Date.now()}`;
+            s.onload = () => resolve(true);
+            s.onerror = () => resolve(false);
+            document.head.appendChild(s);
+        } catch (_) {
+            resolve(false);
+        }
+    });
+}
+
 async function imprimirPlanillaOficial() {
     const btn = document.getElementById('btn-imprimir-planilla');
     const txtOriginal = btn ? btn.innerHTML : '';
@@ -2296,6 +2311,7 @@ async function imprimirPlanillaOficial() {
         if (!ultimoRegistroAspirante.foto_base64 && (capturedPhotoBase64 || window.capturedPhotoBase64)) {
             ultimoRegistroAspirante.foto_base64 = capturedPhotoBase64 || window.capturedPhotoBase64;
         }
+        await recargarMotorPDFEnVivo();
         if (typeof window.descargarPlanillaPDFOficial === 'function') {
             await window.descargarPlanillaPDFOficial(ultimoRegistroAspirante);
         }
