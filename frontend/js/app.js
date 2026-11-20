@@ -218,6 +218,30 @@ function initModalCamaraVivo() {
     }
 }
 
+function mostrarAvisoErrorFormatoDocumentos() {
+    const errFoto = document.getElementById('err-foto');
+    const errCed = document.getElementById('err-cedula-aspirante-doc');
+    const errRep = document.getElementById('err-repres-cedula-doc');
+
+    let targetEl = null;
+    let msg = 'Solo se admiten archivos en formato .JPG o .PNG. No se permite ningún otro formato.';
+
+    if (errFoto && errFoto.classList.contains('visible') && (errFoto.textContent || '').includes('no permitido')) {
+        targetEl = document.getElementById('btn-subir-foto') || errFoto;
+        msg = errFoto.textContent;
+    } else if (errCed && errCed.classList.contains('visible') && (errCed.textContent || '').includes('no permitido')) {
+        targetEl = document.getElementById('btn-subir-cedula-aspirante') || errCed;
+        msg = errCed.textContent;
+    } else if (errRep && errRep.classList.contains('visible') && (errRep.textContent || '').includes('no permitido')) {
+        targetEl = document.getElementById('btn-subir-repres-cedula') || errRep;
+        msg = errRep.textContent;
+    }
+
+    if (targetEl) {
+        mostrarErrorDePaso(targetEl, 1, 'Paso 1: Datos Personales e Identificación', 'Documentos (.JPG / .PNG)', msg);
+    }
+}
+
 function validarArchivoImagenJpgPng(file, errElement) {
     if (!file) return false;
     const nombre = (file.name || '').toLowerCase();
@@ -226,18 +250,20 @@ function validarArchivoImagenJpgPng(file, errElement) {
 
     if (!esJpgOPng) {
         if (errElement) {
-            errElement.textContent = '⚠️ Formato no permitido. Solo se admiten archivos .JPG o .PNG.';
+            errElement.textContent = '⚠️ Formato no permitido. Solo se reciben archivos en formato .JPG o .PNG (no se permite PDF ni otros formatos).';
             errElement.classList.add('visible');
         }
+        verificarYActualizarBloqueoDocumentos();
         return false;
     }
 
     if (file.size > TAMANO_MAX_ARCHIVO_FOTO) {
         const pesoMB = (file.size / (1024 * 1024)).toFixed(2);
         if (errElement) {
-            errElement.textContent = `⚠️ El archivo seleccionado (${pesoMB} MB) excede el tamaño máximo requerido de 5 MB.`;
+            errElement.textContent = `⚠️ El archivo seleccionado (${pesoMB} MB) excede el tamaño máximo permitido de 5 MB.`;
             errElement.classList.add('visible');
         }
+        verificarYActualizarBloqueoDocumentos();
         return false;
     }
 
@@ -245,6 +271,7 @@ function validarArchivoImagenJpgPng(file, errElement) {
         errElement.textContent = '';
         errElement.classList.remove('visible');
     }
+    verificarYActualizarBloqueoDocumentos();
     return true;
 }
 
@@ -406,36 +433,30 @@ function initAspiranteCedulaDocCapture() {
     const btnQuitarDoc = document.getElementById('btn-quitar-cedula-aspirante');
     const previewBox = document.getElementById('preview-cedula-aspirante-box');
     const previewImg = document.getElementById('preview-cedula-aspirante-img');
-    const previewPdf = document.getElementById('preview-cedula-aspirante-pdf');
     const statusDoc = document.getElementById('status-cedula-aspirante');
     const errDoc = document.getElementById('err-cedula-aspirante-doc');
 
     const aplicarDocAspirante = (base64Data, ext = 'jpg') => {
         capturedAspiranteCedulaBase64 = base64Data;
-        capturedAspiranteCedulaExt = ext;
+        capturedAspiranteCedulaExt = (ext === 'png') ? 'png' : 'jpg';
         window.capturedAspiranteCedulaBase64 = capturedAspiranteCedulaBase64;
         window.capturedAspiranteCedulaExt = capturedAspiranteCedulaExt;
 
         if (previewBox) previewBox.style.display = 'block';
-        if (ext === 'pdf') {
-            if (previewImg) previewImg.style.display = 'none';
-            if (previewPdf) previewPdf.style.display = 'flex';
-        } else {
-            if (previewPdf) previewPdf.style.display = 'none';
-            if (previewImg) {
-                previewImg.src = base64Data;
-                previewImg.style.display = 'block';
-            }
+        if (previewImg) {
+            previewImg.src = base64Data;
+            previewImg.style.display = 'block';
         }
         if (btnQuitarDoc) btnQuitarDoc.style.display = 'inline-block';
         if (statusDoc) {
-            statusDoc.textContent = '✓ Documento de identidad del aspirante cargado correctamente.';
+            statusDoc.textContent = '✓ Documento de identidad del aspirante cargado correctamente (.JPG / .PNG).';
             statusDoc.style.display = 'block';
         }
         if (errDoc) {
             errDoc.textContent = '';
             errDoc.classList.remove('visible');
         }
+        verificarYActualizarBloqueoDocumentos();
     };
 
     if (inputDoc) {
@@ -443,31 +464,22 @@ function initAspiranteCedulaDocCapture() {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
 
-            const name = file.name.toLowerCase();
-            const esPdf = file.type === 'application/pdf' || name.endsWith('.pdf');
-            const esImg = file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(name);
-
-            if (!esPdf && !esImg) {
-                if (errDoc) {
-                    errDoc.textContent = 'Formato no permitido. Solo se admiten archivos .JPG, .PNG o .PDF.';
-                    errDoc.classList.add('visible');
-                }
+            if (!validarArchivoImagenJpgPng(file, errDoc)) {
                 inputDoc.value = '';
+                capturedAspiranteCedulaBase64 = null;
+                window.capturedAspiranteCedulaBase64 = null;
+                if (previewImg) previewImg.style.display = 'none';
+                if (previewBox) previewBox.style.display = 'none';
+                if (statusDoc) statusDoc.style.display = 'none';
+                if (btnQuitarDoc) btnQuitarDoc.style.display = 'none';
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) {
-                if (errDoc) {
-                    errDoc.textContent = 'El documento excede el tamaño máximo permitido de 5 MB.';
-                    errDoc.classList.add('visible');
-                }
-                inputDoc.value = '';
-                return;
-            }
+            const esPng = (file.type && file.type.toLowerCase() === 'image/png') || /\.png$/i.test(file.name || '');
+            const ext = esPng ? 'png' : 'jpg';
 
             const reader = new FileReader();
             reader.onload = (evt) => {
-                const ext = esPdf ? 'pdf' : (name.endsWith('.png') ? 'png' : 'jpg');
                 aplicarDocAspirante(evt.target.result, ext);
             };
             reader.readAsDataURL(file);
@@ -491,11 +503,11 @@ function initAspiranteCedulaDocCapture() {
                 previewImg.src = '';
                 previewImg.style.display = 'none';
             }
-            if (previewPdf) previewPdf.style.display = 'none';
             if (previewBox) previewBox.style.display = 'none';
             btnQuitarDoc.style.display = 'none';
             if (statusDoc) statusDoc.style.display = 'none';
             if (errDoc) errDoc.classList.remove('visible');
+            verificarYActualizarBloqueoDocumentos();
         });
     }
 }
@@ -507,36 +519,30 @@ function initRepresentanteDocCapture() {
     const btnQuitarDoc = document.getElementById('btn-quitar-repres-cedula');
     const previewBox = document.getElementById('preview-repres-cedula-box');
     const previewImg = document.getElementById('preview-repres-cedula-img');
-    const previewPdf = document.getElementById('preview-repres-cedula-pdf');
     const statusDoc = document.getElementById('status-repres-cedula');
     const errDoc = document.getElementById('err-repres-cedula-doc');
 
     const aplicarDocRepresentante = (base64Data, ext = 'jpg') => {
         capturedRepresDocBase64 = base64Data;
-        capturedRepresDocExt = ext;
+        capturedRepresDocExt = (ext === 'png') ? 'png' : 'jpg';
         window.capturedRepresDocBase64 = capturedRepresDocBase64;
         window.capturedRepresDocExt = capturedRepresDocExt;
 
         if (previewBox) previewBox.style.display = 'block';
-        if (ext === 'pdf') {
-            if (previewImg) previewImg.style.display = 'none';
-            if (previewPdf) previewPdf.style.display = 'flex';
-        } else {
-            if (previewPdf) previewPdf.style.display = 'none';
-            if (previewImg) {
-                previewImg.src = base64Data;
-                previewImg.style.display = 'block';
-            }
+        if (previewImg) {
+            previewImg.src = base64Data;
+            previewImg.style.display = 'block';
         }
         if (btnQuitarDoc) btnQuitarDoc.style.display = 'inline-block';
         if (statusDoc) {
-            statusDoc.textContent = '✓ Documento de identidad del representante cargado correctamente';
+            statusDoc.textContent = '✓ Documento de identidad del representante cargado correctamente (.JPG / .PNG).';
             statusDoc.style.display = 'block';
         }
         if (errDoc) {
             errDoc.textContent = '';
             errDoc.classList.remove('visible');
         }
+        verificarYActualizarBloqueoDocumentos();
     };
 
     if (inputDoc) {
@@ -544,31 +550,22 @@ function initRepresentanteDocCapture() {
             const file = e.target.files && e.target.files[0];
             if (!file) return;
 
-            const name = file.name.toLowerCase();
-            const esPdf = file.type === 'application/pdf' || name.endsWith('.pdf');
-            const esImg = file.type.startsWith('image/') || /\.(jpe?g|png)$/i.test(name);
-
-            if (!esPdf && !esImg) {
-                if (errDoc) {
-                    errDoc.textContent = 'Formato no permitido. Solo se admiten archivos .JPG, .PNG o .PDF.';
-                    errDoc.classList.add('visible');
-                }
+            if (!validarArchivoImagenJpgPng(file, errDoc)) {
                 inputDoc.value = '';
+                capturedRepresDocBase64 = null;
+                window.capturedRepresDocBase64 = null;
+                if (previewImg) previewImg.style.display = 'none';
+                if (previewBox) previewBox.style.display = 'none';
+                if (statusDoc) statusDoc.style.display = 'none';
+                if (btnQuitarDoc) btnQuitarDoc.style.display = 'none';
                 return;
             }
 
-            if (file.size > 8 * 1024 * 1024) {
-                if (errDoc) {
-                    errDoc.textContent = 'El archivo excede el tamaño máximo permitido de 8 MB.';
-                    errDoc.classList.add('visible');
-                }
-                inputDoc.value = '';
-                return;
-            }
+            const esPng = (file.type && file.type.toLowerCase() === 'image/png') || /\.png$/i.test(file.name || '');
+            const ext = esPng ? 'png' : 'jpg';
 
             const reader = new FileReader();
             reader.onload = (evt) => {
-                const ext = esPdf ? 'pdf' : (name.endsWith('.png') ? 'png' : 'jpg');
                 aplicarDocRepresentante(evt.target.result, ext);
             };
             reader.readAsDataURL(file);
@@ -592,11 +589,11 @@ function initRepresentanteDocCapture() {
                 previewImg.src = '';
                 previewImg.style.display = 'none';
             }
-            if (previewPdf) previewPdf.style.display = 'none';
             if (previewBox) previewBox.style.display = 'none';
             btnQuitarDoc.style.display = 'none';
             if (statusDoc) statusDoc.style.display = 'none';
             if (errDoc) errDoc.classList.remove('visible');
+            verificarYActualizarBloqueoDocumentos();
         });
     }
 }
@@ -653,6 +650,32 @@ const totalSteps = 3;
 let formularioBloqueadoPorEdad = false;
 let formularioBloqueadoPorCedula = false;
 let formularioBloqueadoPorCorreo = false;
+let formularioBloqueadoPorDocumentos = false;
+
+function verificarYActualizarBloqueoDocumentos() {
+    const errFoto = document.getElementById('err-foto');
+    const errCed = document.getElementById('err-cedula-aspirante-doc');
+    const errRep = document.getElementById('err-repres-cedula-doc');
+
+    const hayErrorFoto = errFoto && errFoto.classList.contains('visible') && (errFoto.textContent || '').includes('no permitido');
+    const hayErrorCed = errCed && errCed.classList.contains('visible') && (errCed.textContent || '').includes('no permitido');
+    const hayErrorRep = errRep && errRep.classList.contains('visible') && (errRep.textContent || '').includes('no permitido');
+
+    formularioBloqueadoPorDocumentos = Boolean(hayErrorFoto || hayErrorCed || hayErrorRep);
+
+    const btnNext = document.getElementById('btn-step-next');
+    const btnSubmit = document.getElementById('btn-step-submit');
+
+    if (formularioBloqueadoPorDocumentos) {
+        if (btnNext) btnNext.disabled = true;
+        if (btnSubmit) btnSubmit.disabled = true;
+    } else {
+        if (!formularioBloqueadoPorCedula && !formularioBloqueadoPorEdad && !formularioBloqueadoPorCorreo) {
+            if (btnNext) btnNext.disabled = false;
+            if (btnSubmit) btnSubmit.disabled = false;
+        }
+    }
+}
 
 function initStepper() {
     const btnNext = document.getElementById('btn-step-next');
@@ -660,6 +683,10 @@ function initStepper() {
 
     if (btnNext) {
         btnNext.addEventListener('click', () => {
+            if (formularioBloqueadoPorDocumentos) {
+                mostrarAvisoErrorFormatoDocumentos();
+                return;
+            }
             if (formularioBloqueadoPorCedula) {
                 mostrarAvisoScroll('cedula-lock-banner');
                 return;
@@ -2091,11 +2118,11 @@ function validateCurrentStep(step) {
         if (!capturedAspiranteCedulaBase64) {
             const errCedDoc = document.getElementById('err-cedula-aspirante-doc');
             if (errCedDoc) {
-                errCedDoc.textContent = 'Es obligatorio adjuntar o escanear la fotografía/documento de su cédula de identidad.';
+                errCedDoc.textContent = 'Es obligatorio adjuntar o escanear la fotografía/documento de su cédula de identidad (.JPG o .PNG).';
                 errCedDoc.classList.add('visible');
             }
             const btnCedDoc = document.getElementById('btn-subir-cedula-aspirante') || document.getElementById('seccion-cedula-aspirante');
-            mostrarErrorDePaso(btnCedDoc, 1, 'Paso 1: Datos Personales e Identificación', 'Documento de Identidad (Cédula)', 'Es obligatorio adjuntar o escanear su cédula de identidad (.JPG, .PNG o .PDF).');
+            mostrarErrorDePaso(btnCedDoc, 1, 'Paso 1: Datos Personales e Identificación', 'Documento de Identidad (Cédula)', 'Es obligatorio adjuntar o escanear su cédula de identidad en formato .JPG o .PNG.');
             return false;
         }
 
@@ -2105,11 +2132,11 @@ function validateCurrentStep(step) {
             if (!capturedRepresDocBase64) {
                 const errDoc = document.getElementById('err-repres-cedula-doc');
                 if (errDoc) {
-                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar o escanear la cédula de su representante legal.';
+                    errDoc.textContent = 'Por ser menor de edad, es obligatorio adjuntar o escanear la cédula de su representante legal (.JPG o .PNG).';
                     errDoc.classList.add('visible');
                 }
                 const btnRep = document.getElementById('btn-subir-repres-cedula') || document.getElementById('seccion-representante-menor');
-                mostrarErrorDePaso(btnRep, 1, 'Paso 1: Datos Personales e Identificación', 'Cédula del Representante Legal', 'Por ser menor de edad, debe adjuntar la cédula de su representante legal.');
+                mostrarErrorDePaso(btnRep, 1, 'Paso 1: Datos Personales e Identificación', 'Cédula del Representante Legal', 'Por ser menor de edad, debe adjuntar la cédula de su representante legal (.JPG o .PNG).');
                 return false;
             }
         }

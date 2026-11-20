@@ -31,15 +31,13 @@ os.makedirs(CEDULAS_ALUM_FRONTEND_DIR, exist_ok=True)
 MAX_CEDULA_ALUM_BYTES = 5 * 1024 * 1024  # 5 MB
 
 def detectar_tipo_documento(doc_bytes):
-    """Identifica el tipo real del archivo por su firma binaria (magic bytes)."""
+    """Identifica el tipo real del archivo por su firma binaria (magic bytes). Solo JPG o PNG."""
     if not doc_bytes:
         return None
     if doc_bytes[:3] == b'\xff\xd8\xff':
         return 'jpg'
     if doc_bytes[:8] == b'\x89PNG\r\n\x1a\n':
         return 'png'
-    if doc_bytes[:5] == b'%PDF-':
-        return 'pdf'
     return None
 
 def _normalizar_token_nombre(texto, fallback):
@@ -145,17 +143,11 @@ def guardar_cedula_representante(doc_base64, cedula_aspirante, nom_repres='', ex
             logger.warning(f"Cédula representante excede tamaño permitido: {len(doc_bytes)} bytes")
             return None, None
 
-        es_pdf = ('application/pdf' in header.lower()) or (str(ext).lower().lstrip('.') == 'pdf')
-        es_png = ('image/png' in header.lower()) or (str(ext).lower().lstrip('.') == 'png')
-        if es_pdf:
-            ext_final = 'pdf'
-            mime_type = 'application/pdf'
-        elif es_png:
-            ext_final = 'png'
-            mime_type = 'image/png'
-        else:
-            ext_final = 'jpg'
-            mime_type = 'image/jpeg'
+        ext_final = detectar_tipo_documento(doc_bytes)
+        if not ext_final:
+            logger.warning(f"Cédula representante tiene formato no permitido: solo .jpg y .png")
+            return None, None
+        mime_type = 'image/png' if ext_final == 'png' else 'image/jpeg'
 
         ced_digits = re.sub(r'\D', '', str(cedula_aspirante)) or str(cedula_aspirante)
         filename = f"cedula_repres_{ced_digits}.{ext_final}"
@@ -202,7 +194,7 @@ def guardar_cedula_aspirante(doc_base64, cedula_aspirante):
         return None, "La cédula del aspirante excede el tamaño máximo permitido de 5 MB."
     ext_final = detectar_tipo_documento(doc_bytes)
     if not ext_final:
-        return None, "Formato de cédula no permitido. Solo se admiten archivos .JPG, .PNG o .PDF."
+        return None, "Formato de cédula no permitido. Solo se admiten archivos en formato .JPG o .PNG."
 
     ced_digits = re.sub(r'\D', '', str(cedula_aspirante)) or str(cedula_aspirante)
     filename = f"cedula_alum_{ced_digits}.{ext_final}"

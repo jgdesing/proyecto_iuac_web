@@ -256,31 +256,36 @@ def validate_aspirante_payload(data):
         return False, None, f"La carrera seleccionada '{carrera}' no es válida. Seleccione una carrera de la oferta académica oficial."
     cleaned['carrera'] = carrera
 
-    # 10. Fotografía Carnet (100% Obligatoria)
+    # 10. Fotografía Carnet (Obligatoria: solo .jpg o .png)
     foto_raw = data.get('foto_base64')
     if not foto_raw:
         return False, None, "La fotografía tipo carnet es obligatoria. Por favor suba un archivo o active su cámara."
     cleaned['foto_base64'] = foto_raw
     foto_ext_raw = str(data.get('foto_ext') or 'jpg').strip().lower().lstrip('.')
+    if foto_ext_raw not in ('jpg', 'jpeg', 'png'):
+        return False, None, "Formato de fotografía no permitido. Solo se reciben archivos en formato .JPG o .PNG."
     cleaned['foto_ext'] = 'png' if foto_ext_raw == 'png' else 'jpg'
 
-    # 10.1 Fotocopia o Escaneo de Cédula del Aspirante (100% Obligatoria para menores y mayores de edad)
+    # 10.1 Fotocopia o Escaneo de Cédula del Aspirante (Obligatoria: solo .jpg o .png)
     ced_doc_raw = data.get('cedula_doc_base64')
     if not ced_doc_raw:
         return False, None, "Debe subir o escanear la fotografía o fotocopia de la cédula de identidad del aspirante."
     cleaned['cedula_doc_base64'] = ced_doc_raw
     ced_doc_ext_raw = str(data.get('cedula_doc_ext') or 'jpg').strip().lower().lstrip('.')
-    cleaned['cedula_doc_ext'] = 'png' if ced_doc_ext_raw == 'png' else ('pdf' if ced_doc_ext_raw == 'pdf' else 'jpg')
+    if ced_doc_ext_raw not in ('jpg', 'jpeg', 'png'):
+        return False, None, "Formato de cédula de aspirante no permitido. Solo se reciben archivos en formato .JPG o .PNG."
+    cleaned['cedula_doc_ext'] = 'png' if ced_doc_ext_raw == 'png' else 'jpg'
 
-    # 11. Datos y Fotocopia de Cédula del Representante (Obligatorio si es menor de 18 años)
-    # Por requerimiento oficial, el único recaudo obligatorio del representante es su fotocopia/escaneo de cédula
+    # 11. Datos y Fotocopia de Cédula del Representante (Obligatorio si es menor de 18 años: solo .jpg o .png)
     if cleaned['edad_alum'] < 18:
         repres_doc = data.get('repres_doc_base64')
         if not repres_doc:
             return False, None, "Por ser menor de edad, debe subir o escanear la fotocopia de la cédula de su representante legal."
         cleaned['repres_doc_base64'] = repres_doc
         repres_ext_raw = str(data.get('repres_doc_ext') or 'jpg').strip().lower().lstrip('.')
-        cleaned['repres_doc_ext'] = 'png' if repres_ext_raw == 'png' else ('pdf' if repres_ext_raw == 'pdf' else 'jpg')
+        if repres_ext_raw not in ('jpg', 'jpeg', 'png'):
+            return False, None, "Formato de cédula del representante no permitido. Solo se reciben archivos en formato .JPG o .PNG."
+        cleaned['repres_doc_ext'] = 'png' if repres_ext_raw == 'png' else 'jpg'
 
         repres_ced_raw = data.get('ced_repres')
         if repres_ced_raw and str(repres_ced_raw).strip() and str(repres_ced_raw).strip() != 'Adjunta':
